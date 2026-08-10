@@ -1,0 +1,15 @@
+# Hooks de Git — a última linha de defesa contra A2 (segredo no histórico).
+# Ver docs/SECURITY.md §4.11.
+
+pre-commit:
+  commands:
+    gitleaks:
+      run: gitleaks protect --staged --redact --verbose
+    lint-staged:
+      glob: "*.{ts,tsx}"
+      run: npx eslint {staged_files}
+
+pre-push:
+  commands:
+    gitleaks-full:
+      run: gitleaks detect --no-git --redact

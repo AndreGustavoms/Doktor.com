@@ -1,0 +1,287 @@
+# Modelo de ameaça e checklist de segurança
+
+Este documento é a fonte da verdade sobre o que este painel defende, contra
+o quê, e onde cada defesa está implementada. Atualize-o na mesma fase em
+que o mecanismo correspondente for construído — checklist desatualizada é
+pior que nenhuma checklist.
+
+**Premissa central: "é localhost, então é seguro" é falsa.** Este documento
+existe porque essa premissa é a raiz da maioria dos vazamentos em
+ferramentas desse tipo. Todo controle abaixo assume que o painel está sob
+ataque mesmo rodando em `127.0.0.1`.
+
+---
+
+## As dez ameaças
+
+### A1 — Vazamento para o bundle do navegador
+Um token que chega ao client é um token público. Devtools, extensões e
+qualquer XSS o leem. Vetores: variável `NEXT_PUBLIC_*`, token como prop de
+Client Component, objeto do Octokit serializado numa resposta de API,
+resposta crua da API do GitHub repassada sem filtro.
+
+- **Defesa:** token vive só no processo servidor (`GITHUB_TOKEN`, nunca
+  prefixado); todo módulo que o toca começa com `import "server-only"`;
+  DTOs de saída fazem allowlist campo a campo (nunca repassam objeto cru).
+- **Mecanismo:** `src/server/**` (todo o diretório), `src/server/github/dto.ts`.
+- **Teste automatizado:** `scripts/check-bundle-secrets.ts`, rodado ao
+  final de todo `npm run build` — falha o build se achar `ghp_`,
+  `github_pat_`, `gho_`, `ghs_`, `ghu_` em `.next/static/` ou `out/portfolio/`.
+- **Status:** ☐ Implementado — Fase 0 traz o script; Fase 2 traz os DTOs
+  que o tornam efetivo (sem eles não há nada de real para vazar ainda).
+
+### A2 — Vazamento para o histórico do Git
+Um `.env` commitado uma vez fica no histórico para sempre — remover o
+arquivo num commit posterior não resolve nada.
+
+- **Defesa:** `.gitignore` completo cobrindo `.env*`, `data/`, `*.db`,
+  `vault.enc`, certificados; hook `pre-commit` do lefthook rodando
+  `gitleaks protect --staged`; hook `pre-push` rodando `gitleaks detect`
+  no diretório inteiro; regras extras em `.gitleaks.toml` para os padrões
+  de token do GitHub e para o nome de arquivo `vault.enc`.
+- **Mecanismo:** [.gitignore](../.gitignore), [.gitleaks.toml](../.gitleaks.toml),
+  [lefthook.yml](../lefthook.yml).
+- **Procedimento de incidente:** se um token for commitado, **revogue
+  imediatamente** em `github.com/settings/tokens`. Reescrever o histórico
+  do Git (`git filter-repo`, BFG) não é suficiente — assuma que o token já
+  foi coletado por qualquer bot que varre repositórios públicos, mesmo que
+  o commit tenha vivido por segundos. Depois de revogar: gere um token
+  novo, rode `npm run db:backup` antes de tocar no vault, então use
+  `scripts/rotate-token.ts` (Fase 5) para trocar o token sem refazer o
+  setup inteiro.
+- **Recomendação adicional:** habilite **Push Protection** e **Secret
+  Scanning** nas configurações do repositório no GitHub — são gratuitos
+  para repositórios públicos e detectam antes mesmo do seu hook local.
+- **Status:** ☐ Implementado — Fase 0.
+
+### A3 — CSRF e DNS rebinding a partir do navegador
+Com o painel aberto, visitar um site malicioso na mesma sessão do
+navegador permite que esse site dispare requisições para
+`http://localhost:3000`. Com DNS rebinding, ele contorna a same-origin
+policy resolvendo um domínio dele para `127.0.0.1` — nesse ponto, o
+browser considera a origem "correta" do ponto de vista de IP, mas o
+header `Host` da requisição ainda carrega o domínio do atacante.
+
+- **Defesa (anti-rebinding):** `middleware.ts` lê o header `Host` antes de
+  qualquer outra lógica e aceita apenas `127.0.0.1:<porta>`,
+  `localhost:<porta>` e `[::1]:<porta>`. Qualquer outro valor recebe
+  `421 Misdirected Request` com corpo vazio.
+- **Defesa (anti-CSRF):** toda rota que muda estado exige
+  `Sec-Fetch-Site: same-origin` (ou ausência do header, tratada no Route
+  Handler); como reforço, valida `Origin` contra a lista de origens
+  permitidas. Requisições sem `Origin` e sem `Sec-Fetch-Site` (ex: `curl`,
+  scripts locais) só passam com `X-Local-Client: 1` **e** sessão válida —
+  as duas coisas, não uma ou outra. CORS nunca é habilitado; o header
+  `Access-Control-Allow-Origin` nunca é emitido.
+- **Mecanismo:** [src/middleware.ts](../src/middleware.ts) (Host check +
+  primeira camada de origem); `src/server/guards.ts` (Fase 1 — reforço com
+  sessão validada contra o banco).
+- **Teste automatizado:** `tests/security/host-check.test.ts`,
+  `tests/security/csrf.test.ts` (Fase 7).
+- **Status:** ☐ Implementado — Host check e verificação de origem prontos
+  na Fase 0; a camada de sessão que fecha o `X-Local-Client` chega na Fase 1.
+
+### A4 — Exposição na rede local
+`next dev -H 0.0.0.0` publica o painel para todo mundo no Wi-Fi. Num café
+ou coworking, isso é acesso administrativo aberto aos repositórios.
+
+- **Defesa:** todos os scripts do `package.json` usam `-H 127.0.0.1`
+  explicitamente, nunca `0.0.0.0`. `next.config.ts` verifica
+  `process.env.HOST` no carregamento do módulo e **aborta o processo**
+  (`throw`) se o valor não for loopback — não é possível contornar isso
+  definindo `HOST` no ambiente por engano.
+- **Mecanismo:** [package.json](../package.json) (scripts `dev`, `start`),
+  [next.config.ts](../next.config.ts) (checagem no topo do arquivo).
+- **Log no boot:** o servidor deve logar explicitamente
+  `Escutando apenas em 127.0.0.1:3000 — não acessível pela rede local.`
+  (adicionado quando o servidor de fato inicializa, Fase 1).
+- **Status:** ☐ Implementado — bind e abort check prontos na Fase 0; log
+  de boot explícito chega junto com a inicialização real do servidor
+  (Fase 1).
+
+### A5 — XSS via conteúdo do GitHub
+READMEs, títulos de issues, descrições e corpos de PR são conteúdo
+controlado por terceiros (qualquer colaborador, ou você mesmo copiando de
+algum lugar). Renderizar HTML cru dali executa script no painel
+autenticado — que tem acesso de escrita aos seus repositórios.
+
+- **Defesa:** todo markdown passa pelo pipeline `unified` com
+  `rehype-sanitize` **obrigatório**, usando um schema restritivo baseado
+  em `defaultSchema` — permite cabeçalhos, parágrafos, listas, links,
+  imagens, code, blockquote, tabelas GFM, `hr`, `strong`, `em`, `del`;
+  bloqueia `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`,
+  `<form>`, todo atributo `on*`, URLs `javascript:` e `data:` (exceto
+  `data:image/` em `img`). Links externos recebem
+  `rel="noopener noreferrer nofollow"` e `target="_blank"`. Imagens de
+  domínio de terceiro não carregam automaticamente (placeholder com botão
+  "Carregar imagens" — evita hotlink tracking). `dangerouslySetInnerHTML`
+  só é usado com string que já passou pelo sanitizador.
+- **Mecanismo:** `src/server/markdown.ts`, `src/components/markdown/MarkdownView.tsx`
+  (Fase 3).
+- **Teste automatizado:** `tests/unit/markdown-sanitize.test.ts` — corpus
+  de payloads (`<script>`, `<img onerror>`, `javascript:`, `<iframe>`, SVG
+  com script) precisa sair sem nenhum executável (Fase 7).
+- **Status:** ☐ Implementado — chega na Fase 3, junto com a primeira tela
+  que renderiza conteúdo do GitHub.
+
+### A6 — SSRF pelo servidor
+Se algum endpoint aceitar uma URL do usuário e o servidor buscar essa URL,
+ele vira um proxy para a rede interna e para endpoints de metadata (ex:
+`169.254.169.254` em ambientes cloud).
+
+- **Defesa:** nenhum Route Handler aceita URL arbitrária para `fetch` no
+  servidor. Recursos externos usam allowlist estrita de host:
+  `api.github.com`, `raw.githubusercontent.com`,
+  `avatars.githubusercontent.com` — nada mais. `owner`/`repo` validados
+  por regex restritiva; caminhos de arquivo normalizados e rejeitados se
+  escaparem do diretório do repositório.
+- **Mecanismo:** `src/server/github/client.ts` (Fase 2 — fábrica do
+  Octokit já restringe o host de destino por construção).
+- **Teste automatizado:** `tests/security/ssrf.test.ts` — parâmetros com
+  `../`, URL absoluta e caractere de controle todos rejeitados (Fase 7).
+- **Status:** ☐ Implementado — chega na Fase 2, com a camada GitHub.
+
+### A7 — Vazamento por log
+`console.log(response)` do Octokit imprime o header `Authorization`. Logs
+vão para arquivo, terminal, e às vezes para um paste num chat de suporte.
+
+- **Defesa:** `src/server/log.ts` expõe uma função `redact()` que
+  substitui por `[REDACTED]` qualquer string que case com
+  `ghp_[A-Za-z0-9]{36}`, `github_pat_[A-Za-z0-9_]{22,}`, `gho_`, `ghs_`,
+  `ghu_`, e o valor literal do token atual em memória. O hook de log do
+  Octokit registra apenas método, caminho, status e tempo — nunca
+  headers, nunca corpo. `console.log` direto é proibido em código de
+  servidor via regra ESLint `no-console`, com exceção só para o próprio
+  módulo de log. Logs vão para `data/logs/app.log` (diretório inteiro no
+  `.gitignore`).
+- **Mecanismo:** `src/server/log.ts` (Fase 2), [eslint.config.mjs](../eslint.config.mjs)
+  (regra `no-console` já ativa desde a Fase 0).
+- **Teste automatizado:** `tests/unit/redact.test.ts` — objeto de log
+  contendo token sai com `[REDACTED]` (Fase 7).
+- **Status:** ☐ Implementado — regra de lint ativa desde a Fase 0; o
+  módulo `redact()` e o hook do Octokit chegam na Fase 2.
+
+### A8 — Outro processo na mesma máquina
+Qualquer processo local pode falar com `127.0.0.1:3000`. Sem
+autenticação, um script qualquer rodado por engano (ou por outro
+programa) tem acesso total ao painel.
+
+- **Defesa:** sessão local com senha mestra, mesmo rodando só em
+  localhost. Wizard de setup no primeiro boot exige senha mestra
+  (derivação `scrypt`, `N=2^17, r=8, p=1`, salt de 16 bytes). Sessão de
+  32 bytes aleatórios; banco guarda só o hash SHA-256 do token de sessão.
+  Cookie `HttpOnly`, `SameSite=Strict`, `Max-Age` de 8h com renovação
+  deslizante. Bloqueio automático após 30 min de inatividade, e botão
+  "Bloquear painel" sempre visível.
+- **Mecanismo:** `src/server/auth/session.ts`, `src/server/auth/password.ts`,
+  `src/app/setup/page.tsx`, `src/app/unlock/page.tsx` (Fase 1).
+- **Status:** ☐ Implementado — chega na Fase 1.
+
+### A9 — Ação destrutiva por engano
+Deletar branch, forçar push, arquivar repositório, apagar release. Erro
+seu, dano permanente.
+
+- **Defesa:** variável `ALLOW_DESTRUCTIVE=false` por padrão — botões
+  destrutivos ficam desabilitados com tooltip explicando como habilitar.
+  Toda ação destrutiva exige digitar o **nome completo do repositório**
+  no diálogo de confirmação (não um "Confirmar" genérico). Toda ação
+  destrutiva é gravada em `activity_log` com timestamp, ação, alvo e
+  resultado. **Exclusão de repositório não é implementada — nem atrás de
+  flag.** Antes de sobrescrever arquivo via API, mostra diff e exige
+  confirmação.
+- **Mecanismo:** `src/server/guards.ts` (checagem da flag),
+  `src/components/feedback/ConfirmDestructive.tsx` (Fase 4).
+- **Status:** ☐ Implementado — chega na Fase 4.
+
+### A10 — Cadeia de suprimentos
+Uma dependência comprometida com script de `postinstall` lê `.env.local`
+e exfiltra.
+
+- **Defesa:** lockfile commitado; `npm ci` nas instruções (nunca
+  `npm install` no fluxo padrão); lista de dependências mantida curta,
+  cada uma justificada; `npm run audit` roda `npm audit --audit-level=high`;
+  `.github/dependabot.yml` com atualizações semanais.
+- **Mecanismo:** [package.json](../package.json) (script `audit`),
+  [.github/dependabot.yml](../.github/dependabot.yml).
+- **Opção mais paranoica:** `npm ci --ignore-scripts` — documentado em
+  `docs/SETUP.md`, com aviso de que pode quebrar pacotes com binário
+  nativo como `better-sqlite3` (nesse caso, rode
+  `npm rebuild better-sqlite3` separadamente após revisar o script).
+- **Status:** ☐ Implementado — Fase 0 traz lockfile e script de audit;
+  `dependabot.yml` chega na Fase 7 junto com o endurecimento final.
+
+### Dívida técnica conhecida — vulnerabilidades aceitas
+
+`npm run audit` (limite `--audit-level=high`) passa limpo desde a Fase 0.
+Abaixo do limite, seguem 4 vulnerabilidades moderadas conhecidas e
+aceitas conscientemente:
+
+- **`esbuild <=0.24.2`** (moderada, CVSS 5.3,
+  [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99))
+  — permite que um site externo mande requisição para o dev server e
+  leia a resposta. Chega via `drizzle-kit` → `@esbuild-kit/esm-loader`.
+  **Por que aceito:** `drizzle-kit` só roda como CLI local
+  (`db:migrate`, `db:generate`), nunca como processo de servidor do
+  painel em si — não há dev server do Drizzle exposto durante o uso
+  normal. A correção exigiria downgrade do `drizzle-kit` para
+  `0.18.1` (`isSemVerMajor: true`), uma regressão de versão maior que
+  o risco que resolve.
+  **Reavaliar quando:** o próprio `drizzle-kit` publicar uma versão
+  estável que não dependa mais de `@esbuild-kit/esm-loader` — checar
+  com `npm audit` a cada bump de `drizzle-kit`.
+
+Se novas vulnerabilidades de severidade alta ou crítica aparecerem no
+futuro (via `npm audit` ou Dependabot), elas **não** entram nesta lista
+de aceitas sem decisão explícita — o padrão é corrigir, não silenciar.
+
+---
+
+## Acesso remoto — se um dia você quiser acessar de fora
+
+O design atual **assume loopback**, e essa suposição está codificada em
+vários pontos: o Host check da A3 rejeita qualquer `Host` que não seja
+`127.0.0.1`/`localhost`/`[::1]`; a sessão de 8h sem segundo fator assume
+que só você tem acesso físico à máquina; não há rate limiting por IP
+porque não se espera mais de um cliente.
+
+Se você quiser acessar o painel de fora da sua máquina:
+
+- **Opção recomendada:** [Tailscale](https://tailscale.com) ou
+  **Cloudflare Tunnel com Access** — os dois autenticam na borda, antes
+  da requisição sequer chegar no processo Node. Isso significa que o
+  painel continua "pensando" que está em loopback (você acessa via um IP
+  da VPN/túnel que ainda bate com as regras de host, ou o túnel termina
+  em `127.0.0.1` do lado do servidor).
+- **Nunca** exponha via port forwarding no roteador. Nunca use túnel
+  público sem autenticação na borda (ex: `ngrok` sem senha).
+- Se o painel algum dia sair do loopback de verdade (bind em interface
+  não-loopback, mesmo que atrás de um proxy reverso próprio), a
+  verificação de Host da A3 precisa ser **reescrita** para aceitar o novo
+  host esperado, e a senha mestra sozinha deixa de ser suficiente —
+  segundo fator (TOTP) se torna obrigatório antes de fazer esse switch.
+
+---
+
+## Checklist de definição de pronto
+
+Marcado conforme cada item é implementado e verificado — ver
+`prompt-painel-github-local.md` §15 para a lista original.
+
+- [ ] `npm run check` passa limpo.
+- [ ] Todos os testes de `tests/security/` passam.
+- [ ] `gitleaks detect --no-git` acha zero coisas.
+- [ ] Grep por `ghp_`, `github_pat_`, `gho_` no `.next/static/` e no
+      `out/` não retorna nada.
+- [ ] O servidor recusa iniciar se configurado para escutar fora do
+      loopback.
+- [ ] `curl -H "Host: evil.com" http://127.0.0.1:3000/api/repos` responde
+      421.
+- [ ] Toda rota de API valida sessão, origem e input, nessa ordem.
+- [ ] Nenhum arquivo em `src/components/` ou `src/hooks/` importa de
+      `src/server/`, e o lint reforça isso.
+- [ ] Este documento lista os 10 pontos do modelo de ameaça, cada um com
+      o mecanismo de defesa e o arquivo que o implementa.
+- [ ] `docs/SETUP.md` leva alguém do zero ao painel rodando em menos de
+      10 minutos.
+- [ ] O painel roda offline (exceto pelas chamadas ao GitHub) e o cache
+      serve conteúdo quando a rede cai.

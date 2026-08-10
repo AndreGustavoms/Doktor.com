@@ -1,0 +1,41 @@
+# Segredos e dados
+.env
+.env.*
+!.env.example
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+vault.enc
+*.pem
+*.key
+*.p12
+certs/
+
+# Build e dependências
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+next-env.d.ts
+*.tsbuildinfo
+
+# Sistema e editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Testes
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+coverage/

@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/*
+ * Direção visual: mesa de luz / cianotipia.
+ * Prancheta de engenharia invertida — linhas claras sobre fundo escuro,
+ * hairlines, réguas, rótulos técnicos.
+ */
+:root {
+  --ink-900: #0a1220; /* fundo da página */
+  --ink-800: #101b2d; /* superfície de card */
+  --ink-700: #1a2942; /* borda, superfície elevada */
+  --ink-600: #26385a; /* hairline de grade */
+  --chalk: #e6edf6; /* texto primário */
+  --chalk-dim: #8fa3bf; /* texto secundário, rótulos */
+  --blueprint: #4cc9f0; /* acento primário: seleção, foco, links */
+  --amber: #f2a65a; /* atenção: pendente, sem push, rate limit baixo */
+  --jade: #57d9a3; /* ok: sincronizado, workflow verde */
+  --coral: #ff6b6b; /* falha, destrutivo */
+
+  --font-display: var(--font-archivo-expanded), sans-serif;
+  --font-body: var(--font-public-sans), sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+}
+
+@theme inline {
+  --color-ink-900: var(--ink-900);
+  --color-ink-800: var(--ink-800);
+  --color-ink-700: var(--ink-700);
+  --color-ink-600: var(--ink-600);
+  --color-chalk: var(--chalk);
+  --color-chalk-dim: var(--chalk-dim);
+  --color-blueprint: var(--blueprint);
+  --color-amber: var(--amber);
+  --color-jade: var(--jade);
+  --color-coral: var(--coral);
+
+  --font-family-display: var(--font-display);
+  --font-family-body: var(--font-body);
+  --font-family-mono: var(--font-mono);
+}
+
+* {
+  border-color: var(--ink-700);
+}
+
+body {
+  background-color: var(--ink-900);
+  color: var(--chalk);
+  font-family: var(--font-body);
+  /* Pattern de grade sutil — a prancheta. */
+  background-image:
+    linear-gradient(var(--ink-600) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink-600) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+}
+
+@media (prefers-color-scheme: light) {
+  /* O painel é assumidamente dark-first (mesa de luz). Não há modo claro
+     definido nesta fase — mantemos o mesmo fundo para não gerar contraste
+     quebrado até o tema claro ser desenhado explicitamente. */
+}
+
+:focus-visible {
+  outline: 2px solid var(--blueprint);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
