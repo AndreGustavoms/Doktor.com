@@ -1,0 +1,61 @@
+title = "gitleaks config — painel-github"
+
+# Regras padrão do gitleaks cobrem a maioria dos formatos de token do GitHub,
+# mas somamos regras explícitas porque a ameaça A2 (segredo no histórico do
+# Git) é a que este projeto trata como mais cara de reverter — revogar é a
+# única resposta real, então detecção antes do commit precisa ser redundante.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "github-fine-grained-pat"
+description = "GitHub fine-grained personal access token"
+regex = '''github_pat_[A-Za-z0-9_]{22,}'''
+tags = ["github", "pat"]
+
+[[rules]]
+id = "github-classic-pat"
+description = "GitHub classic personal access token"
+regex = '''ghp_[A-Za-z0-9]{36}'''
+tags = ["github", "pat"]
+
+[[rules]]
+id = "github-oauth-token"
+description = "GitHub OAuth access token"
+regex = '''gho_[A-Za-z0-9]{36}'''
+tags = ["github", "oauth"]
+
+[[rules]]
+id = "github-app-token"
+description = "GitHub App server-to-server or user-to-server token"
+regex = '''(ghs|ghu)_[A-Za-z0-9]{36}'''
+tags = ["github", "app"]
+
+[[rules]]
+id = "painel-vault-file"
+description = "Vault cifrado não deve nunca ser commitado, mesmo estando em data/"
+path = '''vault\.enc$'''
+tags = ["painel", "vault"]
+
+[allowlist]
+description = "Placeholders óbvios, fixtures de teste, e artefatos de build"
+regexes = [
+  '''github_pat_cole_o_seu_token_aqui_nao_e_um_valor_real''',
+  '''ghp_0{36}''',
+]
+paths = [
+  '''\.env\.example$''',
+  # .next/ já está no .gitignore (nunca é commitado), mas gitleaks detect
+  # --no-git varre o filesystem completo independente do .gitignore. Os
+  # manifests internos do Next (hashes de build, IDs de módulo) disparam
+  # falso positivo na regra generic-api-key — não são segredos.
+  '''(^|[\\/])\.next[\\/]''',
+  '''(^|[\\/])node_modules[\\/]''',
+  # Testes de crypto/redação (tests/unit/crypto.test.ts, redact.test.ts,
+  # auth-flow.test.ts) PRECISAM usar strings no formato exato de token
+  # real do GitHub para testar as próprias regras de detecção — usar um
+  # formato diferente enfraqueceria a cobertura de teste. Todos são
+  # fixtures óbvias (senhas/tokens com "teste", "fake", "e2e" no valor),
+  # nunca segredos reais.
+  '''tests[\\/]unit[\\/](crypto|redact|auth-flow)\.test\.ts$''',
+]
