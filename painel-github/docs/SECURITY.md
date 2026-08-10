@@ -74,12 +74,15 @@ header `Host` da requisição ainda carrega o domínio do atacante.
   as duas coisas, não uma ou outra. CORS nunca é habilitado; o header
   `Access-Control-Allow-Origin` nunca é emitido.
 - **Mecanismo:** [src/middleware.ts](../src/middleware.ts) (Host check +
-  primeira camada de origem); `src/server/guards.ts` (Fase 1 — reforço com
-  sessão validada contra o banco).
+  primeira camada de origem); [src/server/guards.ts](../src/server/guards.ts)
+  (`requireSameOrigin` — reforço que cobre o caso `X-Local-Client`; a
+  validação de sessão em si, `requireSession`, ainda não é chamada por
+  nenhum Route Handler real, porque não há rota autenticada além das de
+  auth em si até a Fase 2).
 - **Teste automatizado:** `tests/security/host-check.test.ts`,
   `tests/security/csrf.test.ts` (Fase 7).
-- **Status:** ☐ Implementado — Host check e verificação de origem prontos
-  na Fase 0; a camada de sessão que fecha o `X-Local-Client` chega na Fase 1.
+- **Status:** ☑ Implementado — Host check, verificação de origem, e
+  `requireSameOrigin` com suporte a `X-Local-Client` prontos.
 
 ### A4 — Exposição na rede local
 `next dev -H 0.0.0.0` publica o painel para todo mundo no Wi-Fi. Num café
@@ -91,13 +94,13 @@ ou coworking, isso é acesso administrativo aberto aos repositórios.
   (`throw`) se o valor não for loopback — não é possível contornar isso
   definindo `HOST` no ambiente por engano.
 - **Mecanismo:** [package.json](../package.json) (scripts `dev`, `start`),
-  [next.config.ts](../next.config.ts) (checagem no topo do arquivo).
-- **Log no boot:** o servidor deve logar explicitamente
-  `Escutando apenas em 127.0.0.1:3000 — não acessível pela rede local.`
-  (adicionado quando o servidor de fato inicializa, Fase 1).
-- **Status:** ☐ Implementado — bind e abort check prontos na Fase 0; log
-  de boot explícito chega junto com a inicialização real do servidor
-  (Fase 1).
+  [next.config.ts](../next.config.ts) (checagem no topo do arquivo),
+  [src/instrumentation.ts](../src/instrumentation.ts) (`register()` —
+  hook oficial do Next que roda uma vez no boot do servidor, antes de
+  atender qualquer requisição; loga
+  `Escutando apenas em 127.0.0.1 — não acessível pela rede local.`
+  Verificado ao vivo no terminal com `next start`.)
+- **Status:** ☑ Implementado.
 
 ### A5 — XSS via conteúdo do GitHub
 READMEs, títulos de issues, descrições e corpos de PR são conteúdo
@@ -173,9 +176,25 @@ programa) tem acesso total ao painel.
   Cookie `HttpOnly`, `SameSite=Strict`, `Max-Age` de 8h com renovação
   deslizante. Bloqueio automático após 30 min de inatividade, e botão
   "Bloquear painel" sempre visível.
-- **Mecanismo:** `src/server/auth/session.ts`, `src/server/auth/password.ts`,
-  `src/app/setup/page.tsx`, `src/app/unlock/page.tsx` (Fase 1).
-- **Status:** ☐ Implementado — chega na Fase 1.
+- **Mecanismo:** [src/server/auth/session.ts](../src/server/auth/session.ts),
+  [src/server/auth/password.ts](../src/server/auth/password.ts),
+  [src/server/vault/crypto.ts](../src/server/vault/crypto.ts) (scrypt +
+  AES-256-GCM), [src/app/setup/page.tsx](../src/app/setup/page.tsx),
+  [src/app/unlock/page.tsx](../src/app/unlock/page.tsx),
+  [src/components/layout/LockButton.tsx](../src/components/layout/LockButton.tsx)
+  (botão + timer de inatividade client-side — a garantia real de
+  inatividade é recalculada no servidor a partir de `lastSeenAt` em
+  `session.ts`, o timer do client é só UX).
+- **Nota de arquitetura importante:** o token decifrado do vault vive em
+  `globalThis` (não numa variável `let` de module scope) — ver
+  [docs/ARCHITECTURE.md](ARCHITECTURE.md), seção "Estado em memória
+  entre Route Handlers e páginas". Sem isso, o estado "destravado" não
+  era visto de forma consistente entre a rota de unlock e a página do
+  dashboard — bug real descoberto e corrigido nesta fase.
+- **Status:** ☑ Implementado. Validado ao vivo: setup → unlock → acesso
+  ao dashboard → restart do processo → painel exige senha de novo
+  (`isUnlocked()` reseta porque `globalThis` é por processo, não
+  persiste entre restarts — o vault sempre precisa ser redecifrado).
 
 ### A9 — Ação destrutiva por engano
 Deletar branch, forçar push, arquivar repositório, apagar release. Erro

@@ -46,6 +46,64 @@ Ver [docs/SECURITY.md](SECURITY.md) para o motivo de cada camada (mapeado
 às ameaças A1–A10) e [docs/API.md](API.md) para o contrato de erro
 uniforme.
 
+## Estado em memória entre Route Handlers e páginas
+
+**Regra:** todo módulo de servidor com estado mutável de module scope
+(`let algumaCoisa = ...`) precisa ancorar esse estado em `globalThis`
+via uma chave `Symbol.for(...)`, nunca numa variável solta no topo do
+arquivo.
+
+**Por quê:** Next.js compila Route Handlers (`app/api/**/route.ts`) e
+Server Components de página (`app/**/page.tsx`) como entry points de
+build separados. Cada um ganha sua própria cópia física de qualquer
+módulo que importa — inclusive dentro do **mesmo processo Node, mesmo
+`next start`, sem restart**. Uma variável `let` em module scope em
+`src/server/vault/session-state.ts` ou `src/server/log.ts` seta um valor
+que uma Route Handler enxerga, mas que um Server Component de página,
+importando "o mesmo" módulo, não vê — porque não é o mesmo módulo em
+memória, é uma cópia com sua própria closure.
+
+**Como foi descoberto:** `POST /api/auth/unlock` chamava
+`setUnlockedToken()` com sucesso (log confirmado), mas a página `/`
+(Server Component) chamando `isUnlocked()` logo em seguida via `false` —
+mesmo processo, sem restart, cookie de sessão válido confirmado por uma
+rota de API diferente (`/api/auth/status`) na mesma janela de tempo.
+Debugado com log temporário no componente, comparando os três valores
+lado a lado. Ver
+[vercel/next.js#65350](https://github.com/vercel/next.js/issues/65350).
+
+**Onde isso já foi corrigido:** `src/server/vault/session-state.ts`
+(token decifrado do vault) e `src/server/log.ts` (valor do token
+registrado para redação) — os dois únicos módulos com estado mutável
+até a Fase 1. Qualquer módulo futuro com o mesmo padrão (ex: cache de
+rate limit ou circuit breaker do Octokit, Fase 2) precisa do mesmo
+tratamento — copie o padrão `getState()` desses dois arquivos.
+
+## Prerendering e páginas que decidem autenticação
+
+**Regra:** toda página (`page.tsx`) cuja árvore de renderização depende
+de `cookies()`, sessão, ou qualquer estado que mude depois do build
+**precisa** de `export const dynamic = "force-dynamic"` explícito no
+topo do arquivo — não confie em detecção automática do Next.
+
+**Por quê:** verificado ao vivo que `src/app/page.tsx` (que lê
+`cookies()` e decide entre renderizar o dashboard ou `redirect()`) foi
+prerenderizada no build e servida do cache HTTP
+(`x-nextjs-cache: HIT`, `Cache-Control: s-maxage=31536000`) em vez de
+reavaliar a cada requisição. Isso significa que o resultado da
+autenticação no momento do `next build` (tipicamente "não configurado")
+ficaria congelado por até um ano, ignorando qualquer setup ou unlock
+feito depois. `export const dynamic = "force-dynamic"` resolve —
+confirmado via `curl -D -` mostrando `Cache-Control: private, no-cache,
+no-store, max-age=0, must-revalidate` depois da correção.
+
+**Onde isso já foi corrigido:** `src/app/page.tsx`. `/setup` e
+`/unlock` são Client Components puros (a lógica de auth roda via
+`fetch` para as rotas de API, não no Server Component em si) — não
+precisam da mesma flag, mas qualquer página futura em `src/app/**` que
+leia estado de sessão/auth diretamente no Server Component precisa do
+mesmo tratamento.
+
 ## Decisões registradas
 
 - **Next.js 16.3.0, não 15.x:** o prompt original pedia "Next.js 15+".

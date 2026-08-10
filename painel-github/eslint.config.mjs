@@ -5,25 +5,13 @@ const config = [
   ...nextCoreWebVitals,
   ...nextTypescript,
   {
-    rules: {
-      // A1: código de servidor (Octokit, vault, sessão) nunca pode ser
-      // importado por componentes ou hooks do client — isso é como um
-      // token vaza para o bundle sem ninguém perceber.
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: ["@/server/*", "@/server"],
-              message:
-                "src/server/** só pode ser importado por Route Handlers e Server Components. Ver regra de ouro da arquitetura em docs/ARCHITECTURE.md.",
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
+    // A1: código de servidor (Octokit, vault, sessão) nunca pode ser
+    // importado por componentes ou hooks do client — isso é como um
+    // token vaza para o bundle sem ninguém perceber. Restrito a
+    // components/hooks (não a todo o projeto): Route Handlers,
+    // page.tsx de Server Component e testes unitários PRECISAM
+    // importar de src/server/** — essa é a fronteira certa, não uma
+    // proibição geral.
     files: ["src/components/**/*.{ts,tsx}", "src/hooks/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [

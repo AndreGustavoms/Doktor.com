@@ -51,4 +51,11 @@ paths = [
   # falso positivo na regra generic-api-key — não são segredos.
   '''(^|[\\/])\.next[\\/]''',
   '''(^|[\\/])node_modules[\\/]''',
+  # Testes de crypto/redação (tests/unit/crypto.test.ts, redact.test.ts,
+  # auth-flow.test.ts) PRECISAM usar strings no formato exato de token
+  # real do GitHub para testar as próprias regras de detecção — usar um
+  # formato diferente enfraqueceria a cobertura de teste. Todos são
+  # fixtures óbvias (senhas/tokens com "teste", "fake", "e2e" no valor),
+  # nunca segredos reais.
+  '''tests[\\/]unit[\\/](crypto|redact|auth-flow)\.test\.ts$''',
 ]

@@ -39,3 +39,4 @@ logs/
 /blob-report/
 /playwright/.cache/
 coverage/
+/data-test-*/
