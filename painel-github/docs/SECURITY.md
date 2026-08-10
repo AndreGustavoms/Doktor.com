@@ -116,23 +116,39 @@ algum lugar). Renderizar HTML cru dali executa script no painel
 autenticado — que tem acesso de escrita aos seus repositórios.
 
 - **Defesa:** todo markdown passa pelo pipeline `unified` com
-  `rehype-sanitize` **obrigatório**, usando um schema restritivo baseado
-  em `defaultSchema` — permite cabeçalhos, parágrafos, listas, links,
-  imagens, code, blockquote, tabelas GFM, `hr`, `strong`, `em`, `del`;
-  bloqueia `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`,
-  `<form>`, todo atributo `on*`, URLs `javascript:` e `data:` (exceto
-  `data:image/` em `img`). Links externos recebem
-  `rel="noopener noreferrer nofollow"` e `target="_blank"`. Imagens de
-  domínio de terceiro não carregam automaticamente (placeholder com botão
-  "Carregar imagens" — evita hotlink tracking). `dangerouslySetInnerHTML`
-  só é usado com string que já passou pelo sanitizador.
-- **Mecanismo:** `src/server/markdown.ts`, `src/components/markdown/MarkdownView.tsx`
-  (Fase 3).
-- **Teste automatizado:** `tests/unit/markdown-sanitize.test.ts` — corpus
-  de payloads (`<script>`, `<img onerror>`, `javascript:`, `<iframe>`, SVG
-  com script) precisa sair sem nenhum executável (Fase 7).
-- **Status:** ☐ Implementado — chega na Fase 3, junto com a primeira tela
-  que renderiza conteúdo do GitHub.
+  `rehype-sanitize` **obrigatório**, schema restritivo baseado em
+  `defaultSchema` cortado para a lista exata: cabeçalhos, parágrafos,
+  listas, links, imagens, code, blockquote, tabelas GFM, `hr`, `strong`,
+  `em`, `del`, `br`, `span` (tokens de syntax highlight). Bloqueia
+  `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`,
+  `<meta>`, `<base>`, todo atributo `on*`, URLs `javascript:` em
+  qualquer atributo, e `data:` em qualquer lugar exceto `img.src`. Links
+  externos recebem `rel="noopener noreferrer nofollow"` e
+  `target="_blank"`. `dangerouslySetInnerHTML` só existe num único
+  componente (`MarkdownView`) — reforçado por regra ESLint
+  `react/no-danger` habilitada em todo o resto do projeto, testada ao
+  vivo (arquivo de prova temporário criado e removido; confirmado que a
+  regra bloqueia de verdade fora desse componente).
+- **Lacuna conhecida, não implementada nesta fase:** o placeholder
+  "Carregar imagens" para hotlink de domínio de terceiro (mencionado no
+  prompt original §4.7) — imagens de qualquer host `http`/`https`
+  carregam diretamente hoje. Não é uma vulnerabilidade de XSS (é sobre
+  privacidade/tracking via hotlink, ameaça distinta), mas é uma
+  divergência real do prompt original que fica registrada aqui em vez de
+  reivindicada como feita.
+- **Mecanismo:** [src/server/markdown.ts](../src/server/markdown.ts),
+  [src/components/markdown/MarkdownView.tsx](../src/components/markdown/MarkdownView.tsx),
+  [eslint.config.mjs](../eslint.config.mjs) (regra `react/no-danger`).
+- **Teste automatizado:** `tests/unit/markdown-sanitize.test.ts` — 25
+  testes cobrindo o corpus completo: `<script>` (direto e case-mangled),
+  `<img onerror/onload>`, `javascript:` em `href` e em HTML bruto,
+  `<iframe>`, `<object>`, `<embed>`, `<form>`, SVG com `<script>`/`onload`/
+  `xlink:href`, `<style>` com expression, `data:text/html` em link,
+  `<meta refresh>`, `<base>`, atributo `style=`. Todos neutralizados;
+  markdown legítimo (headers, listas, links, tabelas GFM, code) continua
+  renderizando.
+- **Status:** ☑ Implementado (exceto a lacuna do placeholder de imagem,
+  documentada acima).
 
 ### A6 — SSRF pelo servidor
 Se algum endpoint aceitar uma URL do usuário e o servidor buscar essa URL,

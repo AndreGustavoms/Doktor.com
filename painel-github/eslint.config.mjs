@@ -37,6 +37,17 @@ const config = [
       "no-console": "error",
     },
   },
+  {
+    // A5: dangerouslySetInnerHTML com HTML que não passou por
+    // src/server/markdown.ts (renderMarkdown) é o vetor central de XSS
+    // via conteúdo do GitHub. Único arquivo autorizado é MarkdownView —
+    // ver docs/SECURITY.md e o comentário no topo desse componente.
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["src/components/markdown/MarkdownView.tsx"],
+    rules: {
+      "react/no-danger": "error",
+    },
+  },
 ];
 
 export default config;

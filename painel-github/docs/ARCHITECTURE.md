@@ -1,5 +1,23 @@
 # Arquitetura
 
+## Limitações conhecidas — Fase 3
+
+- **Paginação de 100 repos no dashboard e na régua de sincronia:**
+  `src/app/(authenticated)/page.tsx` e
+  `src/app/api/stats/activity/route.ts` chamam `listRepos({ perPage:
+  100 })` sem paginar além disso. Usuários com mais de 100 repositórios
+  não veem os excedentes nos cards agregados nem conseguem fixar um
+  repositório além da primeira página. Paginação completa de dashboard
+  fica para a Fase 5.
+- **Popover da régua de sincronia mostra só contagem, não mensagens de
+  commit:** o prompt original (§8) pede que o hover num traço abra um
+  popover com as mensagens de commit daquele dia. `SyncRuler.tsx`
+  implementado nesta fase mostra só "N commits" — buscar e exibir as
+  mensagens reais exigiria uma chamada sob demanda por dia+repo, escopo
+  deixado para refinamento futuro.
+- **Placeholder "Carregar imagens" para hotlink não implementado** — ver
+  docs/SECURITY.md, ameaça A5.
+
 ## Regra de ouro
 
 `src/server/**` nunca é importado por nada dentro de `src/components/**`
@@ -97,12 +115,42 @@ feito depois. `export const dynamic = "force-dynamic"` resolve —
 confirmado via `curl -D -` mostrando `Cache-Control: private, no-cache,
 no-store, max-age=0, must-revalidate` depois da correção.
 
-**Onde isso já foi corrigido:** `src/app/page.tsx`. `/setup` e
-`/unlock` são Client Components puros (a lógica de auth roda via
-`fetch` para as rotas de API, não no Server Component em si) — não
-precisam da mesma flag, mas qualquer página futura em `src/app/**` que
-leia estado de sessão/auth diretamente no Server Component precisa do
-mesmo tratamento.
+**Onde isso já foi corrigido:** `src/app/(authenticated)/page.tsx`
+(dashboard) e `src/app/(authenticated)/repos/[owner]/[name]/page.tsx`
+(detalhe do repositório) — os dois Server Components que decidem
+autenticação diretamente. `/setup` e `/unlock` são Client Components
+puros (a lógica de auth roda via `fetch` para as rotas de API, não no
+Server Component em si) — não precisam da mesma flag, mas qualquer
+página futura em `src/app/**` que leia estado de sessão/auth diretamente
+no Server Component precisa do mesmo tratamento.
+
+## React Compiler (ativo por padrão via eslint-config-next@16)
+
+O `eslint-config-next@16` já vem com as regras do React Compiler
+habilitadas por padrão (`react-hooks/purity`,
+`react-hooks/preserve-manual-memoization`), mesmo sem
+`reactCompiler: true` declarado em `next.config.ts` — essas são regras
+de **lint**, não o compiler em si rodando no build; ele analisa código
+buscando padrões que quebrariam a otimização automática se o compiler
+estivesse ativo. Duas descobertas reais durante a Fase 3:
+
+- **Funções impuras no corpo de um componente são erro de lint**, não
+  só warning. `Date.now()` chamado direto dentro de
+  `src/app/(authenticated)/page.tsx` (para calcular "repositório parado
+  há mais de 6 meses") falhou com `react-hooks/purity`. Correção:
+  extrair para função pura de módulo, fora do componente, recebendo
+  timestamp como parâmetro implícito via `Date.now()` chamado dentro da
+  função (não no corpo de render) — ver `isStale()` no topo do arquivo.
+  Isso vale mesmo em Server Components, onde a preocupação original
+  (re-render inconsistente no client) não se aplica da mesma forma — o
+  linter não distingue Server de Client Component nessa regra.
+- **`useMemo` com optional chaining na lista de dependências
+  (`data?.repos`) pode ser rejeitado** com "Existing memoization could
+  not be preserved" — o compiler infere a dependência real de forma
+  diferente da declarada explicitamente. Correção: extrair
+  `data?.repos` para uma variável antes do `useMemo` e referenciar essa
+  variável tanto no corpo quanto no array de dependências — ver
+  `src/app/(authenticated)/repos/page.tsx`.
 
 ## Decisões registradas
 

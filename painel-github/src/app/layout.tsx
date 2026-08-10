@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { archivoExpanded, publicSans, jetbrainsMono } from "./fonts";
+import { QueryProvider } from "@/components/QueryProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${archivoExpanded.variable} ${publicSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }
