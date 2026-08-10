@@ -23,12 +23,19 @@ resposta crua da API do GitHub repassada sem filtro.
 - **Defesa:** token vive só no processo servidor (`GITHUB_TOKEN`, nunca
   prefixado); todo módulo que o toca começa com `import "server-only"`;
   DTOs de saída fazem allowlist campo a campo (nunca repassam objeto cru).
-- **Mecanismo:** `src/server/**` (todo o diretório), `src/server/github/dto.ts`.
+- **Mecanismo:** `src/server/**` (todo o diretório),
+  [src/server/github/dto.ts](../src/server/github/dto.ts) (`RepoDTO`,
+  mapeamento explícito campo a campo — confirmado por teste que campos
+  extra como `owner.email`, `permissions`, `installation`, `clone_url`
+  com token embutido não sobrevivem ao mapeamento).
 - **Teste automatizado:** `scripts/check-bundle-secrets.ts`, rodado ao
   final de todo `npm run build` — falha o build se achar `ghp_`,
-  `github_pat_`, `gho_`, `ghs_`, `ghu_` em `.next/static/` ou `out/portfolio/`.
-- **Status:** ☐ Implementado — Fase 0 traz o script; Fase 2 traz os DTOs
-  que o tornam efetivo (sem eles não há nada de real para vazar ainda).
+  `github_pat_`, `gho_`, `ghs_`, `ghu_` em `.next/static/` ou
+  `out/portfolio/`. `tests/unit/dto.test.ts` — campo extra na resposta
+  simulada do GitHub não passa para a saída.
+- **Status:** ☑ Implementado (para a rota `GET /api/repos`; outros
+  endpoints ganham seus próprios DTOs conforme são construídos nas
+  próximas fases — a técnica é a mesma).
 
 ### A2 — Vazamento para o histórico do Git
 Um `.env` commitado uma vez fica no histórico para sempre — remover o
@@ -138,11 +145,17 @@ ele vira um proxy para a rede interna e para endpoints de metadata (ex:
   `avatars.githubusercontent.com` — nada mais. `owner`/`repo` validados
   por regex restritiva; caminhos de arquivo normalizados e rejeitados se
   escaparem do diretório do repositório.
-- **Mecanismo:** `src/server/github/client.ts` (Fase 2 — fábrica do
-  Octokit já restringe o host de destino por construção).
-- **Teste automatizado:** `tests/security/ssrf.test.ts` — parâmetros com
-  `../`, URL absoluta e caractere de controle todos rejeitados (Fase 7).
-- **Status:** ☐ Implementado — chega na Fase 2, com a camada GitHub.
+- **Mecanismo:** [src/server/github/client.ts](../src/server/github/client.ts)
+  (o Octokit em si só fala com `api.github.com` por construção — não há
+  parâmetro de host configurável exposto ao usuário);
+  [src/server/schemas/github.ts](../src/server/schemas/github.ts)
+  (`RepoParamsSchema` — regex restritiva para owner/repo).
+- **Teste automatizado:** `tests/security/ssrf.test.ts` — `../`, barra,
+  barra invertida, URL absoluta, caractere de controle (null byte), e
+  encoding de porcentagem todos rejeitados.
+- **Status:** ☑ Implementado (validação de entrada; a listagem de allowed
+  hosts para `raw.githubusercontent.com`/`avatars.githubusercontent.com`
+  chega quando um endpoint realmente buscar esses recursos — Fase 3).
 
 ### A7 — Vazamento por log
 `console.log(response)` do Octokit imprime o header `Authorization`. Logs
@@ -157,12 +170,16 @@ vão para arquivo, terminal, e às vezes para um paste num chat de suporte.
   servidor via regra ESLint `no-console`, com exceção só para o próprio
   módulo de log. Logs vão para `data/logs/app.log` (diretório inteiro no
   `.gitignore`).
-- **Mecanismo:** `src/server/log.ts` (Fase 2), [eslint.config.mjs](../eslint.config.mjs)
-  (regra `no-console` já ativa desde a Fase 0).
+- **Mecanismo:** [src/server/log.ts](../src/server/log.ts) (`redact()`,
+  estado ancorado em `globalThis` — ver docs/ARCHITECTURE.md),
+  [src/server/github/client.ts](../src/server/github/client.ts)
+  (`octokit.hook.wrap("request", ...)` — confirmado ao vivo no log real:
+  `{"method":"GET","path":"/user/repos","status":401,"durationMs":411}`,
+  sem headers, sem corpo, sem o token), [eslint.config.mjs](../eslint.config.mjs)
+  (regra `no-console` ativa desde a Fase 0).
 - **Teste automatizado:** `tests/unit/redact.test.ts` — objeto de log
-  contendo token sai com `[REDACTED]` (Fase 7).
-- **Status:** ☐ Implementado — regra de lint ativa desde a Fase 0; o
-  módulo `redact()` e o hook do Octokit chegam na Fase 2.
+  contendo token sai com `[REDACTED]`.
+- **Status:** ☑ Implementado.
 
 ### A8 — Outro processo na mesma máquina
 Qualquer processo local pode falar com `127.0.0.1:3000`. Sem
@@ -252,6 +269,18 @@ aceitas conscientemente:
 Se novas vulnerabilidades de severidade alta ou crítica aparecerem no
 futuro (via `npm audit` ou Dependabot), elas **não** entram nesta lista
 de aceitas sem decisão explícita — o padrão é corrigir, não silenciar.
+
+### Pendência de validação — sem token real do GitHub disponível
+
+`GET /api/repos` (Fase 2) foi validado ao vivo contra o servidor real
+(`next start`) para todas as camadas de guarda: Host check (421),
+sessão ausente (401), origem cross-site (403), vault bloqueado (423), e
+erro sanitizado quando o GitHub rejeita um token inválido (502, log
+confirmado sem vazamento). **Não validado nesta sessão de
+desenvolvimento**, por não haver um fine-grained PAT real disponível no
+ambiente: listagem de repositórios reais, `fromCache: true` no segundo
+load, e revalidação via ETag/304 contra `api.github.com` de verdade.
+Procedimento de validação manual documentado em `docs/SETUP.md`.
 
 ---
 
