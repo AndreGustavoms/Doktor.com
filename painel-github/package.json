@@ -27,7 +27,7 @@
     "next": "16.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.2",
     "@octokit/rest": "^21.1.0",
     "@octokit/plugin-throttling": "^9.6.0",
