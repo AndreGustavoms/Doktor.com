@@ -127,6 +127,42 @@ com "Can't find lefthook in PATH" sem abortar o commit). Ver commit
   além do grep pós-build de `scripts/check-bundle-secrets.ts`, que varre
   `out/portfolio/` como defesa em profundidade adicional.
 
+## Limitações conhecidas — Fase 7
+
+- **Todas as páginas de tela são `force-dynamic`, nenhuma é estática:**
+  consequência direta da correção do bug de CSP/nonce (ver
+  `docs/SECURITY.md`, ameaça A5, e o comentário em
+  `src/app/(authenticated)/layout.tsx`). Nonce só é aplicado pelo Next.js
+  em páginas renderizadas por requisição — páginas estáticas são geradas
+  uma vez no build, quando nenhum header de requisição existe ainda, e
+  por isso nunca recebem o nonce que o Next.js precisaria propagar para
+  o script de bootstrap que ele mesmo injeta. A alternativa seria voltar
+  a `'unsafe-inline'` em produção (perde a defesa em profundidade contra
+  XSS que o nonce oferece). Custo real da escolha atual: zero cache
+  estático de página, toda navegação passa pelo servidor Node — aceitável
+  porque este é um painel local de usuário único (sem CDN) e toda página
+  autenticada já dependia de sessão/cookie mesmo, então nunca seria
+  cacheável de forma útil entre usuários distintos.
+- **`tests/e2e/full-flow.spec.ts` roda contra a API real do GitHub, não
+  mockada:** exige um `GITHUB_TOKEN` (fine-grained ou classic PAT com
+  permissão de escrita em Contents) e um `E2E_TEST_REPO` de baixo risco
+  em `.env.local` — se ausentes, o teste é pulado automaticamente
+  (`test.skip`), não falha. O teste cria um commit real no repositório de
+  teste a cada execução (marcador com timestamp no README). Escolha
+  deliberada: mockar o Octokit no processo do servidor Next (que roda
+  como processo filho separado do `webServer` do Playwright) exigiria
+  tornar a base URL do GitHub configurável via env var só para viabilizar
+  o mock — mudança de superfície maior do que rodar contra a API real com
+  um repositório dedicado e de baixo risco.
+- **Auditoria de segurança sob demanda não roda `npm audit` nem
+  `gitleaks detect` ao vivo:** `src/server/security-audit.ts` cobre só
+  checagens síncronas e locais (bind em loopback, vault cifrado,
+  `.gitignore`, hooks do gitleaks instalados, flag destrutiva, headers de
+  segurança). As duas checagens que disparam processo filho continuam
+  cobertas por `npm run check`/`npm run audit` (CLI) e pelos hooks do
+  lefthook — rodá-las dentro do tempo de resposta de uma requisição HTTP
+  da UI arriscaria travar a tela de settings por vários segundos.
+
 ## Regra de ouro
 
 `src/server/**` nunca é importado por nada dentro de `src/components/**`

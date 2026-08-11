@@ -17,36 +17,20 @@ if (host && !loopbackHosts.has(host)) {
   );
 }
 
-const isProd = process.env.NODE_ENV === "production";
-
 /*
  * A1/A5/A6 — Content-Security-Policy.
- * script-src sem 'unsafe-inline' em produção é o que torna XSS (A5) inerte
- * mesmo que o sanitizador de markdown falhe em algum caso — defesa em
- * profundidade. connect-src 'self' impede que JS injetado exfiltre dados
- * para um host externo (relevante também para A6, SSRF client-side).
+ * A CSP (incluindo script-src) é definida em src/middleware.ts, não
+ * aqui — ela precisa de um nonce gerado por requisição para permitir o
+ * script inline que o próprio Next.js App Router injeta em cada página,
+ * sem abrir mão de bloquear script injetado por XSS (ver comentário em
+ * middleware.ts para o raciocínio completo e o bug que motivou a
+ * mudança). Os headers abaixo não dependem de nonce — continuam
+ * estáticos aqui.
  *
  * 'unsafe-eval' NUNCA é permitido, em nenhum modo — instrução explícita
- * do prompt original (§4.9). 'unsafe-inline' em script-src fica restrito
- * a dev, onde o Next injeta scripts inline para o HMR (hot module reload);
- * se o overlay de erro do dev quebrar por causa disso, ainda assim não
- * afrouxe 'unsafe-eval' — resolva de outra forma.
+ * do prompt original (§4.9).
  */
-const csp = [
-  "default-src 'self'",
-  isProd ? "script-src 'self'" : "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://avatars.githubusercontent.com",
-  "font-src 'self'",
-  "connect-src 'self'",
-  "frame-ancestors 'none'",
-  "form-action 'none'",
-  "base-uri 'none'",
-  "object-src 'none'",
-].join("; ");
-
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: csp },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "no-referrer" },
   {

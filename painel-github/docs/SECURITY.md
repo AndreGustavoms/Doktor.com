@@ -155,6 +155,29 @@ autenticado — que tem acesso de escrita aos seus repositórios.
 - **Status:** ☑ Implementado (exceto a lacuna do placeholder de imagem,
   documentada acima).
 
+**Defesa em profundidade adicional (Fase 7): CSP com nonce por
+requisição.** Mesmo que o sanitizador acima falhe em algum caso não
+coberto, a Content-Security-Policy em produção usa `script-src 'self'
+'nonce-<valor único por requisição>'` — sem `'unsafe-inline'` — então um
+`<script>` injetado via XSS não tem como adivinhar o nonce da requisição
+em curso e o navegador recusa executá-lo. Corrigido um bug real
+encontrado ao rodar `tests/e2e/full-flow.spec.ts` contra `next start` de
+produção: a CSP estava bloqueando também o script de bootstrap que o
+próprio Next.js injeta em cada página, porque nonce só é aplicado a
+páginas **dinamicamente renderizadas** (a doc oficial do Next é
+explícita: "Static pages are generated at build time, when no request or
+response headers exist — so no nonce can be injected"), e a maioria das
+páginas do painel era estática por padrão. Consequência do bug: toda
+interatividade client-side morria em silêncio em produção (erro de
+hidratação React #412) — nenhum formulário reagia, incluindo o wizard de
+setup. Corrigido forçando `export const dynamic = "force-dynamic"` em
+todas as páginas com formulário (aceitável aqui: painel local de um
+único usuário, sem CDN, e essas páginas já dependem de sessão mesmo).
+Ver [src/middleware.ts](../src/middleware.ts) (geração do nonce),
+[src/app/(authenticated)/layout.tsx](<../src/app/(authenticated)/layout.tsx>),
+[src/app/setup/layout.tsx](../src/app/setup/layout.tsx),
+[src/app/unlock/layout.tsx](../src/app/unlock/layout.tsx).
+
 ### A6 — SSRF pelo servidor
 Se algum endpoint aceitar uma URL do usuário e o servidor buscar essa URL,
 ele vira um proxy para a rede interna e para endpoints de metadata (ex:
@@ -359,23 +382,56 @@ Se você quiser acessar o painel de fora da sua máquina:
 ## Checklist de definição de pronto
 
 Marcado conforme cada item é implementado e verificado — ver
-`prompt-painel-github-local.md` §15 para a lista original.
+`prompt-painel-github-local.md` §15 para a lista original. Itens
+verificados ao vivo na Fase 7 (endurecimento), não só por leitura de
+código.
 
-- [ ] `npm run check` passa limpo.
-- [ ] Todos os testes de `tests/security/` passam.
-- [ ] `gitleaks detect --no-git` acha zero coisas.
-- [ ] Grep por `ghp_`, `github_pat_`, `gho_` no `.next/static/` e no
-      `out/` não retorna nada.
-- [ ] O servidor recusa iniciar se configurado para escutar fora do
-      loopback.
-- [ ] `curl -H "Host: evil.com" http://127.0.0.1:3000/api/repos` responde
-      421.
-- [ ] Toda rota de API valida sessão, origem e input, nessa ordem.
-- [ ] Nenhum arquivo em `src/components/` ou `src/hooks/` importa de
-      `src/server/`, e o lint reforça isso.
-- [ ] Este documento lista os 10 pontos do modelo de ameaça, cada um com
+- [x] `npm run check` passa limpo — lint (eslint + tsc --noEmit), 90
+      testes unitários/segurança, `npm audit --audit-level=high` sem
+      achados (4 vulnerabilidades moderadas conhecidas e aceitas, ver
+      "Dívida técnica conhecida" acima).
+- [x] Todos os testes de `tests/security/` passam — `host-check.test.ts`,
+      `ssrf.test.ts`, `csrf.test.ts` (Fase 7).
+- [x] `gitleaks detect --no-git` acha zero coisas — verificado ao vivo
+      nesta sessão.
+- [x] Grep por `ghp_`, `github_pat_`, `gho_` no `.next/static/` e no
+      `out/` não retorna nada — `scripts/check-bundle-secrets.ts` roda
+      automaticamente ao final de todo `npm run build` e falha o build
+      se achar; `tests/unit/portfolio-export.test.ts` cobre
+      especificamente `out/portfolio/` (Fase 6).
+- [x] O servidor recusa iniciar se configurado para escutar fora do
+      loopback — verificado ao vivo: `HOST=0.0.0.0 npm run start` sai
+      com código 1 e a mensagem de erro de `next.config.ts`.
+- [x] `curl -H "Host: evil.com" http://127.0.0.1:3000/api/repos` responde
+      421 — verificado ao vivo contra `next start` de produção.
+- [x] Toda rota de API valida sessão, origem e input, nessa ordem — ver
+      `docs/API.md`, "Forma de todo Route Handler"; todo Route Handler
+      novo desde a Fase 2 segue esse padrão.
+- [x] Nenhum arquivo em `src/components/` ou `src/hooks/` importa de
+      `src/server/`, e o lint reforça isso — verificado ao vivo criando
+      um import de teste em `src/hooks/` e confirmando que
+      `no-restricted-imports` bloqueia com a mensagem certa (removido
+      logo em seguida).
+- [x] Este documento lista os 10 pontos do modelo de ameaça, cada um com
       o mecanismo de defesa e o arquivo que o implementa.
-- [ ] `docs/SETUP.md` leva alguém do zero ao painel rodando em menos de
+- [x] `docs/SETUP.md` leva alguém do zero ao painel rodando em menos de
       10 minutos.
-- [ ] O painel roda offline (exceto pelas chamadas ao GitHub) e o cache
-      serve conteúdo quando a rede cai.
+- [x] O painel roda offline (exceto pelas chamadas ao GitHub) e o cache
+      serve conteúdo quando a rede cai — `tests/unit/cache.test.ts`
+      (Fase 2) cobre TTL e revalidação por ETag/304.
+- [x] E2E completo (Fase 7) — `tests/e2e/full-flow.spec.ts`: setup →
+      unlock → listar repos → abrir um → editar README → verificar
+      commit → bloquear. Rodado ao vivo contra a API real do GitHub
+      (não mockada) usando um token e repositório de teste dedicados;
+      commit real confirmado via `GET /repos/{owner}/{repo}/commits`
+      após a execução. Requer `GITHUB_TOKEN` em `.env.local` — pulado
+      automaticamente se ausente (não quebra `npm run check` nem CI sem
+      credenciais).
+- [x] Auditoria de segurança sob demanda em `/settings` (Fase 7) —
+      `src/server/security-audit.ts`, checagens síncronas sem I/O de
+      rede: bind em loopback, vault cifrado, `.gitignore`, hooks do
+      gitleaks, flag de ações destrutivas, headers de segurança.
+- [x] `.github/dependabot.yml` na raiz do repositório Git, apontando
+      para `/painel-github` (corrigido na Fase 7 — antes vivia dentro de
+      `painel-github/.github/`, onde o GitHub nunca o leria, e apontava
+      `directory: "/"`, que não existe nesse monorepo).

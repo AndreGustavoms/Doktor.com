@@ -48,6 +48,47 @@ function hasLegitimateOrigin(req: NextRequest): boolean {
   return true;
 }
 
+/*
+ * A1/A5/A6 — Content-Security-Policy com nonce por requisição.
+ *
+ * script-src sem 'unsafe-inline' é o que torna XSS (A5) inerte mesmo que
+ * o sanitizador de markdown falhe em algum caso — mas o próprio Next.js
+ * App Router injeta um pequeno script inline por página (dados de
+ * hidratação/streaming), então script-src 'self' sozinho bloqueia ESSE
+ * script legítimo junto com o de um atacante — o React nunca termina de
+ * hidratar (erro #412) e toda a interatividade da página morre em
+ * silêncio (nenhum onClick roda, nenhum formulário reage ao estado).
+ * Descoberto ao rodar tests/e2e/full-flow.spec.ts contra `next start`
+ * de produção: o botão "Continuar" do wizard de setup nunca habilitava,
+ * porque o clique nunca chegava a nenhum handler.
+ *
+ * A correção correta é nonce, não 'unsafe-inline': um valor aleatório
+ * gerado aqui, a cada requisição, colocado no header CSP (script-src
+ * 'nonce-...'). O Next.js lê esse mesmo header de dentro do request
+ * (não algo que setamos manualmente em layout.tsx) e aplica o nonce
+ * automaticamente a todo script que ele injeta — MAS só em páginas
+ * dinamicamente renderizadas (ver comentário em
+ * src/app/(authenticated)/layout.tsx, que documenta a consequência
+ * disso: toda página com formulário precisou virar force-dynamic). Um
+ * atacante injetando <script> via XSS não conhece o nonce da requisição
+ * em curso, então o navegador recusa executar o script injetado mesmo
+ * que script-src permita *algum* inline.
+ */
+function buildCsp(nonce: string, isProd: boolean): string {
+  return [
+    "default-src 'self'",
+    isProd ? `script-src 'self' 'nonce-${nonce}'` : "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https://avatars.githubusercontent.com",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "form-action 'none'",
+    "base-uri 'none'",
+    "object-src 'none'",
+  ].join("; ");
+}
+
 export function middleware(req: NextRequest) {
   const hostHeader = req.headers.get("host");
 
@@ -68,7 +109,17 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  return NextResponse.next();
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const isProd = process.env.NODE_ENV === "production";
+  const csp = buildCsp(nonce, isProd);
+
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("Content-Security-Policy", csp);
+  return response;
 }
 
 export const config = {

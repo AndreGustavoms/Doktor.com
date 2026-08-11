@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useActivityLog, useChangePassword, useClearCache, ApiError } from "@/hooks/useSettings";
+import {
+  useActivityLog,
+  useChangePassword,
+  useClearCache,
+  useRunSecurityAudit,
+  ApiError,
+  type AuditItem,
+} from "@/hooks/useSettings";
 import { LockButton } from "@/components/layout/LockButton";
 import { relativeTime } from "@/lib/format";
 
@@ -25,6 +32,7 @@ export default function SettingsPage() {
         <ChangePasswordCard />
         <MaintenanceCard />
         <TokenRotationCard />
+        <SecurityAuditCard />
         <ActivityLogCard />
       </div>
     </main>
@@ -162,6 +170,59 @@ function TokenRotationCard() {
       <p className="mt-2 text-xs text-chalk-dim">
         Depois de rotacionar, revogue o token antigo em github.com/settings/tokens.
       </p>
+    </section>
+  );
+}
+
+const STATUS_META: Record<AuditItem["status"], { icon: string; className: string }> = {
+  pass: { icon: "✓", className: "text-jade" },
+  warn: { icon: "!", className: "text-amber" },
+  fail: { icon: "✗", className: "text-coral" },
+};
+
+function SecurityAuditCard() {
+  const runAudit = useRunSecurityAudit();
+  const [items, setItems] = useState<AuditItem[] | null>(null);
+
+  return (
+    <section className="rounded border border-ink-700 bg-ink-800 p-5">
+      <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
+        Auditoria de segurança
+      </h2>
+      <p className="mb-3 text-sm text-chalk-dim">
+        Roda ao vivo, sem chamada de rede: bind em loopback, vault cifrado, .gitignore, hooks do
+        gitleaks, flag de ações destrutivas e headers de segurança. Não substitui{" "}
+        <code className="text-chalk">npm run check</code>, que também cobre testes e
+        vulnerabilidades de dependências.
+      </p>
+      <button
+        type="button"
+        onClick={async () => {
+          const res = await runAudit.mutateAsync();
+          setItems(res.items);
+        }}
+        disabled={runAudit.isPending}
+        className="rounded border border-ink-600 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim hover:border-blueprint hover:text-chalk disabled:opacity-40"
+      >
+        {runAudit.isPending ? "Rodando…" : "Rodar auditoria"}
+      </button>
+
+      {items && (
+        <ul className="mt-3 flex flex-col gap-1.5">
+          {items.map((item) => {
+            const meta = STATUS_META[item.status];
+            return (
+              <li key={item.id} className="flex items-start gap-2 text-sm">
+                <span className={`shrink-0 font-mono ${meta.className}`}>{meta.icon}</span>
+                <div>
+                  <span className="text-chalk">{item.label}</span>
+                  <p className="text-xs text-chalk-dim">{item.detail}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }

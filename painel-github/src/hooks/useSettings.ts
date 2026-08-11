@@ -32,4 +32,17 @@ export function useClearCache() {
   });
 }
 
+export interface AuditItem {
+  id: string;
+  label: string;
+  status: "pass" | "fail" | "warn";
+  detail: string;
+}
+
+export function useRunSecurityAudit() {
+  return useMutation({
+    mutationFn: () => apiPost<{ items: AuditItem[] }>("/api/settings/audit", {}),
+  });
+}
+
 export { ApiError };
