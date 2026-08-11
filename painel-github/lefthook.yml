@@ -1,15 +1,26 @@
 # Hooks de Git — a última linha de defesa contra A2 (segredo no histórico).
 # Ver docs/SECURITY.md §4.11.
+#
+# Este arquivo vive em painel-github/ (não na raiz do repositório Git,
+# que é Doktor.com/) — é importado via `extends` no lefthook.yml da
+# raiz. `root:` de command no lefthook muda o cwd de execução de
+# `run:` para dentro dessa pasta (confirmado empiricamente). Os
+# caminhos de {staged_files} continuam relativos à raiz do repo — por
+# isso não usamos {staged_files} aqui, o eslint roda no diretório
+# inteiro via glob do próprio comando.
 
 pre-commit:
   commands:
     gitleaks:
-      run: gitleaks protect --staged --redact --verbose
+      root: "painel-github/"
+      run: gitleaks protect --staged --redact --verbose --config .gitleaks.toml
     lint-staged:
-      glob: "*.{ts,tsx}"
-      run: npx eslint {staged_files}
+      root: "painel-github/"
+      glob: "painel-github/**/*.{ts,tsx}"
+      run: node_modules/.bin/eslint --no-error-on-unmatched-pattern src
 
 pre-push:
   commands:
     gitleaks-full:
-      run: gitleaks detect --no-git --redact
+      root: "painel-github/"
+      run: gitleaks detect --no-git --redact --config .gitleaks.toml
