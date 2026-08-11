@@ -32,10 +32,15 @@ resposta crua da API do GitHub repassada sem filtro.
   final de todo `npm run build` — falha o build se achar `ghp_`,
   `github_pat_`, `gho_`, `ghs_`, `ghu_` em `.next/static/` ou
   `out/portfolio/`. `tests/unit/dto.test.ts` — campo extra na resposta
-  simulada do GitHub não passa para a saída.
-- **Status:** ☑ Implementado (para a rota `GET /api/repos`; outros
-  endpoints ganham seus próprios DTOs conforme são construídos nas
-  próximas fases — a técnica é a mesma).
+  simulada do GitHub não passa para a saída. `tests/unit/portfolio-export.test.ts`
+  (Fase 6) — gera uma exportação real do portfólio com um token falso
+  registrado para redação e garante por asserção que o HTML resultante
+  não contém o token, nenhum padrão `ghp_*`/`github_pat_*`, nem tags que
+  fariam uma requisição de rede (`<script>`, `<link>`, `fetch(`).
+- **Status:** ☑ Implementado (DTOs cobrindo `GET /api/repos` e a
+  exportação estática do portfólio — Fase 6; outros endpoints ganham seus
+  próprios DTOs conforme são construídos nas próximas fases — a técnica é
+  a mesma).
 
 ### A2 — Vazamento para o histórico do Git
 Um `.env` commitado uma vez fica no histórico para sempre — remover o

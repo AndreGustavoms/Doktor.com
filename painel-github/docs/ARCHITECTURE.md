@@ -72,8 +72,9 @@ com "Can't find lefthook in PATH" sem abortar o commit). Ver commit
   mapeia a resposta crua para `IssueDTO` antes de chegar em
   `inbox.ts`, então o campo que distinguiria PR de issue comum não
   sobrevive ao DTO. Uma inbox de PRs de verdade, separada, usando
-  `octokit.pulls.list()`, fica para a Fase 6 do prompt original
-  (`/prs` como página própria).
+  `octokit.pulls.list()`, fica para a Fase 7 do prompt original
+  (`/prs` como página própria) — não estava no escopo da Fase 6
+  (Portfólio).
 - **Rotação de token via CLI, não via UI web:** `scripts/rotate-token.ts`
   pede a senha mestra e o token novo por `stdin`, fora do processo HTTP
   do painel — decisão deliberada, não lacuna. Expor rotação de token
@@ -86,6 +87,45 @@ com "Can't find lefthook in PATH" sem abortar o commit). Ver commit
   (pinned, tags, notas, portfólio) — nunca `auth`, `sessions`, ou o
   conteúdo de `vault.enc`. Migrar o token para uma instalação nova é um
   fluxo separado (rodar o setup lá com o mesmo token).
+
+## Limitações conhecidas — Fase 6
+
+- **`portfolioItems.repoId` resolve owner/name via `listRepos()`, não via
+  um índice próprio:** o schema (definido desde a Fase 0) guarda só o ID
+  numérico do repositório no GitHub, sem `fullName`. Como a API de
+  detalhe do GitHub exige owner/name, `exportPortfolio()`
+  (`src/server/portfolio-export.ts`) busca a listagem completa cacheada
+  (`listRepos`, até 100 repos/página) e casa por ID em memória, em vez de
+  guardar um segundo índice redundante no banco ou depender de estado de
+  processo. Para o volume de repositórios pessoais a que este painel se
+  destina (ver prompt original §1), isso custa uma chamada a mais por
+  exportação, não uma por item — dentro do orçamento de rate limit. Um
+  usuário com mais de 100 repositórios pessoais precisaria de paginação
+  aqui, que não foi implementada.
+- **Preview do editor não é o HTML final:** a tela `/portfolio` renderiza
+  uma aproximação em React dos mesmos dados, para edição rápida sem
+  round-trip a cada tecla. O HTML de verdade só existe depois de
+  "Exportar", gerado inteiramente em `src/server/portfolio-export.ts`
+  (string templates, sem JSX/SSR) — os dois caminhos podem divergir
+  visualmente se um for alterado sem o outro. `tests/unit/portfolio-export.test.ts`
+  cobre o exportador real, não o preview.
+- **Exportação sempre sobrescreve `out/portfolio/` inteiro:** não há
+  versionamento nem histórico de exportações — cada chamada a
+  `exportPortfolio()` apaga o diretório anterior (`rmSync` recursivo) e
+  escreve do zero. Aceitável porque o prompt original trata a exportação
+  como um "congelamento" pontual para publicação manual, não como um
+  pipeline de deploy.
+- **Sem imagem de capa:** o schema já reserva `portfolioItems.coverPath`,
+  mas nenhuma UI de upload foi construída nesta fase — todo card no site
+  exportado é só texto. Fica para quando (se) o critério de "vitrine"
+  pedir imagens.
+- **Critério de "abre offline, sem rede, sem token" verificado
+  automaticamente, não manualmente:** `tests/unit/portfolio-export.test.ts`
+  gera um export real (com `listRepos` mockado, sem tocar o GitHub de
+  verdade) e garante por asserção que o HTML resultante não contém
+  `<script>`, `<link>`, `fetch(`, nem nenhum padrão de token do GitHub —
+  além do grep pós-build de `scripts/check-bundle-secrets.ts`, que varre
+  `out/portfolio/` como defesa em profundidade adicional.
 
 ## Regra de ouro
 
