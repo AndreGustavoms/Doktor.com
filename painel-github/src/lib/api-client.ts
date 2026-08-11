@@ -20,9 +20,13 @@ interface ApiErrorBody {
   error: { code: string; message: string; field?: string };
 }
 
-export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+async function apiWrite<T>(
+  method: "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  body: unknown,
+): Promise<T> {
   const response = await fetch(path, {
-    method: "POST",
+    method,
     headers: {
       "Content-Type": "application/json",
       "X-Local-Client": "1",
@@ -44,6 +48,22 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   }
 
   return data as T;
+}
+
+export function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return apiWrite<T>("POST", path, body);
+}
+
+export function apiPut<T>(path: string, body: unknown): Promise<T> {
+  return apiWrite<T>("PUT", path, body);
+}
+
+export function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  return apiWrite<T>("PATCH", path, body);
+}
+
+export function apiDelete<T>(path: string, body: unknown): Promise<T> {
+  return apiWrite<T>("DELETE", path, body);
 }
 
 export async function apiGet<T>(path: string): Promise<T> {

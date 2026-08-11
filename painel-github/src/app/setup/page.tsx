@@ -70,7 +70,7 @@ export default function SetupPage() {
         <p className="font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
           Primeiro boot — passo {step} de 4
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold text-chalk">
+        <h1 className="mt-2 font-(family-name:--font-display) text-3xl font-bold text-chalk">
           {STEP_LABELS[step]}
         </h1>
         <div className="mt-4 flex gap-1">

@@ -23,7 +23,7 @@ export function Sidebar() {
       aria-label="Navegação principal"
       className="sticky top-0 flex h-screen w-[240px] shrink-0 flex-col border-r border-ink-700 bg-ink-900 px-4 py-6"
     >
-      <p className="mb-6 px-2 font-[family-name:var(--font-display)] text-lg font-bold text-chalk">
+      <p className="mb-6 px-2 font-(family-name:--font-display) text-lg font-bold text-chalk">
         Painel GitHub
       </p>
       <ul className="flex flex-col gap-1">

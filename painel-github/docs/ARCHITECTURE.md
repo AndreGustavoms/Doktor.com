@@ -1,5 +1,29 @@
 # Arquitetura
 
+## Localização do repositório
+
+Este projeto vive em `Doktor.com/painel-github/` — um subdiretório do
+repositório `Doktor.com`, não um repositório Git próprio. Os commits das
+Fases 0-3 foram construídos originalmente num repositório isolado
+(`Dev/painel-github`) e trazidos para cá via `git filter-repo` (moveu
+todo o histórico para a subpasta) + `git merge --allow-unrelated-histories`,
+preservando os 4 commits de fase individualmente em vez de virarem um
+squash. O `Dev/painel-github` original permanece intacto no disco como
+cópia de referência, mas não é mais o lugar onde o desenvolvimento
+continua.
+
+**Efeito colateral real:** o `lefthook.yml` só é lido pelo lefthook
+quando está na raiz do repositório Git (agora `Doktor.com/`, não
+`painel-github/`). O `Doktor.com/lefthook.yml` usa `extends:` para
+importar `painel-github/lefthook.yml`; cada `command` nesse arquivo
+usa `root: "painel-github/"` para rodar no diretório certo. `lefthook`
+também precisou ser instalado globalmente (`npm install -g lefthook`)
+porque os hooks do Git chamam o binário fora do contexto de
+`node_modules/.bin` do npm — descoberto ao vivo quando um commit de
+teste com um token fake passou batido silenciosamente (o hook falhava
+com "Can't find lefthook in PATH" sem abortar o commit). Ver commit
+"fix: corrige hooks do lefthook após mover painel-github para monorepo".
+
 ## Limitações conhecidas — Fase 3
 
 - **Paginação de 100 repos no dashboard e na régua de sincronia:**
@@ -17,6 +41,27 @@
   deixado para refinamento futuro.
 - **Placeholder "Carregar imagens" para hotlink não implementado** — ver
   docs/SECURITY.md, ameaça A5.
+
+## Limitações conhecidas — Fase 4
+
+- **`workflow_dispatch` com inputs em JSON livre, não formulário
+  gerado do YAML:** o prompt original (§7.5) pede "disparo de
+  workflow_dispatch com os inputs declarados" — ou seja, ler o YAML do
+  workflow (`.github/workflows/*.yml`), extrair a seção
+  `on.workflow_dispatch.inputs`, e gerar um formulário com os campos
+  certos (texto, boolean, choice). `ActionsPanel.tsx` implementado
+  nesta fase pede um textarea de JSON livre em vez disso — cobre o
+  caso de uso real (disparar sabendo os inputs esperados) sem a
+  complexidade de parsear YAML e mapear tipos de input para campos de
+  formulário. Buscar o conteúdo do workflow via `contents.ts` (já
+  existente) e parsear YAML é o caminho se isso vier a ser necessário.
+- **Escopo de "ação destrutiva" restrito a alternar visibilidade:** o
+  prompt original lista "branch, force push, arquivar, apagar release"
+  como exemplos de ações destrutivas, mas nenhuma dessas tem UI nesta
+  fase — só existe a ação de escrita que o painel de fato implementa
+  (alternar visibilidade) passando pela guarda. Se uma fase futura
+  adicionar arquivar repositório ou forçar push, a mesma
+  `requireDestructiveAllowed()` se aplica.
 
 ## Regra de ouro
 

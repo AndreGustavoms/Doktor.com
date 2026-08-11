@@ -48,9 +48,9 @@ export default function ReposPage() {
   }, [repos, deferredQuery, sortKey]);
 
   return (
-    <main className="mx-auto max-w-[1440px] px-8 py-6">
+    <main className="mx-auto max-w-360 px-8 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-chalk">
+        <h1 className="font-(family-name:--font-display) text-3xl font-bold text-chalk">
           Repositórios
         </h1>
         <LockButton />

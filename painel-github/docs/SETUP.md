@@ -33,11 +33,15 @@ token](https://github.com/settings/personal-access-tokens/new) com:
 | Permissão | Nível | Necessária para |
 |---|---|---|
 | Metadata | Leitura | Obrigatória para qualquer fine-grained token |
-| Contents | Leitura e escrita | Ler arquivos, commitar, criar branches (Fase 4) |
-| Issues | Leitura e escrita | Inbox de issues (Fase 5) |
+| Contents | Leitura e escrita | Ler arquivos, commitar README (Fase 4) |
+| Issues | Leitura e escrita | Criar/comentar/fechar issues (Fase 4); inbox unificada (Fase 5) |
 | Pull requests | Leitura e escrita | Listar e comentar PRs (Fase 5) |
-| Actions | Leitura | Status de workflows (Fase 3) |
-| Administration | Leitura e escrita | Só se for editar descrição, topics ou visibilidade pela UI (Fase 4) — se não for, omita |
+| Actions | Leitura e escrita | Ler status de workflows (Fase 3); disparar workflow_dispatch e re-executar (Fase 4) |
+| Administration | Leitura e escrita | Editar descrição/topics (Fase 4) e alternar visibilidade — ação destrutiva, atrás de `ALLOW_DESTRUCTIVE` (Fase 4). Se você nunca for alternar visibilidade pela UI, ainda precisa desta permissão para editar descrição/topics/homepage. |
+
+**Nota:** Actions passou de "Leitura" (Fase 3) para "Leitura e escrita"
+nesta fase — se você criou o token antes da Fase 4, precisa editar as
+permissões dele em github.com/settings/tokens para disparar workflows.
 
 O wizard de `/setup` valida o token chamando `GET /user` antes de
 prosseguir — se a validação falhar, revise as permissões acima.
@@ -56,17 +60,25 @@ ver `docs/SECURITY.md`, ameaças A1/A2/A8.
 
 ## Pendência conhecida: validação com token real
 
-O endpoint `GET /api/repos` (Fase 2) foi validado ao vivo contra o
-servidor real (`next start`) cobrindo: Host check (421), sessão ausente
-(401), origem cross-site (403), vault bloqueado (423), e uma chamada
-real ao GitHub com token inválido retornando erro sanitizado (502, sem
-vazar detalhe da resposta do GitHub — confirmado no log). **O que não
-foi validado nesta sessão de desenvolvimento**, por não haver um
-fine-grained PAT real disponível no ambiente: a listagem de repositórios
-de verdade, o comportamento de cache (`fromCache: true` no segundo
-load), e a revalidação via ETag/304 contra `api.github.com`.
+Todas as rotas foram validadas ao vivo contra o servidor real
+(`next start`) para as camadas que não dependem de um token válido:
+Host check (421), sessão ausente (401), origem cross-site (403), vault
+bloqueado (423), path traversal rejeitado (400), guarda destrutiva sem
+`ALLOW_DESTRUCTIVE` (403), nome de confirmação incorreto (400), e uma
+chamada real ao GitHub com token inválido retornando erro sanitizado
+(502, sem vazar detalhe da resposta do GitHub).
 
-Para validar manualmente: rode o setup com um token real, chame
-`GET /api/repos` duas vezes seguidas e confirme que a segunda resposta
-tem `"fromCache": true` — a query interna correspondente em
-`data/app.db` (tabela `api_cache`) deve mostrar `etag` preenchido.
+**O que não foi validado nesta sessão de desenvolvimento**, por não
+haver um fine-grained PAT real disponível no ambiente:
+
+- Fase 2: listagem de repositórios de verdade, `fromCache: true` no
+  segundo load, revalidação via ETag/304.
+- Fase 4: commit de README de verdade (incluindo o caso de conflito de
+  SHA — 409), edição de descrição/topics persistindo no GitHub, criar
+  issue/comentar/fechar contra um repo real, criar release de verdade,
+  disparar `workflow_dispatch` contra um workflow real, e alternar
+  visibilidade com `ALLOW_DESTRUCTIVE=true` de fato setado.
+
+Para validar manualmente: rode o setup com um token real, defina
+`ALLOW_DESTRUCTIVE=true` no `.env.local` temporariamente, e exercite
+cada fluxo de escrita na UI de um repositório de teste descartável.

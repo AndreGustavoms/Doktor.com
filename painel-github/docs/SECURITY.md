@@ -241,9 +241,34 @@ seu, dano permanente.
   resultado. **Exclusão de repositório não é implementada — nem atrás de
   flag.** Antes de sobrescrever arquivo via API, mostra diff e exige
   confirmação.
-- **Mecanismo:** `src/server/guards.ts` (checagem da flag),
-  `src/components/feedback/ConfirmDestructive.tsx` (Fase 4).
-- **Status:** ☐ Implementado — chega na Fase 4.
+- **Mecanismo:** [src/server/guards.ts](../src/server/guards.ts)
+  (`requireDestructiveAllowed()` — checa `ALLOW_DESTRUCTIVE`, lança 403
+  se ausente/false),
+  [src/components/feedback/ConfirmDestructive.tsx](../src/components/feedback/ConfirmDestructive.tsx)
+  (exige digitar o nome completo; botão de confirmação fica desabilitado
+  quando `destructiveAllowed` é `false`, com o motivo explicado na UI),
+  [src/server/github/repo-settings.ts](../src/server/github/repo-settings.ts)
+  (`setRepoVisibility()` — única ação classificada como destrutiva nesta
+  fase; a rota valida o nome digitado ANTES de sequer chamar a função
+  que checa a flag — duas camadas independentes),
+  [src/server/activity-log.ts](../src/server/activity-log.ts)
+  (`logAction()` — timestamp, ação, alvo, resultado, chamado em toda
+  escrita ao GitHub, destrutiva ou não).
+- **Escopo desta fase:** das ações destrutivas listadas no prompt
+  original (branch, force push, arquivar, apagar release), só
+  alternância de visibilidade foi implementada — as demais não têm UI
+  nesta fase (não existe "forçar push" ou "arquivar" no painel ainda).
+  Exclusão de repositório **não implementada, nem atrás de flag** —
+  decisão permanente, não uma lacuna desta fase.
+- **Teste automatizado:** nenhum teste unitário dedicado ainda (a lógica
+  de `requireDestructiveAllowed()` é simples o bastante para não
+  justificar um arquivo de teste próprio) — validado ao vivo contra o
+  servidor real: `PUT /visibility` sem `ALLOW_DESTRUCTIVE` retorna `403
+  DESTRUCTIVE_ACTIONS_DISABLED`; nome de confirmação incorreto retorna
+  `400 CONFIRMATION_MISMATCH` antes mesmo de a guarda destrutiva ser
+  avaliada.
+- **Status:** ☑ Implementado (para o escopo desta fase — ver nota
+  acima).
 
 ### A10 — Cadeia de suprimentos
 Uma dependência comprometida com script de `postinstall` lê `.env.local`

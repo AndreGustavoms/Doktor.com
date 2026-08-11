@@ -68,10 +68,10 @@ export default async function DashboardPage() {
   };
 
   return (
-    <main className="mx-auto max-w-[1440px] px-8 py-6">
+    <main className="mx-auto max-w-360 px-8 py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-chalk">
+          <h1 className="font-(family-name:--font-display) text-3xl font-bold text-chalk">
             Painel GitHub
           </h1>
           <p className="font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
@@ -130,7 +130,7 @@ function StatCard({
     <div className="rounded border border-ink-700 bg-ink-800 p-4">
       <p className="font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">{label}</p>
       <p
-        className={`mt-1 font-[family-name:var(--font-display)] text-2xl font-bold ${
+        className={`mt-1 font-(family-name:--font-display) text-2xl font-bold ${
           tone === "warning" && Number(value) > 0 ? "text-amber" : "text-chalk"
         }`}
       >

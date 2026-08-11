@@ -76,3 +76,22 @@ export function requireSameOrigin(req: Request): void {
     "Requisição rejeitada: origem não confiável.",
   );
 }
+
+/**
+ * A9 — ação destrutiva por engano. `ALLOW_DESTRUCTIVE=false` por padrão
+ * (a ausência da variável também conta como false — nunca opt-in
+ * silencioso). Chamado por toda rota que executa ação destrutiva de
+ * verdade (alternar visibilidade, forçar push, arquivar) — nunca por
+ * ações de escrita "normais" (criar issue, comentar, criar release),
+ * que são reversíveis ou de baixo risco. Ver prompt original §4.13 e
+ * docs/SECURITY.md, ameaça A9.
+ */
+export function requireDestructiveAllowed(): void {
+  if (process.env.ALLOW_DESTRUCTIVE !== "true") {
+    throw new GuardError(
+      403,
+      "DESTRUCTIVE_ACTIONS_DISABLED",
+      "Ações destrutivas estão desabilitadas. Defina ALLOW_DESTRUCTIVE=true no .env.local para habilitar.",
+    );
+  }
+}

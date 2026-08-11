@@ -7,7 +7,12 @@ import { isUnlocked } from "@/server/vault/session-state";
 import { RepoParamsSchema } from "@/server/schemas/github";
 import { getRepo, getReadme, listCommits } from "@/server/github/repo-detail";
 import { renderMarkdown } from "@/server/markdown";
-import { MarkdownView } from "@/components/markdown/MarkdownView";
+import { ReadmeEditor } from "@/components/repos/ReadmeEditor";
+import { TopicsEditor } from "@/components/repos/TopicsEditor";
+import { IssuesPanel } from "@/components/repos/IssuesPanel";
+import { ReleasesPanel } from "@/components/repos/ReleasesPanel";
+import { ActionsPanel } from "@/components/repos/ActionsPanel";
+import { VisibilityToggle } from "@/components/repos/VisibilityToggle";
 import { LockButton } from "@/components/layout/LockButton";
 import { languageColor } from "@/lib/language-colors";
 import { relativeTime, formatNumber } from "@/lib/format";
@@ -59,13 +64,13 @@ export default async function RepoDetailPage({ params }: PageProps) {
   const readmeHtml = markdown ? (await renderMarkdown(markdown)).html : null;
 
   return (
-    <main className="mx-auto max-w-[1440px] px-8 py-6">
+    <main className="mx-auto max-w-360 px-8 py-6">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
             {repo.fullName}
           </p>
-          <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-chalk">
+          <h1 className="mt-1 font-(family-name:--font-display) text-3xl font-bold text-chalk">
             {repo.name}
           </h1>
           {repo.description && <p className="mt-2 text-chalk-dim">{repo.description}</p>}
@@ -75,16 +80,13 @@ export default async function RepoDetailPage({ params }: PageProps) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
         <div className="flex flex-col gap-6">
-          <section className="rounded border border-ink-700 bg-ink-800 p-5">
-            <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
-              README
-            </h2>
-            {readmeHtml ? (
-              <MarkdownView html={readmeHtml} />
-            ) : (
-              <p className="text-sm text-chalk-dim">Este repositório não tem README.</p>
-            )}
-          </section>
+          <ReadmeEditor
+            owner={identity.owner}
+            name={identity.name}
+            defaultBranch={repo.defaultBranch}
+            readmeHtml={readmeHtml}
+            hasReadme={markdown !== null}
+          />
 
           <section className="rounded border border-ink-700 bg-ink-800 p-5">
             <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
@@ -113,6 +115,12 @@ export default async function RepoDetailPage({ params }: PageProps) {
               </ul>
             )}
           </section>
+
+          <IssuesPanel owner={identity.owner} name={identity.name} />
+
+          <ReleasesPanel owner={identity.owner} name={identity.name} />
+
+          <ActionsPanel owner={identity.owner} name={identity.name} defaultBranch={repo.defaultBranch} />
         </div>
 
         <aside className="flex flex-col gap-4">
@@ -161,23 +169,14 @@ export default async function RepoDetailPage({ params }: PageProps) {
             </dl>
           </div>
 
-          {repo.topics.length > 0 && (
-            <div className="rounded border border-ink-700 bg-ink-800 p-4">
-              <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
-                Topics
-              </h2>
-              <div className="flex flex-wrap gap-1.5">
-                {repo.topics.map((topic) => (
-                  <span
-                    key={topic}
-                    className="rounded border border-ink-600 px-2 py-0.5 font-mono text-xs text-chalk-dim"
-                  >
-                    {topic}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          <TopicsEditor owner={identity.owner} name={identity.name} initialTopics={repo.topics} />
+
+          <VisibilityToggle
+            owner={identity.owner}
+            name={identity.name}
+            isPrivate={repo.isPrivate}
+            destructiveAllowed={process.env.ALLOW_DESTRUCTIVE === "true"}
+          />
 
           <a
             href={repo.htmlUrl}

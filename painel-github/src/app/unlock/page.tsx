@@ -35,7 +35,7 @@ export default function UnlockPage() {
         <p className="mb-1 text-center font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
           Painel bloqueado
         </p>
-        <h1 className="mb-8 text-center font-[family-name:var(--font-display)] text-2xl font-bold text-chalk">
+        <h1 className="mb-8 text-center font-(family-name:--font-display) text-2xl font-bold text-chalk">
           Digite a senha mestra
         </h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

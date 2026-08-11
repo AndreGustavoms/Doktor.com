@@ -73,3 +73,14 @@ export function touchCache(key: string, resourceType: CacheResourceType): void {
   const expiresAt = new Date(Date.now() + CACHE_TTL_MS[resourceType]);
   getDb().update(apiCache).set({ expiresAt }).where(eq(apiCache.key, key)).run();
 }
+
+/**
+ * Remove uma entrada de cache — usado depois de uma escrita bem
+ * sucedida (editar descrição/topics) para que o próximo GET busque
+ * dados frescos em vez de esperar o TTL vencer. Sem isto, a UI mostraria
+ * a descrição antiga por até 2 minutos (TTL de repoDetail) depois de
+ * uma edição confirmada.
+ */
+export function deleteCache(key: string): void {
+  getDb().delete(apiCache).where(eq(apiCache.key, key)).run();
+}
