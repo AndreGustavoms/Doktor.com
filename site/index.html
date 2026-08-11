@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>André Gustavo — Fullstack Developer</title>
+<meta name="description" content="André Gustavo — Fullstack Developer. Sistemas que aguentam uso real: cofres de credenciais, painéis de operação e plataformas de estudo.">
+<meta name="author" content="André Gustavo">
+<meta property="og:type" content="website">
+<meta property="og:title" content="André Gustavo — Fullstack Developer">
+<meta property="og:description" content="Sistemas que aguentam uso real. Segurança e arquitetura desde a primeira linha.">
+<meta name="theme-color" content="#08070A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2308070A'/%3E%3Ctext y='.9em' font-size='88' x='50%25' text-anchor='middle' fill='%23C8FF4D' font-family='sans-serif' font-weight='bold'%3EA%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --bg:        #08070A;
+  --bg-2:      #0E0C12;
+  --surface:   #141118;
+  --line:      #241F2C;
+  --line-2:    #373043;
+  --fg:        #F2EFEA;
+  --fg-2:      #A69EB2;
+  --fg-3:      #6B6479;
+  --acid:      #C8FF4D;
+  --acid-dim:  #8FB833;
+
+  --display: "Haettenschweiler", "Arial Narrow Bold", Impact, sans-serif;
+  --sans:    "Corbel", "Segoe UI", system-ui, sans-serif;
+  --mono:    "Consolas", ui-monospace, "Courier New", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--acid); color: var(--bg); }
+
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
+
+/* ══════════ atmosfera ══════════ */
+.glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    520px circle at var(--mx, 50%) var(--my, 30%),
+    rgba(200, 255, 77, 0.055),
+    transparent 62%
+  );
+  transition: background 240ms ease-out;
+}
+
+.grain {
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.026;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.shell { position: relative; z-index: 2; }
+
+/* ══════════ nav ══════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 40px;
+  mix-blend-mode: difference;
+}
+
+.brand {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff;
+}
+
+.nav-links { display: flex; gap: 30px; }
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff;
+  opacity: 0.62;
+  transition: opacity 200ms;
+}
+.nav-links a:hover { opacity: 1; }
+
+/* ══════════ hero ══════════ */
+header.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 40px 52px;
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin: 0 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-eyebrow::before {
+  content: "";
+  width: 42px;
+  height: 1px;
+  background: var(--acid);
+  transform-origin: left;
+  animation: grow 900ms 200ms cubic-bezier(.16,1,.3,1) backwards;
+}
+@keyframes grow { from { transform: scaleX(0); } }
+
+h1.hero-name {
+  font-family: var(--display);
+  font-size: clamp(72px, 17.5vw, 260px);
+  line-height: 0.78;
+  letter-spacing: 0.004em;
+  text-transform: uppercase;
+  margin: 0 0 34px;
+}
+
+h1.hero-name span {
+  display: block;
+  overflow: hidden;
+}
+h1.hero-name span i {
+  display: block;
+  font-style: normal;
+  animation: rise 1s cubic-bezier(.16,1,.3,1) backwards;
+}
+h1.hero-name span:nth-child(1) i { animation-delay: 120ms; }
+h1.hero-name span:nth-child(2) i { animation-delay: 230ms; }
+@keyframes rise { from { transform: translateY(102%); } }
+
+.hero-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  flex-wrap: wrap;
+  animation: fade 1s 620ms both;
+}
+@keyframes fade { from { opacity: 0; transform: translateY(16px); } }
+
+.hero-lede {
+  font-size: clamp(17px, 2vw, 21px);
+  color: var(--fg-2);
+  max-width: 44ch;
+  margin: 0;
+}
+.hero-lede b { color: var(--fg); font-weight: 600; }
+
+.hero-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  text-align: right;
+  line-height: 2.1;
+}
+.hero-meta b { color: var(--fg-2); font-weight: 400; }
+
+.scroll-cue {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  animation: bob 2.4s ease-in-out infinite;
+}
+@keyframes bob { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 7px); } }
+
+/* ══════════ marquee ══════════ */
+.strip {
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  padding: 15px 0;
+  background: var(--bg-2);
+}
+.strip-track {
+  display: flex;
+  gap: 48px;
+  width: max-content;
+  animation: slide 34s linear infinite;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+.strip-track b { color: var(--acid); font-weight: 400; }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+/* ══════════ seções ══════════ */
+section { padding: 118px 40px; border-bottom: 1px solid var(--line); }
+
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 62px;
+}
+.sec-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--acid);
+}
+.sec-title {
+  font-family: var(--display);
+  font-size: clamp(30px, 5.2vw, 62px);
+  line-height: 0.94;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.006em;
+}
+
+/* ── reveal on scroll ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 800ms cubic-bezier(.16,1,.3,1), transform 800ms cubic-bezier(.16,1,.3,1);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+/* ══════════ trabalhos ══════════ */
+.work-list { border-top: 1px solid var(--line); }
+
+.work {
+  display: block;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding: 34px 0;
+  position: relative;
+  transition: padding-left 480ms cubic-bezier(.16,1,.3,1);
+}
+.work::before {
+  content: "";
+  position: absolute;
+  left: -40px; right: -40px; top: 0; bottom: 0;
+  background: var(--surface);
+  opacity: 0;
+  transition: opacity 380ms;
+  z-index: -1;
+}
+.work:hover, .work:focus-visible { padding-left: 26px; outline: none; }
+.work:hover::before, .work:focus-visible::before { opacity: 1; }
+
+.work-top {
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.work-idx {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  min-width: 26px;
+  font-variant-numeric: tabular-nums;
+  transition: color 380ms;
+}
+.work:hover .work-idx { color: var(--acid); }
+
+.work-name {
+  font-family: var(--display);
+  font-size: clamp(28px, 5.4vw, 64px);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.006em;
+  margin: 0;
+  transition: color 380ms;
+  flex: 1 1 auto;
+}
+.work:hover .work-name { color: var(--acid); }
+
+.work-year {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-3);
+  letter-spacing: 0.1em;
+}
+
+.work-body {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.work-desc {
+  color: var(--fg-2);
+  font-size: 16px;
+  margin: 0;
+  max-width: 60ch;
+}
+
+.stack {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.stack span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  border: 1px solid var(--line-2);
+  padding: 3px 9px;
+  border-radius: 100px;
+  white-space: nowrap;
+  transition: border-color 380ms, color 380ms;
+}
+.work:hover .stack span { border-color: var(--acid-dim); color: var(--fg-2); }
+
+.work-arrow {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  font-family: var(--mono);
+  font-size: 20px;
+  color: var(--acid);
+  opacity: 0;
+  transform: translateX(-14px);
+  transition: opacity 380ms, transform 380ms cubic-bezier(.16,1,.3,1);
+}
+.work:hover .work-arrow { opacity: 1; transform: none; }
+
+/* ══════════ princípios ══════════ */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.cell {
+  background: var(--bg);
+  padding: 38px 32px 42px;
+  transition: background 420ms;
+}
+.cell:hover { background: var(--surface); }
+.cell-k {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin: 0 0 20px;
+}
+.cell h3 {
+  font-family: var(--display);
+  font-size: 27px;
+  line-height: 1.06;
+  text-transform: uppercase;
+  margin: 0 0 13px;
+  letter-spacing: 0.006em;
+}
+.cell p { margin: 0; color: var(--fg-2); font-size: 15.5px; }
+
+/* ══════════ números ══════════ */
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 44px;
+}
+.fig-n {
+  font-family: var(--display);
+  font-size: clamp(52px, 8vw, 96px);
+  line-height: 0.86;
+  margin: 0 0 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--acid);
+}
+.fig-l {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin: 0;
+  max-width: 22ch;
+}
+
+/* ══════════ contato ══════════ */
+.contact { border-bottom: 0; }
+.contact-in { display: flex; flex-direction: column; gap: 40px; }
+
+.big-link {
+  font-family: var(--display);
+  font-size: clamp(42px, 11vw, 150px);
+  line-height: 0.86;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.006em;
+  display: inline-block;
+  transition: color 340ms, transform 480ms cubic-bezier(.16,1,.3,1);
+}
+.big-link:hover { color: var(--acid); transform: translateX(16px); }
+
+.contact-rows {
+  display: flex;
+  gap: 52px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.contact-rows a { color: var(--fg-2); text-decoration: none; transition: color 240ms; }
+.contact-rows a:hover { color: var(--acid); }
+
+footer {
+  padding: 26px 40px 34px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 880px) {
+  nav { padding: 18px 20px; }
+  .nav-links { gap: 18px; }
+  header.hero { padding: 0 20px 40px; }
+  section { padding: 82px 20px; }
+  .work::before { left: -20px; right: -20px; }
+  .work-body { grid-template-columns: 1fr; gap: 14px; }
+  .stack { justify-content: flex-start; }
+  .work-arrow { display: none; }
+  .hero-meta { text-align: left; }
+  footer { padding: 22px 20px 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+<div class="glow" id="glow"></div>
+<div class="grain"></div>
+
+<div class="shell">
+
+<nav>
+  <a class="brand" href="#top">AG — Doktor</a>
+  <div class="nav-links">
+    <a href="#trabalhos">Trabalhos</a>
+    <a href="#metodo">Método</a>
+    <a href="#contato">Contato</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <p class="hero-eyebrow">Fullstack Developer · Rio de Janeiro, BR</p>
+  <h1 class="hero-name">
+    <span><i>André</i></span>
+    <span><i>Gustavo</i></span>
+  </h1>
+  <div class="hero-foot">
+    <p class="hero-lede">Construo <b>sistemas que aguentam uso real</b> — cofres de credenciais, painéis de operação, plataformas de estudo. Segurança e arquitetura desde a primeira linha, não como reforma depois.</p>
+    <div class="hero-meta">
+      <b>Disponível</b> para projetos<br>
+      TypeScript · React · Node<br>
+      Python · Next.js
+    </div>
+  </div>
+  <span class="scroll-cue">Role ↓</span>
+</header>
+
+<div class="strip">
+  <div class="strip-track" aria-hidden="true">
+    <span>Arquitetura de sistemas</span><b>◆</b>
+    <span>Segurança aplicada</span><b>◆</b>
+    <span>Design systems</span><b>◆</b>
+    <span>Interfaces densas</span><b>◆</b>
+    <span>Automação</span><b>◆</b>
+    <span>Arquitetura de sistemas</span><b>◆</b>
+    <span>Segurança aplicada</span><b>◆</b>
+    <span>Design systems</span><b>◆</b>
+    <span>Interfaces densas</span><b>◆</b>
+    <span>Automação</span><b>◆</b>
+  </div>
+</div>
+
+<section id="trabalhos">
+  <div class="sec-head reveal">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">Trabalhos selecionados</h2>
+  </div>
+
+  <div class="work-list">
+
+    <a class="work reveal" href="https://github.com/AndreGustavoms/Contas.exe" target="_blank" rel="noopener noreferrer">
+      <div class="work-top">
+        <span class="work-idx">01</span>
+        <h3 class="work-name">Contas.exe</h3>
+        <span class="work-year">2026</span>
+      </div>
+      <div class="work-body">
+        <span></span>
+        <p class="work-desc">Cofre de credenciais para equipes gerenciarem contas compartilhadas. Login individual, permissões por papel, 2FA e criptografia em repouso — com trilha de auditoria de cada acesso.</p>
+        <div class="stack"><span>TypeScript</span><span>React</span><span>Tailwind</span><span>Docker</span></div>
+      </div>
+      <span class="work-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <a class="work reveal" href="https://github.com/AndreGustavoms/Doktor-SystemDesign" target="_blank" rel="noopener noreferrer">
+      <div class="work-top">
+        <span class="work-idx">02</span>
+        <h3 class="work-name">Doktor System Design</h3>
+        <span class="work-year">2026</span>
+      </div>
+      <div class="work-body">
+        <span></span>
+        <p class="work-desc">Design system e conjunto de diretrizes de arquitetura que sustenta os outros projetos: padrões de código, componentes reutilizáveis e validação automatizada em CI.</p>
+        <div class="stack"><span>Design System</span><span>CI/CD</span><span>MIT</span></div>
+      </div>
+      <span class="work-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <a class="work reveal" href="https://github.com/AndreGustavoms/Doktor.com" target="_blank" rel="noopener noreferrer">
+      <div class="work-top">
+        <span class="work-idx">03</span>
+        <h3 class="work-name">Painel GitHub</h3>
+        <span class="work-year">2026</span>
+      </div>
+      <div class="work-body">
+        <span></span>
+        <p class="work-desc">Painel local de gestão de repositórios: leitura, escrita, inbox unificada de issues e exportação de portfólio estático. Token cifrado em vault local, dez ameaças mapeadas e defendidas uma a uma.</p>
+        <div class="stack"><span>Next.js</span><span>SQLite</span><span>Octokit</span><span>Playwright</span></div>
+      </div>
+      <span class="work-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <a class="work reveal" href="https://github.com/AndreGustavoms/MeuEcooBETA" target="_blank" rel="noopener noreferrer">
+      <div class="work-top">
+        <span class="work-idx">04</span>
+        <h3 class="work-name">Ecoo</h3>
+        <span class="work-year">2026</span>
+      </div>
+      <div class="work-body">
+        <span></span>
+        <p class="work-desc">Landing page autoral no estilo de plataformas de streaming — marca, identidade visual e texto originais. Grid cinematográfico com logo fixo e transições de entrada por seção.</p>
+        <div class="stack"><span>React 19</span><span>TypeScript</span><span>Vite</span></div>
+      </div>
+      <span class="work-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <a class="work reveal" href="https://github.com/AndreGustavoms/PrismaTest" target="_blank" rel="noopener noreferrer">
+      <div class="work-top">
+        <span class="work-idx">05</span>
+        <h3 class="work-name">Prisma</h3>
+        <span class="work-year">2026</span>
+      </div>
+      <div class="work-body">
+        <span></span>
+        <p class="work-desc">Plataforma de estudos com IA para instituições de ensino: créditos por assinatura, memória persistente por aluno e perfis distintos para professor, aluno e coordenação.</p>
+        <div class="stack"><span>Python</span><span>OpenRouter</span><span>Web</span></div>
+      </div>
+      <span class="work-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <a class="work reveal" href="https://github.com/AndreGustavoms" target="_blank" rel="noopener noreferrer">
+      <div class="work-top">
+        <span class="work-idx">06</span>
+        <h3 class="work-name">Discord Us</h3>
+        <span class="work-year">2025</span>
+      </div>
+      <div class="work-body">
+        <span></span>
+        <p class="work-desc">Bot que monta um servidor inteiro no Discord a partir de um comando — cargos, categorias e canais organizados por intenção, com permissões fechadas por padrão.</p>
+        <div class="stack"><span>JavaScript</span><span>Discord.js</span><span>Node</span></div>
+      </div>
+      <span class="work-arrow" aria-hidden="true">↗</span>
+    </a>
+
+  </div>
+</section>
+
+<section id="metodo">
+  <div class="sec-head reveal">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">Como eu trabalho</h2>
+  </div>
+
+  <div class="grid-3 reveal">
+    <div class="cell">
+      <p class="cell-k">Princípio 01</p>
+      <h3>Segurança não é fase final</h3>
+      <p>Modelo de ameaça antes da primeira linha. Cada defesa aponta para o risco que endereça — e existe um teste automatizado provando que ela funciona.</p>
+    </div>
+    <div class="cell">
+      <p class="cell-k">Princípio 02</p>
+      <h3>Densidade com clareza</h3>
+      <p>Ferramenta que se usa todo dia precisa mostrar muito sem cansar. Hierarquia carrega a informação; cor só codifica estado real, nunca decora.</p>
+    </div>
+    <div class="cell">
+      <p class="cell-k">Princípio 03</p>
+      <h3>Um padrão, um lugar</h3>
+      <p>Design system versionado e validado em CI. O que vale para todos os projetos vive num só lugar, referenciado — não copiado em cada repositório.</p>
+    </div>
+  </div>
+</section>
+
+<section id="numeros">
+  <div class="sec-head reveal">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Em números</h2>
+  </div>
+  <div class="figures reveal">
+    <div>
+      <p class="fig-n">06</p>
+      <p class="fig-l">Projetos próprios em produção ou desenvolvimento ativo</p>
+    </div>
+    <div>
+      <p class="fig-n">10</p>
+      <p class="fig-l">Ameaças mapeadas e defendidas no painel de operação</p>
+    </div>
+    <div>
+      <p class="fig-n">95</p>
+      <p class="fig-l">Testes automatizados no projeto mais recente</p>
+    </div>
+    <div>
+      <p class="fig-n">21</p>
+      <p class="fig-l">Anos — sempre aprendendo, sempre entregando</p>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contato">
+  <div class="sec-head reveal">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">Vamos construir</h2>
+  </div>
+  <div class="contact-in reveal">
+    <a class="big-link" href="https://github.com/AndreGustavoms" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <div class="contact-rows">
+      <span>Rio de Janeiro · Volta Redonda, BR</span>
+      <a href="https://github.com/AndreGustavoms" target="_blank" rel="noopener noreferrer">@AndreGustavoms</a>
+      <span>Aberto a propostas</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 André Gustavo</span>
+  <span>Fullstack Developer</span>
+  <span>Sempre aprendendo</span>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* brilho que segue o cursor */
+  if (!reduce && window.matchMedia("(pointer: fine)").matches) {
+    var glow = document.getElementById("glow");
+    var raf = null, mx = 50, my = 30;
+    window.addEventListener("mousemove", function (e) {
+      mx = (e.clientX / window.innerWidth) * 100;
+      my = (e.clientY / window.innerHeight) * 100;
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        glow.style.setProperty("--mx", mx + "%");
+        glow.style.setProperty("--my", my + "%");
+        raf = null;
+      });
+    }, { passive: true });
+  }
+
+  /* revelação ao rolar */
+  var items = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("in"); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry, i) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var delay = el.classList.contains("work") ? (i * 70) : 0;
+      setTimeout(function () { el.classList.add("in"); }, delay);
+      io.unobserve(el);
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -60px 0px" });
+  items.forEach(function (el) { io.observe(el); });
+})();
+</script>
+
+</body>
+</html>
