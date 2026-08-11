@@ -84,3 +84,13 @@ export function touchCache(key: string, resourceType: CacheResourceType): void {
 export function deleteCache(key: string): void {
   getDb().delete(apiCache).where(eq(apiCache.key, key)).run();
 }
+
+/**
+ * Limpa o cache inteiro — botão "Limpar cache" em /settings (ver prompt
+ * original §7.9). Força toda próxima leitura a ir buscar do GitHub de
+ * novo, sem esperar TTL nem ETag — útil se o usuário suspeita que algo
+ * está desatualizado ou quer forçar uma sincronização completa.
+ */
+export function clearAllCache(): void {
+  getDb().delete(apiCache).run();
+}

@@ -63,6 +63,30 @@ com "Can't find lefthook in PATH" sem abortar o commit). Ver commit
   adicionar arquivar repositório ou forçar push, a mesma
   `requireDestructiveAllowed()` se aplica.
 
+## Limitações conhecidas — Fase 5
+
+- **Inbox unificada mistura issues e Pull Requests:** a API REST do
+  GitHub retorna PRs no mesmo endpoint de issues (`GET
+  /repos/{owner}/{repo}/issues`) — um PR é uma issue internamente, com
+  um campo `pull_request` a mais. `src/server/github/issues.ts` já
+  mapeia a resposta crua para `IssueDTO` antes de chegar em
+  `inbox.ts`, então o campo que distinguiria PR de issue comum não
+  sobrevive ao DTO. Uma inbox de PRs de verdade, separada, usando
+  `octokit.pulls.list()`, fica para a Fase 6 do prompt original
+  (`/prs` como página própria).
+- **Rotação de token via CLI, não via UI web:** `scripts/rotate-token.ts`
+  pede a senha mestra e o token novo por `stdin`, fora do processo HTTP
+  do painel — decisão deliberada, não lacuna. Expor rotação de token
+  como Route Handler exigiria confiar em CSRF/sessão para uma operação
+  que já assume acesso físico à máquina (quem roda o script já tem
+  acesso ao terminal); um script CLI elimina qualquer superfície de
+  ataque web nesse fluxo específico. Ver comentário no topo do arquivo.
+- **Export de dados não inclui o vault nem o token:** `exportLocalData()`
+  (settings → Exportar dados) exporta só tabelas de dado pessoal
+  (pinned, tags, notas, portfólio) — nunca `auth`, `sessions`, ou o
+  conteúdo de `vault.enc`. Migrar o token para uma instalação nova é um
+  fluxo separado (rodar o setup lá com o mesmo token).
+
 ## Regra de ouro
 
 `src/server/**` nunca é importado por nada dentro de `src/components/**`

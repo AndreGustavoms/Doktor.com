@@ -2,7 +2,8 @@ import "server-only";
 import { deriveKey, generateSalt, safeEqual, SCRYPT_PARAMS } from "../vault/crypto";
 import { getDb } from "../db";
 import { auth, loginAttempts } from "../db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { readVault, writeVault } from "../vault/store";
 
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
@@ -79,4 +80,46 @@ export async function recordLoginAttempt(success: boolean): Promise<void> {
       lockedUntil: null,
     })
     .run();
+}
+
+/**
+ * Troca a senha mestra — precisa recifrar o vault junto, porque a
+ * chave de cifra do token é derivada da senha mestra (ver
+ * src/server/vault/crypto.ts). Decifra com a senha atual ANTES de
+ * qualquer escrita: se currentPassword estiver errada, nada é alterado
+ * (nem a linha de auth, nem o vault). Ver prompt original §7.9.
+ */
+export async function changeMasterPassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const existingRow = getDb().select().from(auth).limit(1).get();
+  if (!existingRow) {
+    throw new Error("Senha mestra atual incorreta.");
+  }
+
+  const isCurrentValid = await verifyMasterPassword(currentPassword);
+  if (!isCurrentValid) {
+    throw new Error("Senha mestra atual incorreta.");
+  }
+
+  // Decifra o vault com a senha atual antes de qualquer mudança — se
+  // isso falhar (vault corrompido, dessincronizado da senha), abortamos
+  // sem ter tocado a tabela auth.
+  const token = await readVault(currentPassword);
+
+  const salt = generateSalt();
+  const hash = await deriveKey(newPassword, salt);
+
+  getDb()
+    .update(auth)
+    .set({
+      passwordSalt: salt.toString("hex"),
+      passwordHash: hash.toString("hex"),
+      scryptParams: JSON.stringify(SCRYPT_PARAMS),
+    })
+    .where(eq(auth.id, existingRow.id))
+    .run();
+
+  await writeVault(token, newPassword);
 }
