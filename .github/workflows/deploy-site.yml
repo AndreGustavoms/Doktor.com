@@ -1,10 +1,4 @@
-# Publica site/ no GitHub Pages.
-#
-# Pages nativo só serve a raiz do repositório ou /docs — e /docs aqui já é
-# a documentação do painel, não o site. Este workflow contorna isso
-# publicando a pasta site/ como artefato, o que também deixa o deploy
-# explícito no histórico de Actions em vez de escondido numa tela de
-# configuração.
+# Publica o site estático do Doktor no GitHub Pages.
 
 name: Deploy site
 
