@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
+import { ThemeToggle } from "./ThemeToggle";
 
 /*
  * Só rotas que já existem entram aqui — prs/actions chegam em fases
@@ -51,6 +52,12 @@ export function Sidebar() {
           );
         })}
       </ul>
+
+      {/* Fica no rodapé da sidebar: é ajuste de aparência, não navegação
+          — não deve competir com os destinos do painel. */}
+      <div className="mt-auto px-1 pt-4">
+        <ThemeToggle />
+      </div>
     </nav>
   );
 }

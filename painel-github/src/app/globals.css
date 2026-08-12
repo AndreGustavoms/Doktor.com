@@ -44,6 +44,52 @@
   --font-mono: var(--font-jetbrains-mono), monospace;
 }
 
+/*
+ * Tema escuro — a cianotipia da fase anterior, com os tons de texto
+ * recalibrados pelo mesmo critério de contraste aplicado ao claro.
+ *
+ * Três estados, não dois: escolha explícita grava data-theme no <html>;
+ * o padrão ("sistema") não grava nada, e aí só prefers-color-scheme
+ * decide. Por isso o bloco de media vem guardado por
+ * :root:not([data-theme="light"]) — assim um usuário que escolheu claro
+ * num sistema escuro continua no claro — e o mesmo conjunto de tokens é
+ * repetido em [data-theme="dark"], para a escolha manual vencer nos dois
+ * sentidos. Nenhuma cor pode ser declarada SÓ dentro destes blocos: o
+ * estado sem carimbo não os aplica, e a tela sairia com texto de um tema
+ * sobre o fundo do outro.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink-900: #0d1117;
+    --ink-800: #151b23;
+    --ink-700: #2a313c;
+    --ink-600: #1c232c;
+    --chalk: #e6edf3;
+    --chalk-dim: #9aa4b2;
+    --blueprint: #58a6ff;
+    --amber: #e3a008;
+    --jade: #46c877;
+    --coral: #ff7b72;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink-900: #0d1117;
+  --ink-800: #151b23;
+  --ink-700: #2a313c;
+  --ink-600: #1c232c;
+  --chalk: #e6edf3;
+  --chalk-dim: #9aa4b2;
+  --blueprint: #58a6ff;
+  --amber: #e3a008;
+  --jade: #46c877;
+  --coral: #ff7b72;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
 @theme inline {
   --color-ink-900: var(--ink-900);
   --color-ink-800: var(--ink-800);
