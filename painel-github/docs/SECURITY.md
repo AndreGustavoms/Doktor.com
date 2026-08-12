@@ -53,6 +53,18 @@ arquivo num commit posterior não resolve nada.
   de token do GitHub e para o nome de arquivo `vault.enc`.
 - **Mecanismo:** [.gitignore](../.gitignore), [.gitleaks.toml](../.gitleaks.toml),
   [lefthook.yml](../lefthook.yml).
+- **Lacuna de cobertura encontrada e corrigida:** os comandos do gitleaks
+  tinham `root: painel-github/`, o que fazia o lefthook considerá-los
+  inaplicáveis quando nenhum arquivo staged estava sob aquela pasta — um
+  commit tocando só `site/` (ou qualquer outro diretório da raiz do
+  monorepo) passava com `(skip) no matching staged files`, sem varredura
+  nenhuma. Como o repositório deixou de ser exclusivamente o painel,
+  gitleaks passou a rodar a partir da raiz, com caminho explícito para a
+  config. Revalidado ao vivo: um commit com token falso de alta entropia
+  em `site/` é bloqueado com exit 1 e duas regras disparando
+  (`github-pat`, `github-classic-pat`). Só o `lint-staged` mantém
+  `root:`, porque é o eslint de um projeto Node específico e precisa do
+  cwd para achar `node_modules/` e `eslint.config.mjs`.
 - **Procedimento de incidente:** se um token for commitado, **revogue
   imediatamente** em `github.com/settings/tokens`. Reescrever o histórico
   do Git (`git filter-repo`, BFG) não é suficiente — assuma que o token já
