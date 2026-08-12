@@ -58,4 +58,19 @@ paths = [
   # fixtures óbvias (senhas/tokens com "teste", "fake", "e2e" no valor),
   # nunca segredos reais.
   '''tests[\\/]unit[\\/](crypto|redact|auth-flow)\.test\.ts$''',
+  # data/ é o diretório de trabalho do painel em uso — vault cifrado,
+  # banco SQLite, logs. Está no .gitignore e nunca chega a um commit,
+  # mas `gitleaks detect --no-git` varre o filesystem inteiro,
+  # independente do .gitignore: assim que alguém roda o setup de
+  # verdade, o vault local passa a bloquear TODO push, para sempre, por
+  # um arquivo que nunca sairia da máquina. Mesma situação já tratada
+  # acima para .next/.
+  #
+  # Isto NÃO afrouxa a defesa contra commitar o vault: a regra
+  # painel-vault-file (acima) e o hook pre-commit continuam valendo
+  # sobre arquivos staged, que é onde o risco real está. Aqui só
+  # deixamos de alarmar sobre um arquivo que existe legitimamente no
+  # disco de quem usa o painel.
+  '''(^|[\\/])data[\\/]''',
+  '''(^|[\\/])data-test-[^\\/]*[\\/]''',
 ]
