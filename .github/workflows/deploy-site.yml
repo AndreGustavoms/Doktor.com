@@ -1,0 +1,43 @@
+# Publica site/ no GitHub Pages.
+#
+# Pages nativo só serve a raiz do repositório ou /docs — e /docs aqui já é
+# a documentação do painel, não o site. Este workflow contorna isso
+# publicando a pasta site/ como artefato, o que também deixa o deploy
+# explícito no histórico de Actions em vez de escondido numa tela de
+# configuração.
+
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Uma publicação por vez; não cancela a que está em andamento para não
+# deixar o Pages num estado parcial.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
