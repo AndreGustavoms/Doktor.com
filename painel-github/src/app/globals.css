@@ -19,11 +19,17 @@
 :root {
   --ink-900: #fbfbfa; /* fundo da página — branco quente, não puro */
   --ink-800: #ffffff; /* superfície de card */
-  --ink-700: #e8e6e1; /* borda */
-  --ink-600: #f0efec; /* hairline / superfície sutil */
-  --chalk: #1c1b19; /* texto primário — quase preto, viés quente */
-  --chalk-dim: #6b6862; /* texto secundário, rótulos */
-  --blueprint: #2f6feb; /* acento primário: seleção, foco, links */
+  --ink-700: #e7e5e2; /* borda */
+  --ink-600: #f1f0ee; /* hairline / superfície sutil */
+  --chalk: #1b1a18; /* texto primário — quase preto, leve viés quente */
+  /* O viés quente que dá caráter às superfícies não serve para texto
+     corrido: num parágrafo inteiro ele lê como sépia, e o bloco parece
+     um aviso em vez de texto neutro. Aqui o cinza é quase puro. */
+  --chalk-dim: #67666a; /* texto secundário, rótulos */
+  /* #2f6feb deixava o texto branco dos botões primários em 4.41:1 —
+     abaixo do mínimo AA de 4.5 para corpo. Este tom passa em 5.1:1 sem
+     mudar o caráter do acento. */
+  --blueprint: #1f5fd8; /* acento primário: seleção, foco, links */
   --amber: #b45309; /* atenção: pendente, sem push, rate limit baixo */
   --jade: #15803d; /* ok: sincronizado, workflow verde */
   --coral: #c2352c; /* falha, destrutivo */
@@ -123,12 +129,26 @@ h1[class*="text-3xl"] {
  * prancheta técnica. Sobre branco eles pesam e competem com o conteúdo,
  * então perdem a caixa alta e ganham corpo — a hierarquia passa a vir do
  * peso e da cor, não do tamanho da letra.
+ *
+ * A família também muda: mono num título de card ("Perfil", "Exportar")
+ * faz o rótulo parecer trecho de código. O mono continua onde é dado de
+ * verdade — SHA, branch, caminho, contagem —, aplicado ponto a ponto
+ * pelos componentes.
  */
 [class*="uppercase"][class*="tracking-"] {
+  font-family: var(--font-body);
   text-transform: none;
   letter-spacing: 0;
   font-size: 12px;
   font-weight: 500;
+}
+
+/* Títulos de card ganham o mesmo tratamento e um tom mais forte que o
+   texto secundário: eles rotulam a seção, não são nota de rodapé. */
+h2[class*="uppercase"][class*="tracking-"] {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--chalk);
 }
 
 /*
