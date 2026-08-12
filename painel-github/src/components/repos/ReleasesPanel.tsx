@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useReleases, useCreateRelease } from "@/hooks/useReleases";
 import { relativeTime } from "@/lib/format";
 import { ApiError } from "@/lib/api-client";
+import { SkeletonLista } from "@/components/feedback/Skeleton";
 
 /**
  * Listar, criar release com tag e notas, marcar como pré-release — ver
@@ -30,7 +31,7 @@ export function ReleasesPanel({ owner, name }: { owner: string; name: string }) 
         <CreateReleaseForm owner={owner} name={name} onDone={() => setShowCreate(false)} />
       )}
 
-      {isLoading && <p className="text-sm text-chalk-dim">Carregando releases…</p>}
+      {isLoading && <SkeletonLista itens={2} />}
       {isError && <p className="text-sm text-coral">Não foi possível carregar as releases.</p>}
       {!isLoading && !isError && data?.releases.length === 0 && (
         <p className="text-sm text-chalk-dim">Nenhuma release publicada ainda.</p>

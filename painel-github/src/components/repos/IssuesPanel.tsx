@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useIssues, useCreateIssue, useSetIssueState, useCommentIssue } from "@/hooks/useIssues";
 import { relativeTime } from "@/lib/format";
 import { ApiError } from "@/lib/api-client";
+import { SkeletonLista } from "@/components/feedback/Skeleton";
 
 export function IssuesPanel({ owner, name }: { owner: string; name: string }) {
   const [stateFilter, setStateFilter] = useState<"open" | "closed">("open");
@@ -49,7 +50,7 @@ export function IssuesPanel({ owner, name }: { owner: string; name: string }) {
         <CreateIssueForm owner={owner} name={name} onDone={() => setShowCreate(false)} />
       )}
 
-      {isLoading && <p className="text-sm text-chalk-dim">Carregando issues…</p>}
+      {isLoading && <SkeletonLista itens={3} />}
       {isError && <p className="text-sm text-coral">Não foi possível carregar as issues.</p>}
       {!isLoading && !isError && data?.issues.length === 0 && (
         <p className="text-sm text-chalk-dim">Nenhuma issue {stateFilter === "open" ? "aberta" : "fechada"}.</p>

@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useSettings";
 import { LockButton } from "@/components/layout/LockButton";
 import { relativeTime } from "@/lib/format";
+import { SkeletonLista } from "@/components/feedback/Skeleton";
 
 /**
  * Rotacionar token · trocar senha mestra · limpar cache · exportar
@@ -235,7 +236,7 @@ function ActivityLogCard() {
       <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
         Log de atividade
       </h2>
-      {isLoading && <p className="text-sm text-chalk-dim">Carregando…</p>}
+      {isLoading && <SkeletonLista itens={3} />}
       {!isLoading && data?.activity.length === 0 && (
         <p className="text-sm text-chalk-dim">Nenhuma atividade registrada ainda.</p>
       )}

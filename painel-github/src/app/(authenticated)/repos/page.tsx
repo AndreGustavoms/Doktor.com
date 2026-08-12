@@ -5,6 +5,7 @@ import { useRepos } from "@/hooks/useRepos";
 import { RepoCard } from "@/components/repos/RepoCard";
 import { RepoTable } from "@/components/repos/RepoTable";
 import { LockButton } from "@/components/layout/LockButton";
+import { SkeletonLista } from "@/components/feedback/Skeleton";
 
 type ViewMode = "grid" | "table";
 type SortKey = "updated" | "created" | "name" | "stars";
@@ -99,7 +100,7 @@ export default function ReposPage() {
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-chalk-dim">Carregando repositórios…</p>}
+      {isLoading && <SkeletonLista itens={6} />}
 
       {isError && (
         <p className="text-sm text-coral">

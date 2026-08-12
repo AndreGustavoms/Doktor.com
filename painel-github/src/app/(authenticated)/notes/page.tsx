@@ -5,6 +5,7 @@ import { useNotes, useCreateNote, useUpdateNote, useDeleteNote } from "@/hooks/u
 import { LockButton } from "@/components/layout/LockButton";
 import { relativeTime } from "@/lib/format";
 import type { NoteDTO } from "@/lib/types-notes";
+import { SkeletonLista } from "@/components/feedback/Skeleton";
 
 /**
  * Notas locais — ficam SÓ no SQLite, nunca sincronizam com o GitHub.
@@ -41,7 +42,7 @@ export default function NotesPage() {
 
       {creating && <NoteForm onDone={() => setCreating(false)} />}
 
-      {isLoading && <p className="text-sm text-chalk-dim">Carregando notas…</p>}
+      {isLoading && <SkeletonLista itens={3} />}
 
       {!isLoading && data?.notes.length === 0 && !creating && (
         <div className="rounded border border-ink-700 bg-ink-800 p-8 text-center">

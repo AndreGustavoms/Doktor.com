@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useActivity } from "@/hooks/useActivity";
 
 const DAYS = 90;
@@ -47,9 +48,19 @@ export function SyncRuler() {
 
   if (repos.length === 0) {
     return (
-      <div className="rounded border border-ink-700 bg-ink-800 p-6 text-sm text-chalk-dim">
-        Nenhum repositório fixado. Fixe os que você mexe toda semana para eles aparecerem na
-        régua.
+      <div className="rounded border border-dashed border-ink-700 bg-ink-800 p-6">
+        <h2 className="mb-1 text-[13px] font-semibold text-chalk">Régua de sincronia</h2>
+        <p className="mb-3 max-w-lg text-sm text-chalk-dim">
+          Mostra 90 dias de atividade lado a lado: quais projetos estão vivos, quais pararam, e
+          para onde sua atenção migrou no trimestre. É a única leitura do painel que não dá para
+          obter olhando um repositório de cada vez.
+        </p>
+        <Link
+          href="/repos"
+          className="inline-block rounded-md border border-ink-700 px-3 py-1.5 text-sm text-chalk-dim transition-colors hover:border-blueprint hover:text-chalk"
+        >
+          Fixar repositórios
+        </Link>
       </div>
     );
   }
@@ -59,22 +70,34 @@ export function SyncRuler() {
     ...repos.flatMap((r) => Object.values(r.activity)),
   );
 
+  const totalCommits = repos.reduce(
+    (soma, r) => soma + Object.values(r.activity).reduce((a, b) => a + b, 0),
+    0,
+  );
+
   return (
-    <div className="overflow-x-auto rounded border border-ink-700 bg-ink-800 p-4">
+    <div className="overflow-x-auto rounded border border-ink-700 bg-ink-800 p-5">
+      <div className="mb-4 flex items-baseline justify-between gap-4">
+        <h2 className="text-[13px] font-semibold text-chalk">Régua de sincronia</h2>
+        <p className="font-mono text-[11px] text-chalk-dim">
+          {totalCommits} commit{totalCommits === 1 ? "" : "s"} · últimos {DAYS} dias
+        </p>
+      </div>
+
       <div className="min-w-[720px]">
-        {/* Régua graduada */}
-        <div className="relative mb-3 flex h-6 border-b border-ink-600">
+        {/* Régua graduada — marca maior a cada 7 dias, como fita métrica. */}
+        <div className="relative mb-2 flex h-5 items-end border-b border-ink-700">
           {days.map((day, i) => {
             const isWeekMark = i % 7 === 0;
             return (
-              <div
-                key={day}
-                className="relative flex-1"
-                style={{ borderLeft: isWeekMark ? "1px solid var(--ink-600)" : undefined }}
-              >
+              <div key={day} className="relative flex-1">
+                <div
+                  className="absolute bottom-0 left-0 w-px bg-ink-700"
+                  style={{ height: isWeekMark ? 9 : 4 }}
+                />
                 {isWeekMark && (
-                  <span className="absolute -top-0.5 left-0.5 font-mono text-[9px] text-chalk-dim">
-                    {new Date(day).getDate()}/{new Date(day).getMonth() + 1}
+                  <span className="absolute bottom-3 left-0 font-mono text-[9px] text-chalk-dim">
+                    {new Date(day).getUTCDate()}/{new Date(day).getUTCMonth() + 1}
                   </span>
                 )}
               </div>
@@ -83,40 +106,61 @@ export function SyncRuler() {
         </div>
 
         {/* Uma linha por repositório fixado */}
-        <div className="flex flex-col gap-2">
-          {repos.map((repo) => (
-            <div key={repo.repoId} className="flex items-center gap-3">
-              <span className="w-40 shrink-0 truncate font-mono text-xs text-chalk-dim">
-                {repo.fullName.split("/")[1]}
-              </span>
-              <div className="relative flex h-4 flex-1">
-                {days.map((day) => {
-                  const count = repo.activity[day] ?? 0;
-                  const intensity = count > 0 ? Math.min(1, count / maxCommitsPerDay) : 0;
-                  return (
-                    <div
-                      key={day}
-                      className="group relative flex-1"
-                      onMouseEnter={() => setHoveredDay(`${repo.repoId}:${day}`)}
-                      onMouseLeave={() => setHoveredDay(null)}
-                    >
-                      {count > 0 && (
-                        <div
-                          className="mx-auto h-full w-[2px] rounded-full bg-blueprint"
-                          style={{ opacity: 0.25 + intensity * 0.75 }}
-                        />
-                      )}
-                      {hoveredDay === `${repo.repoId}:${day}` && count > 0 && (
-                        <div className="absolute bottom-full left-1/2 z-10 mb-1 -translate-x-1/2 whitespace-nowrap rounded border border-ink-600 bg-ink-900 px-2 py-1 font-mono text-[10px] text-chalk shadow-lg">
-                          {day} — {count} commit{count === 1 ? "" : "s"}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+        <div className="flex flex-col">
+          {repos.map((repo) => {
+            const commitsDoRepo = Object.values(repo.activity).reduce((a, b) => a + b, 0);
+            return (
+              <div
+                key={repo.repoId}
+                className="flex items-center gap-3 border-b border-ink-700/60 py-1.5 last:border-0"
+              >
+                <span className="w-40 shrink-0 truncate text-xs text-chalk" title={repo.fullName}>
+                  {repo.fullName.split("/")[1]}
+                </span>
+                <div className="relative flex h-5 flex-1 items-center">
+                  {days.map((day) => {
+                    const count = repo.activity[day] ?? 0;
+                    /*
+                     * Escala de raiz quadrada, não linear: um dia de 20
+                     * commits não deve deixar os dias de 1 ou 2 commits
+                     * invisíveis — o que importa aqui é distinguir
+                     * "houve trabalho" de "não houve", e só depois a
+                     * intensidade.
+                     */
+                    const intensidade =
+                      count > 0 ? Math.sqrt(count / maxCommitsPerDay) : 0;
+                    return (
+                      <div
+                        key={day}
+                        className="relative flex h-full flex-1 items-center justify-center"
+                        onMouseEnter={() => setHoveredDay(`${repo.repoId}:${day}`)}
+                        onMouseLeave={() => setHoveredDay(null)}
+                      >
+                        {count > 0 && (
+                          <div
+                            className="w-[3px] rounded-full bg-blueprint"
+                            style={{
+                              height: `${45 + intensidade * 55}%`,
+                              opacity: 0.45 + intensidade * 0.55,
+                            }}
+                          />
+                        )}
+                        {hoveredDay === `${repo.repoId}:${day}` && count > 0 && (
+                          <div className="absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-ink-700 bg-ink-800 px-2 py-1 font-mono text-[10px] text-chalk shadow-md">
+                            {new Date(day).getUTCDate()}/{new Date(day).getUTCMonth() + 1} —{" "}
+                            {count} commit{count === 1 ? "" : "s"}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <span className="w-12 shrink-0 text-right font-mono text-[11px] text-chalk-dim">
+                  {commitsDoRepo}
+                </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

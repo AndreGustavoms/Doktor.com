@@ -5,6 +5,7 @@ import { useInbox, useMarkRead } from "@/hooks/useInbox";
 import { LockButton } from "@/components/layout/LockButton";
 import { relativeTime } from "@/lib/format";
 import type { InboxItem } from "@/lib/types-inbox";
+import { SkeletonLista } from "@/components/feedback/Skeleton";
 
 type GroupBy = "repo" | "none";
 
@@ -101,7 +102,7 @@ export default function IssuesInboxPage() {
         </label>
       </div>
 
-      {isLoading && <p className="text-sm text-chalk-dim">Carregando inbox…</p>}
+      {isLoading && <SkeletonLista itens={5} />}
       {isError && <p className="text-sm text-coral">Não foi possível carregar a inbox.</p>}
       {!isLoading && !isError && filtered.length === 0 && (
         <p className="text-sm text-chalk-dim">Nada por aqui.</p>
