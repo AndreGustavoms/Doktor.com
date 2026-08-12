@@ -245,7 +245,7 @@ function initHero() {
   })
     .to(".hero-copy", { y: -180, scale: 0.58, autoAlpha: 0, filter: "blur(14px)", ease: "none" }, 0)
     .to(".core-stage", { y: 80, rotation: 38, scale: 4.6, autoAlpha: 0, filter: "blur(18px)", ease: "none" }, 0)
-    .to(".hero-ghost", { xPercent: -30, scale: 3.6, autoAlpha: 0, filter: "blur(10px)", ease: "none" }, 0)
+    .to(".hero-ghost", { xPercent: 14, scale: 3.6, autoAlpha: 0, filter: "blur(10px)", ease: "none" }, 0)
     .to(".hero-scroll", { autoAlpha: 0, y: 18, ease: "none" }, 0);
 }
 

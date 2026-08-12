@@ -115,12 +115,13 @@ body::before {
 .hero-ghost {
   position: absolute;
   z-index: -1;
-  top: 52%;
-  left: 47%;
+  top: 49%;
+  left: 68%;
   color: transparent;
-  font: 800 clamp(96px, 16vw, 250px)/0.72 var(--sans);
-  letter-spacing: -0.09em;
+  font: 800 clamp(104px, 13.5vw, 218px)/0.72 var(--sans);
+  letter-spacing: -0.075em;
   -webkit-text-stroke: 1px color-mix(in srgb, var(--scene-accent) 18%, transparent);
+  filter: drop-shadow(0 0 28px color-mix(in srgb, var(--scene-accent) 12%, transparent));
   text-transform: uppercase;
   white-space: nowrap;
   transform: translate(-50%, -50%);
@@ -131,11 +132,14 @@ body::before {
 .hero-ghost::after {
   content: "SYSTEMS";
   position: absolute;
-  top: 100%;
-  right: 0;
-  color: rgba(56, 220, 255, 0.035);
-  font: 500 0.15em var(--mono);
-  letter-spacing: 0.72em;
+  top: 108%;
+  right: 3%;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--neon) 20%, transparent), color-mix(in srgb, var(--violet) 24%, transparent));
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  font: 600 0.14em var(--mono);
+  letter-spacing: 0.58em;
   -webkit-text-stroke: 0;
 }
 
@@ -686,7 +690,8 @@ body::before {
 @media (max-width: 900px) {
   .hero-ghost {
     top: 33%;
-    left: 52%;
+    left: 70%;
+    font-size: 20vw;
   }
 
   .velocity-hud {
@@ -719,6 +724,7 @@ body::before {
 
   .hero-ghost {
     top: 25%;
+    left: 76%;
     font-size: 28vw;
   }
 
