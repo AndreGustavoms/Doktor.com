@@ -25,23 +25,24 @@ export function Sidebar() {
   return (
     <nav
       aria-label="Navegação principal"
-      className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-ink-700 bg-ink-900 px-4 py-6"
+      className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-ink-700 bg-ink-600 px-3 py-5"
     >
-      <p className="mb-6 px-2 font-(family-name:--font-display) text-lg font-bold text-chalk">
+      <p className="mb-6 px-3 text-[15px] font-semibold tracking-tight text-chalk">
         Painel GitHub
       </p>
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col gap-0.5">
         {NAV_ITEMS.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={clsx(
-                  "block rounded px-3 py-2 font-mono text-xs uppercase tracking-[0.08em] transition-colors",
+                  "block rounded-md px-3 py-1.5 text-sm transition-colors",
                   isActive
-                    ? "bg-ink-800 text-blueprint"
-                    : "text-chalk-dim hover:bg-ink-800 hover:text-chalk",
+                    ? "bg-ink-800 font-medium text-chalk shadow-[0_1px_2px_rgba(28,27,25,0.06)]"
+                    : "text-chalk-dim hover:bg-ink-700/40 hover:text-chalk",
                 )}
               >
                 {item.label}

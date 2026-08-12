@@ -1,21 +1,37 @@
 @import "tailwindcss";
 
 /*
- * Direção visual: mesa de luz / cianotipia.
- * Prancheta de engenharia invertida — linhas claras sobre fundo escuro,
- * hairlines, réguas, rótulos técnicos.
+ * Direção visual: claro e sóbrio, no espírito de ferramenta de trabalho
+ * (Linear, Notion) — superfícies brancas, filetes finos, hierarquia por
+ * peso de texto e espaçamento em vez de caixas coloridas.
+ *
+ * Os NOMES dos tokens vêm da fase anterior (mesa de luz / cianotipia) e
+ * foram mantidos de propósito: `ink-*` para superfícies, `chalk` para
+ * texto, `blueprint` para acento. Trocar só os valores mantém o tema
+ * inteiro num arquivo — nenhum dos 14 componentes precisou ser reescrito
+ * para mudar de escuro para claro. Os nomes descrevem o PAPEL, não mais
+ * a cor literal.
+ *
+ * Neutros com viés levemente quente (não o cinza-azulado padrão de todo
+ * dashboard) e um azul só como acento. Os três sinais entram
+ * dessaturados: sobre branco, verde e vermelho saturados gritam.
  */
 :root {
-  --ink-900: #0a1220; /* fundo da página */
-  --ink-800: #101b2d; /* superfície de card */
-  --ink-700: #1a2942; /* borda, superfície elevada */
-  --ink-600: #26385a; /* hairline de grade */
-  --chalk: #e6edf6; /* texto primário */
-  --chalk-dim: #8fa3bf; /* texto secundário, rótulos */
-  --blueprint: #4cc9f0; /* acento primário: seleção, foco, links */
-  --amber: #f2a65a; /* atenção: pendente, sem push, rate limit baixo */
-  --jade: #57d9a3; /* ok: sincronizado, workflow verde */
-  --coral: #ff6b6b; /* falha, destrutivo */
+  --ink-900: #fbfbfa; /* fundo da página — branco quente, não puro */
+  --ink-800: #ffffff; /* superfície de card */
+  --ink-700: #e8e6e1; /* borda */
+  --ink-600: #f0efec; /* hairline / superfície sutil */
+  --chalk: #1c1b19; /* texto primário — quase preto, viés quente */
+  --chalk-dim: #6b6862; /* texto secundário, rótulos */
+  --blueprint: #2f6feb; /* acento primário: seleção, foco, links */
+  --amber: #b45309; /* atenção: pendente, sem push, rate limit baixo */
+  --jade: #15803d; /* ok: sincronizado, workflow verde */
+  --coral: #c2352c; /* falha, destrutivo */
+
+  /* Elevação por sombra, não por cor de fundo — a diferença entre card e
+     página é de 1 filete e um véu de sombra, não de dois tons de cinza. */
+  --shadow-sm: 0 1px 2px rgba(28, 27, 25, 0.05);
+  --shadow-md: 0 1px 3px rgba(28, 27, 25, 0.07), 0 4px 12px rgba(28, 27, 25, 0.04);
 
   --font-display: var(--font-archivo-expanded), sans-serif;
   --font-body: var(--font-public-sans), sans-serif;
@@ -47,18 +63,9 @@ body {
   background-color: var(--ink-900);
   color: var(--chalk);
   font-family: var(--font-body);
-  /* Pattern de grade sutil — a prancheta. */
-  background-image:
-    linear-gradient(var(--ink-600) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ink-600) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: center;
-}
-
-@media (prefers-color-scheme: light) {
-  /* O painel é assumidamente dark-first (mesa de luz). Não há modo claro
-     definido nesta fase — mantemos o mesmo fundo para não gerar contraste
-     quebrado até o tema claro ser desenhado explicitamente. */
+  /* A grade de prancheta saiu junto com o tema escuro: sobre branco ela
+     vira ruído atrás do conteúdo, e a leitura desta interface é densa o
+     bastante sem concorrência de fundo. */
 }
 
 :focus-visible {
@@ -67,13 +74,61 @@ body {
 }
 
 /*
- * Seleção na paleta do painel, em vez do azul padrão do navegador — que
- * destoa da cianotipia e some por cima do fundo escuro. Um véu do
- * blueprint marca o trecho sem apagar o texto por baixo.
+ * Seleção na paleta do painel, em vez do azul padrão do navegador. Um
+ * véu do acento marca o trecho sem apagar o texto por baixo.
  */
 ::selection {
-  background: color-mix(in srgb, var(--blueprint) 24%, transparent);
+  background: color-mix(in srgb, var(--blueprint) 18%, transparent);
   color: var(--chalk);
+}
+
+/*
+ * Superfícies e elevação — os componentes já pedem bg-ink-800 +
+ * border-ink-700, que agora resolvem para branco sobre cinza-quente.
+ * No escuro o card se destacava por diferença de valor; no claro essa
+ * diferença é fraca demais, então a separação passa a vir de uma sombra
+ * discreta. Aplicado por atributo (e não por classe composta) porque a
+ * ordem das classes no atributo varia entre componentes.
+ */
+[class~="bg-ink-800"][class*="border-ink-700"] {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Cantos: 4px era a régua do tema de prancheta ("quase reto"). No visual
+   claro, um raio um pouco maior tira a dureza sem virar bolha. Só a
+   classe `rounded` isolada — as variantes (-full, -md, -lg) mantêm o
+   próprio raio, senão os badges em pílula viram retângulos. */
+[class~="rounded"] {
+  border-radius: 8px;
+}
+[class~="rounded-full"] {
+  border-radius: 9999px;
+}
+
+/*
+ * Títulos de página: o display expandido em 30px vinha da fase escura,
+ * onde competia com um fundo de grade. Sobre branco, um corpo menor e
+ * mais apertado lê melhor e deixa o conteúdo — não o cabeçalho — ser o
+ * assunto da tela.
+ */
+h1[class*="text-3xl"] {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/*
+ * Rótulos em caixa alta com muito espaçamento eram o vernáculo da
+ * prancheta técnica. Sobre branco eles pesam e competem com o conteúdo,
+ * então perdem a caixa alta e ganham corpo — a hierarquia passa a vir do
+ * peso e da cor, não do tamanho da letra.
+ */
+[class*="uppercase"][class*="tracking-"] {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /*
@@ -97,6 +152,172 @@ h2,
 .prose-panel * {
   -webkit-user-select: text;
   user-select: text;
+}
+
+/*
+ * README quase sempre abre com uma fileira de badges do shields.io, e a
+ * CSP (img-src 'self' data: avatars.githubusercontent.com — ver
+ * src/middleware.ts) bloqueia esse host de propósito: carregar imagem de
+ * terceiro num painel autenticado entrega ao host o IP e o horário de
+ * cada visita, para cada repositório aberto.
+ *
+ * O bloqueio está certo; o efeito colateral não: o navegador desenha o
+ * ícone de imagem quebrada com o alt ao lado, e o topo de todo README
+ * vira uma pilha de retângulos vazios. Aqui a imagem quebrada some e
+ * sobra só o texto alternativo, discreto — a informação do badge
+ * ("build passing", "MIT") continua legível, sem o entulho visual.
+ */
+/*
+ * O ::before só é desenhado quando a imagem FALHA (num <img> que
+ * carregou, o conteúdo substituído cobre o pseudo-elemento). Isso torna
+ * a regra autoajustável: badge bloqueado vira pílula de texto, imagem
+ * permitida (data: ou avatars.githubusercontent.com) aparece normal.
+ *
+ * `content: ""` + position:absolute no ::before pinta por cima do ícone
+ * de imagem quebrada que o navegador desenha; o ::after traz o texto do
+ * alt. Sem isso, a pílula aparecia mas o ícone quebrado continuava
+ * visível ao lado.
+ */
+.prose-panel img {
+  max-width: 100%;
+  height: auto;
+}
+/*
+ * A caixa do <img> quebrado tem a largura que o navegador arbitrou, não
+ * a do texto do alt — daí "TypeScript" sair cortado em "Typed". O
+ * ::before entra no fluxo (não absoluto) com o próprio texto: ele é quem
+ * dita a largura, e a imagem quebrada por baixo fica com tamanho zero.
+ */
+/*
+ * Dois pseudo-elementos resolvem o par de problemas: o ::before entra no
+ * fluxo carregando o texto do alt, então é ELE quem dita a largura da
+ * caixa (sem isso, "TypeScript" saía cortado em "Typed", limitado à
+ * largura que o navegador arbitrou para a imagem quebrada); o ::after
+ * cobre por cima o ícone de imagem quebrada que o navegador desenha.
+ */
+.prose-panel img[alt]:not([src^="data:"]) {
+  position: relative;
+  display: inline-block;
+  width: auto;
+  height: auto;
+  font-size: 0;
+  color: transparent;
+  vertical-align: middle;
+}
+.prose-panel img[alt]:not([src^="data:"])::before {
+  content: attr(alt);
+  display: inline-block;
+  font-size: 11px;
+  line-height: 17px;
+  color: transparent;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.prose-panel img[alt]:not([src^="data:"])::after {
+  content: attr(alt);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--chalk-dim);
+  background: var(--ink-600);
+  border: 1px solid var(--ink-700);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/*
+ * Tipografia do markdown renderizado. O container não tinha estilo
+ * nenhum, então o README saía com parágrafos colados e títulos do mesmo
+ * tamanho do corpo — a estrutura do documento sumia.
+ */
+.prose-panel {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.prose-panel > * + * {
+  margin-top: 0.9em;
+}
+.prose-panel h1,
+.prose-panel h2,
+.prose-panel h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-top: 1.6em;
+}
+.prose-panel h1 {
+  font-size: 19px;
+}
+.prose-panel h2 {
+  font-size: 16px;
+}
+.prose-panel h3 {
+  font-size: 14px;
+}
+.prose-panel a {
+  color: var(--blueprint);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-panel code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--ink-600);
+  border: 1px solid var(--ink-700);
+  border-radius: 4px;
+  padding: 0.5px 4px;
+}
+.prose-panel pre {
+  background: var(--ink-600);
+  border: 1px solid var(--ink-700);
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+.prose-panel pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.prose-panel ul,
+.prose-panel ol {
+  padding-left: 1.35em;
+}
+.prose-panel ul {
+  list-style: disc;
+}
+.prose-panel ol {
+  list-style: decimal;
+}
+.prose-panel li + li {
+  margin-top: 0.3em;
+}
+.prose-panel blockquote {
+  border-left: 3px solid var(--ink-700);
+  padding-left: 12px;
+  color: var(--chalk-dim);
+}
+.prose-panel table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+.prose-panel th,
+.prose-panel td {
+  border: 1px solid var(--ink-700);
+  padding: 5px 10px;
+  text-align: left;
+}
+.prose-panel th {
+  background: var(--ink-600);
+  font-weight: 600;
+}
+.prose-panel hr {
+  border: 0;
+  border-top: 1px solid var(--ink-700);
+  margin: 1.6em 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

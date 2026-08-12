@@ -8,6 +8,7 @@ import { RepoParamsSchema } from "@/server/schemas/github";
 import { getRepo, getReadme, listCommits } from "@/server/github/repo-detail";
 import { renderMarkdown } from "@/server/markdown";
 import { ReadmeEditor } from "@/components/repos/ReadmeEditor";
+import { RepoTabs } from "@/components/repos/RepoTabs";
 import { TopicsEditor } from "@/components/repos/TopicsEditor";
 import { IssuesPanel } from "@/components/repos/IssuesPanel";
 import { ReleasesPanel } from "@/components/repos/ReleasesPanel";
@@ -79,49 +80,77 @@ export default async function RepoDetailPage({ params }: PageProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
-        <div className="flex flex-col gap-6">
-          <ReadmeEditor
-            owner={identity.owner}
-            name={identity.name}
-            defaultBranch={repo.defaultBranch}
-            readmeHtml={readmeHtml}
-            hasReadme={markdown !== null}
-          />
+        <RepoTabs
+          tabs={[
+            {
+              id: "visao-geral",
+              label: "Visão geral",
+              content: (
+                <div className="flex flex-col gap-6">
+                  <ReadmeEditor
+                    owner={identity.owner}
+                    name={identity.name}
+                    defaultBranch={repo.defaultBranch}
+                    readmeHtml={readmeHtml}
+                    hasReadme={markdown !== null}
+                  />
 
-          <section className="rounded border border-ink-700 bg-ink-800 p-5">
-            <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
-              Últimos commits
-            </h2>
-            {commits.length === 0 ? (
-              <p className="text-sm text-chalk-dim">Nenhum commit encontrado.</p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {commits.map((commit) => (
-                  <li key={commit.sha} className="flex items-baseline gap-3 text-sm">
-                    <a
-                      href={commit.htmlUrl}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="shrink-0 font-mono text-xs text-blueprint"
-                    >
-                      {commit.sha.slice(0, 7)}
-                    </a>
-                    <span className="truncate text-chalk">{commit.message.split("\n")[0]}</span>
-                    <span className="ml-auto shrink-0 font-mono text-xs text-chalk-dim">
-                      {relativeTime(commit.authorDate)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <IssuesPanel owner={identity.owner} name={identity.name} />
-
-          <ReleasesPanel owner={identity.owner} name={identity.name} />
-
-          <ActionsPanel owner={identity.owner} name={identity.name} defaultBranch={repo.defaultBranch} />
-        </div>
+                  <section className="rounded border border-ink-700 bg-ink-800 p-5">
+                    <h2 className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">
+                      Últimos commits
+                    </h2>
+                    {commits.length === 0 ? (
+                      <p className="text-sm text-chalk-dim">Nenhum commit encontrado.</p>
+                    ) : (
+                      <ul className="flex flex-col gap-2">
+                        {commits.map((commit) => (
+                          <li key={commit.sha} className="flex items-baseline gap-3 text-sm">
+                            <a
+                              href={commit.htmlUrl}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                              className="shrink-0 font-mono text-xs text-blueprint"
+                            >
+                              {commit.sha.slice(0, 7)}
+                            </a>
+                            <span className="truncate text-chalk">
+                              {commit.message.split("\n")[0]}
+                            </span>
+                            <span className="ml-auto shrink-0 font-mono text-xs text-chalk-dim">
+                              {relativeTime(commit.authorDate)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                </div>
+              ),
+            },
+            {
+              id: "issues",
+              label: "Issues",
+              count: repo.openIssues,
+              content: <IssuesPanel owner={identity.owner} name={identity.name} />,
+            },
+            {
+              id: "releases",
+              label: "Releases",
+              content: <ReleasesPanel owner={identity.owner} name={identity.name} />,
+            },
+            {
+              id: "actions",
+              label: "Actions",
+              content: (
+                <ActionsPanel
+                  owner={identity.owner}
+                  name={identity.name}
+                  defaultBranch={repo.defaultBranch}
+                />
+              ),
+            },
+          ]}
+        />
 
         <aside className="flex flex-col gap-4">
           <div className="rounded border border-ink-700 bg-ink-800 p-4">

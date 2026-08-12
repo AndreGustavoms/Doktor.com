@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiGet, apiPut, ApiError } from "@/lib/api-client";
 import { lineDiff } from "@/lib/line-diff";
 import { MarkdownView } from "@/components/markdown/MarkdownView";
+import { CollapsibleMarkdown } from "@/components/markdown/CollapsibleMarkdown";
 
 interface FileContentResponse {
   file: { content: string; sha: string; path: string } | null;
@@ -101,7 +102,9 @@ export function ReadmeEditor({
           </button>
         </div>
         {readmeHtml ? (
-          <MarkdownView html={readmeHtml} />
+          <CollapsibleMarkdown>
+            <MarkdownView html={readmeHtml} />
+          </CollapsibleMarkdown>
         ) : (
           <p className="text-sm text-chalk-dim">Este repositório não tem README.</p>
         )}
