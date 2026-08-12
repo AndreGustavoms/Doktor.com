@@ -66,6 +66,39 @@ body {
   outline-offset: 2px;
 }
 
+/*
+ * Seleção na paleta do painel, em vez do azul padrão do navegador — que
+ * destoa da cianotipia e some por cima do fundo escuro. Um véu do
+ * blueprint marca o trecho sem apagar o texto por baixo.
+ */
+::selection {
+  background: color-mix(in srgb, var(--blueprint) 24%, transparent);
+  color: var(--chalk);
+}
+
+/*
+ * Cromo não entra na seleção: título de página, rótulos de seção,
+ * navegação, números grandes e a régua. Arrastar o mouse sobre a
+ * interface para ler algo não deveria pintar meia tela. Todo dado que
+ * alguém de fato copia — SHA, nome de repo, branch, mensagem de commit,
+ * conteúdo de issue, README — segue selecionável.
+ */
+nav,
+h1,
+h2,
+[class*="uppercase"][class*="tracking-"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Dentro do markdown renderizado tudo é conteúdo — nada de bloquear
+   (ver src/components/markdown/MarkdownView.tsx). */
+.prose-panel,
+.prose-panel * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

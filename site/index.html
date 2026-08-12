@@ -50,7 +50,46 @@ body {
   overflow-x: hidden;
 }
 
-::selection { background: var(--acid); color: var(--bg); }
+/*
+ * Seleção discreta, e desligada onde não faz sentido.
+ *
+ * O acento puro atrás de um título em display de 260px vira um bloco
+ * sólido tomando a tela inteira ao menor arrasto do mouse — parece
+ * defeito, não intenção. Aqui o realce é um véu do acento (18%), que
+ * marca o trecho sem apagar o texto.
+ *
+ * Nada que exista para ser lido, e não copiado, entra na seleção:
+ * títulos, numeração de seção, rótulos, o marquee e os números grandes.
+ * O que alguém de fato copiaria — bio, descrições dos trabalhos, e-mail,
+ * telefone, @ — permanece selecionável.
+ */
+::selection { background: rgba(200, 255, 77, 0.18); color: var(--fg); }
+
+h1.hero-name,
+.sec-title,
+.sec-num,
+.work-name,
+.work-idx,
+.work-year,
+.cell h3,
+.cell-k,
+.fig-n,
+.hero-eyebrow,
+.scroll-cue,
+.strip,
+.channel-k,
+.stack,
+nav {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* O texto corrido dentro dos cards volta a ser selecionável — só o
+   título e o rótulo do card é que não são. */
+.cell p {
+  -webkit-user-select: text;
+  user-select: text;
+}
 
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
@@ -489,6 +528,19 @@ section { padding: 118px 40px; border-bottom: 1px solid var(--line); }
   color: var(--fg);
   transition: color 340ms;
   word-break: break-word;
+}
+
+/*
+ * O e-mail é exibido em caixa alta como os outros canais, mas o valor
+ * real é minúsculo — text-transform muda o que o navegador copia, e
+ * colar DEDE.GUSTAVO100@GMAIL.COM num campo de e-mail é constrangedor.
+ * Aqui a caixa alta vira aparência pura: o texto no DOM continua como
+ * foi escrito.
+ */
+#mailText {
+  text-transform: none;
+  font-size: clamp(15px, 1.6vw, 19px);
+  letter-spacing: 0.02em;
 }
 .channel:hover .channel-v, .channel:focus-visible .channel-v { color: var(--acid); }
 
