@@ -32,6 +32,8 @@ body::before {
 
 .topbar {
   border-bottom-color: color-mix(in srgb, var(--scene-accent) 34%, transparent);
+  background: rgba(3, 8, 15, 0.94);
+  backdrop-filter: none;
   box-shadow: 0 10px 45px rgba(0, 0, 0, 0.26);
 }
 
@@ -58,7 +60,6 @@ body::before {
   color: transparent;
   background-clip: text;
   -webkit-background-clip: text;
-  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--scene-accent) 28%, transparent));
 }
 
 .reveal,
@@ -95,6 +96,11 @@ body::before {
   isolation: isolate;
 }
 
+.hero-copy {
+  filter: none;
+  will-change: transform, opacity;
+}
+
 .hero::before {
   content: "";
   position: absolute;
@@ -105,9 +111,8 @@ body::before {
   aspect-ratio: 1;
   border-radius: 50%;
   background: conic-gradient(from 30deg, transparent, rgba(56, 220, 255, 0.2), transparent 34%, rgba(139, 92, 255, 0.2), transparent 68%, rgba(215, 255, 63, 0.12), transparent);
-  filter: blur(38px);
-  opacity: 0.7;
-  animation: chroma-spin 14s linear infinite;
+  opacity: 0.34;
+  animation: chroma-spin 24s linear infinite;
 }
 
 .hero-title em {
@@ -116,7 +121,6 @@ body::before {
   background-clip: text;
   -webkit-background-clip: text;
   text-shadow: none !important;
-  filter: drop-shadow(0 0 18px rgba(56, 220, 255, 0.38));
 }
 
 .hero-title {
@@ -127,13 +131,12 @@ body::before {
 .hero-ghost {
   position: absolute;
   z-index: -1;
-  top: 49%;
+  top: 8%;
   left: 56%;
   color: transparent;
   font: 800 clamp(96px, 11.5vw, 186px)/0.72 var(--sans);
   letter-spacing: -0.075em;
   -webkit-text-stroke: 1px color-mix(in srgb, var(--scene-accent) 18%, transparent);
-  filter: drop-shadow(0 0 28px color-mix(in srgb, var(--scene-accent) 12%, transparent));
   text-transform: uppercase;
   white-space: nowrap;
   transform: translateY(-50%);
@@ -158,7 +161,26 @@ body::before {
 
 .core-stage {
   transform-style: preserve-3d;
-  filter: drop-shadow(0 0 42px color-mix(in srgb, var(--scene-accent) 32%, transparent));
+}
+
+.hero.is-dormant::before,
+.hero.is-dormant .core-stage::before,
+.hero.is-dormant .core-stage::after {
+  animation-play-state: paused;
+}
+
+.core-stage:hover .core-image {
+  box-shadow: 0 0 48px rgba(56, 220, 255, 0.28), 0 0 85px rgba(76, 125, 255, 0.13);
+}
+
+.project::before {
+  display: none;
+}
+
+.constellation {
+  opacity: 0.5;
+  mix-blend-mode: normal;
+  contain: strict;
 }
 
 .core-stage::before,
@@ -258,7 +280,6 @@ body::before {
     inset 0 0 120px color-mix(in srgb, var(--scene-accent) 22%, transparent);
   transform: translate(-50%, -50%);
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
 .velocity-hud {
@@ -338,12 +359,10 @@ body::before {
   width: min(58vw, 760px);
   aspect-ratio: 1;
   border-radius: 50%;
-  opacity: 0.42;
+  opacity: 0.24;
   background:
     conic-gradient(from 45deg, transparent 0 8%, var(--neon) 13%, transparent 21% 38%, var(--hot) 46%, transparent 56% 72%, var(--signal) 80%, transparent 90%),
     radial-gradient(circle, transparent 0 28%, rgba(139, 92, 255, 0.22) 29% 31%, transparent 32% 48%, rgba(56, 220, 255, 0.2) 49% 50%, transparent 51%);
-  filter: blur(7px) saturate(1.6);
-  mix-blend-mode: screen;
   pointer-events: none;
 }
 
@@ -416,7 +435,6 @@ body::before {
   font: 700 clamp(120px, 17vw, 250px)/0.75 var(--sans);
   letter-spacing: -0.11em;
   -webkit-text-stroke: 1px color-mix(in srgb, var(--panel-accent) 54%, transparent);
-  filter: drop-shadow(0 0 30px color-mix(in srgb, var(--panel-accent) 23%, transparent));
 }
 
 .story-copy small {
@@ -488,7 +506,7 @@ body::before {
   border-radius: 50%;
   color: var(--panel-accent);
   background: var(--panel-accent);
-  box-shadow: 0 0 65px var(--panel-accent), 0 0 140px color-mix(in srgb, var(--panel-accent) 45%, transparent);
+  box-shadow: 0 0 42px var(--panel-accent), 0 0 85px color-mix(in srgb, var(--panel-accent) 36%, transparent);
   transform: translate(-50%, -50%);
 }
 
@@ -553,6 +571,8 @@ body::before {
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--card-accent) 11%, rgba(16, 34, 53, 0.88)), rgba(3, 8, 16, 0.98));
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4), 0 0 42px color-mix(in srgb, var(--card-accent) 10%, transparent);
+  backface-visibility: hidden;
+  contain: paint;
 }
 
 .project:nth-child(2),
@@ -666,11 +686,28 @@ body::before {
   color: transparent;
   background-clip: text;
   -webkit-background-clip: text;
-  filter: drop-shadow(0 0 26px rgba(56, 220, 255, 0.28));
 }
 
 @keyframes chroma-spin {
   to { transform: rotate(360deg) scale(1.12); }
+}
+
+@media (max-width: 900px), (update: slow) {
+  .hero::before {
+    animation: none;
+  }
+
+  .scene-flash {
+    display: none;
+  }
+
+  .story-spectrum {
+    opacity: 0.12;
+  }
+
+  .constellation {
+    opacity: 0.36;
+  }
 }
 
 @media (min-width: 901px) {
@@ -702,7 +739,7 @@ body::before {
 
 @media (max-width: 900px) {
   .hero-ghost {
-    top: 33%;
+    top: 10%;
     left: 55%;
     font-size: 17vw;
   }
@@ -736,7 +773,7 @@ body::before {
   }
 
   .hero-ghost {
-    top: 25%;
+    top: 9%;
     left: 58%;
     font-size: 22vw;
   }
@@ -785,7 +822,7 @@ body::before {
     top: 18%;
     right: -65%;
     width: 150vw;
-    opacity: 0.2;
+    opacity: 0.12;
   }
 
   .story-panels {

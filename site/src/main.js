@@ -103,13 +103,13 @@ function runIntro() {
       },
     })
       .set(".intro-word span", { yPercent: 140, rotate: 8 })
-      .set(".intro-word", { scale: 0.28, rotation: -5, filter: "blur(18px)" })
+      .set(".intro-word", { scale: 0.28, rotation: -5 })
       .set(".intro-meta", { autoAlpha: 0, x: 24 })
       .fromTo(".intro-scan", { x: -20 }, { x: window.innerWidth + 40, duration: 0.9, ease: "power2.inOut" })
-      .to(".intro-word", { scale: 1, rotation: 0, filter: "blur(0px)", duration: 1.05 }, 0.08)
+      .to(".intro-word", { scale: 1, rotation: 0, duration: 1.05 }, 0.08)
       .to(".intro-word span", { yPercent: 0, rotate: 0, duration: 0.95, stagger: 0.08 }, 0.18)
       .to(".intro-meta", { autoAlpha: 1, x: 0, duration: 0.55 }, 0.55)
-      .to(".intro-word", { scale: 6.5, letterSpacing: "0.08em", filter: "blur(18px)", autoAlpha: 0, duration: 0.92, ease: "power4.in" }, 1.18)
+      .to(".intro-word", { scale: 5.2, letterSpacing: "0.08em", autoAlpha: 0, duration: 0.82, ease: "power4.in" }, 1.18)
       .to(".intro-sequence", { clipPath: "inset(50% 0 50% 0)", duration: 0.82, ease: "power4.inOut" }, 1.48);
   });
 }
@@ -120,12 +120,15 @@ function initCanvasField() {
   if (!context) return;
 
   let nodes = [];
+  let animationFrame = 0;
+  let lastFrame = 0;
+  const frameInterval = 1000 / 30;
   const resize = () => {
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const dpr = Math.min(devicePixelRatio || 1, 1.25);
     canvas.width = innerWidth * dpr;
     canvas.height = innerHeight * dpr;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(54, Math.max(24, Math.floor(innerWidth / 26)));
+    const count = Math.min(34, Math.max(16, Math.floor(innerWidth / 42)));
     nodes = Array.from({ length: count }, () => ({
       x: Math.random() * innerWidth,
       y: Math.random() * innerHeight,
@@ -135,8 +138,14 @@ function initCanvasField() {
     }));
   };
 
-  const render = () => {
+  const render = (time = 0) => {
+    if (time - lastFrame < frameInterval) {
+      animationFrame = requestAnimationFrame(render);
+      return;
+    }
+    lastFrame = time;
     context.clearRect(-1, -1, innerWidth + 2, innerHeight + 2);
+    const scrollPhase = scrollY * 0.002;
     nodes.forEach((node) => {
       if (!reducedMotion) {
         node.x += node.vx;
@@ -144,7 +153,7 @@ function initCanvasField() {
         if (node.x < -20 || node.x > innerWidth + 20) node.vx *= -1;
         if (node.y < -20 || node.y > innerHeight + 20) node.vy *= -1;
       }
-      const pulse = (Math.sin(node.x * 0.01 + node.y * 0.008 + scrollY * 0.002) + 1) * 0.5;
+      const pulse = (Math.sin(node.x * 0.01 + node.y * 0.008 + scrollPhase) + 1) * 0.5;
       node.renderX = node.x;
       node.renderY = node.y;
       context.beginPath();
@@ -158,21 +167,29 @@ function initCanvasField() {
         const a = nodes[index];
         const b = nodes[sibling];
         const distance = Math.hypot(a.renderX - b.renderX, a.renderY - b.renderY);
-        if (distance >= 125) continue;
+        if (distance >= 110) continue;
         context.beginPath();
         context.moveTo(a.renderX, a.renderY);
         context.lineTo(b.renderX, b.renderY);
-        context.strokeStyle = `rgba(76,125,255,${(1 - distance / 125) * 0.22})`;
+        context.strokeStyle = `rgba(76,125,255,${(1 - distance / 110) * 0.18})`;
         context.lineWidth = 0.6;
         context.stroke();
       }
     }
-    if (!reducedMotion) requestAnimationFrame(render);
+    if (!reducedMotion && !document.hidden) animationFrame = requestAnimationFrame(render);
   };
 
   window.addEventListener("resize", resize);
+  document.addEventListener("visibilitychange", () => {
+    cancelAnimationFrame(animationFrame);
+    if (!document.hidden && !reducedMotion) {
+      lastFrame = 0;
+      animationFrame = requestAnimationFrame(render);
+    }
+  });
   resize();
-  render();
+  if (reducedMotion) render(frameInterval);
+  else animationFrame = requestAnimationFrame(render);
 }
 
 function initInterface() {
@@ -234,23 +251,38 @@ function initHero() {
 
   gsap.timeline({ defaults: { ease: "power4.out" } })
     .from(".hero .kicker", { autoAlpha: 0, x: -24, duration: 0.65 })
-    .from(split.words, { yPercent: 150, scale: 2.2, rotateX: -70, filter: "blur(12px)", autoAlpha: 0, duration: 1.18, stagger: 0.05 }, 0.08)
-    .from(".hero-lede", { autoAlpha: 0, y: 60, scale: 0.82, filter: "blur(8px)", duration: 0.82 }, 0.45)
+    .from(split.words, { yPercent: 150, scale: 2.2, rotateX: -70, autoAlpha: 0, duration: 1.18, stagger: 0.05 }, 0.08)
+    .from(".hero-lede", { autoAlpha: 0, y: 60, scale: 0.82, duration: 0.82 }, 0.45)
     .from(".hero .actions a", { autoAlpha: 0, y: 22, duration: 0.58, stagger: 0.08 }, 0.6)
     .from(".hero-meta span", { autoAlpha: 0, y: 12, duration: 0.45, stagger: 0.06 }, 0.74)
-    .from(".core-stage", { autoAlpha: 0, scale: 3.4, rotation: -35, filter: "blur(20px)", duration: 1.35 }, 0.12)
+    .from(".core-stage", { autoAlpha: 0, scale: 2.8, rotation: -35, duration: 1.25 }, 0.12)
     .from(".core-node, .core-readout, .core-label, .core-signal", { autoAlpha: 0, scale: 0.4, duration: 0.55, stagger: 0.08 }, 0.58)
     .from(".hero-scroll", { autoAlpha: 0, y: -10, duration: 0.45 }, 0.9);
 
-  gsap.to(".core-node", { rotation: 360, duration: 18, repeat: -1, ease: "none", stagger: 1.8 });
-  gsap.to(".core-image", { y: -9, duration: 2.4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+  const ambientMotion = [
+    gsap.to(".core-node", { rotation: 360, duration: 18, repeat: -1, ease: "none", stagger: 1.8 }),
+    gsap.to(".core-image", { y: -9, duration: 2.4, repeat: -1, yoyo: true, ease: "sine.inOut" }),
+  ];
+
+  const setHeroActivity = ({ isActive }) => {
+    hero.classList.toggle("is-dormant", !isActive);
+    ambientMotion.forEach((motion) => (isActive ? motion.play() : motion.pause()));
+  };
+
+  const heroPresence = ScrollTrigger.create({
+    trigger: hero,
+    start: "top bottom",
+    end: "bottom top",
+    onToggle: setHeroActivity,
+  });
+  setHeroActivity(heroPresence);
 
   gsap.timeline({
     scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: 0.65, invalidateOnRefresh: true },
   })
-    .to(".hero-copy", { y: -180, scale: 0.58, autoAlpha: 0, filter: "blur(14px)", ease: "none" }, 0)
-    .to(".core-stage", { y: 80, rotation: 38, scale: 4.6, autoAlpha: 0, filter: "blur(18px)", ease: "none" }, 0)
-    .to(".hero-ghost", { x: () => innerWidth * 0.18, scale: 3.6, autoAlpha: 0, filter: "blur(10px)", transformOrigin: "left center", ease: "none" }, 0)
+    .to(".hero-copy", { y: -180, scale: 0.58, autoAlpha: 0, ease: "none" }, 0)
+    .to(".core-stage", { y: 80, rotation: 32, scale: 3.5, autoAlpha: 0, ease: "none" }, 0)
+    .to(".hero-ghost", { x: () => innerWidth * 0.18, scale: 3.2, autoAlpha: 0, transformOrigin: "left center", ease: "none" }, 0)
     .to(".hero-scroll", { autoAlpha: 0, y: 18, ease: "none" }, 0);
 }
 
@@ -268,7 +300,6 @@ function initReveals() {
       scale: 2.35,
       autoAlpha: 0,
       rotateX: -65,
-      filter: "blur(14px)",
       stagger: 0.045,
       duration: 1.05,
       ease: "expo.out",
@@ -287,7 +318,6 @@ function initReveals() {
       scale: 0.68,
       rotationX: 18,
       autoAlpha: 0,
-      filter: "blur(10px)",
       duration: 0.95,
       delay: (index % 4) * 0.04,
       ease: "power3.out",
@@ -313,8 +343,8 @@ function initStory() {
 
   const media = gsap.matchMedia();
   media.add("(min-width: 621px)", () => {
-    gsap.set(panels, { autoAlpha: 0, scale: 0.24, rotation: -9, filter: "blur(24px)", clipPath: "inset(12% 12% 12% 12%)" });
-    gsap.set(panels[0], { autoAlpha: 1, scale: 1, rotation: 0, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)" });
+    gsap.set(panels, { autoAlpha: 0, scale: 0.24, rotation: -9 });
+    gsap.set(panels[0], { autoAlpha: 1, scale: 1, rotation: 0 });
 
     const timeline = gsap.timeline({
       scrollTrigger: {
@@ -334,19 +364,19 @@ function initStory() {
     });
 
     timeline
-      .from(headingSplit.words, { yPercent: 170, scale: 2.2, rotateX: -70, filter: "blur(14px)", autoAlpha: 0, duration: 0.7, stagger: 0.04 }, 0)
+      .from(headingSplit.words, { yPercent: 170, scale: 2.2, rotateX: -70, autoAlpha: 0, duration: 0.7, stagger: 0.04 }, 0)
       .from(".story-head", { autoAlpha: 0, y: -18, duration: 0.4 }, 0)
       .to(".story-progress-fill", { scaleX: 1, ease: "none", duration: 3.5 }, 0)
       .to(".story-spectrum", { rotation: 420, scale: 2.2, xPercent: -18, ease: "none", duration: 3.5 }, 0)
       .to(".story-panel:nth-child(1) .story-visual", { rotation: 520, scale: 2.4, duration: 1.05, ease: "none" }, 0)
-      .to(panels[0], { autoAlpha: 0, scale: 3.6, rotation: 8, filter: "blur(24px)", clipPath: "inset(18% 18% 18% 18%)", duration: 0.42 }, 0.78)
-      .fromTo(panels[1], { autoAlpha: 0, scale: 0.2, rotation: -12, filter: "blur(26px)", clipPath: "inset(20% 20% 20% 20%)" }, { autoAlpha: 1, scale: 1, rotation: 0, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)", duration: 0.48 }, 1.02)
+      .to(panels[0], { autoAlpha: 0, scale: 3.2, rotation: 8, duration: 0.42 }, 0.78)
+      .fromTo(panels[1], { autoAlpha: 0, scale: 0.2, rotation: -12 }, { autoAlpha: 1, scale: 1, rotation: 0, duration: 0.48 }, 1.02)
       .to(".story-panel:nth-child(2) .story-visual", { rotation: -620, scale: 2.6, duration: 1.05, ease: "none" }, 1.12)
-      .to(panels[1], { autoAlpha: 0, scale: 3.6, rotation: -8, filter: "blur(24px)", clipPath: "inset(18% 18% 18% 18%)", duration: 0.42 }, 1.78)
-      .fromTo(panels[2], { autoAlpha: 0, scale: 0.2, rotation: 12, filter: "blur(26px)", clipPath: "inset(20% 20% 20% 20%)" }, { autoAlpha: 1, scale: 1, rotation: 0, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)", duration: 0.48 }, 2.02)
+      .to(panels[1], { autoAlpha: 0, scale: 3.2, rotation: -8, duration: 0.42 }, 1.78)
+      .fromTo(panels[2], { autoAlpha: 0, scale: 0.2, rotation: 12 }, { autoAlpha: 1, scale: 1, rotation: 0, duration: 0.48 }, 2.02)
       .to(".story-panel:nth-child(3) .story-visual", { rotation: 720, scale: 2.8, duration: 1.3, ease: "none" }, 2.12)
-      .to(".story-core", { scale: 3.2, boxShadow: "0 0 120px currentColor", stagger: 0.72, duration: 0.38, yoyo: true, repeat: 1 }, 0.3)
-      .to(".story-heading", { scale: 1.65, y: -55, autoAlpha: 0.08, filter: "blur(7px)", transformOrigin: "left top", duration: 2.6, ease: "none" }, 0.7);
+      .to(".story-core", { scale: 3.2, stagger: 0.72, duration: 0.38, yoyo: true, repeat: 1 }, 0.3)
+      .to(".story-heading", { scale: 1.55, y: -55, autoAlpha: 0.08, transformOrigin: "left top", duration: 2.6, ease: "none" }, 0.7);
 
     return () => {
       timeline.scrollTrigger?.kill();
@@ -377,23 +407,37 @@ function initProjectRail() {
   media.add("(min-width: 901px)", () => {
     const distance = () => Math.max(0, rail.scrollWidth - stage.clientWidth);
     const cards = $$(".project", rail);
+    const setters = cards.map((card) => ({
+      scale: gsap.quickSetter(card, "scale"),
+      rotationY: gsap.quickSetter(card, "rotationY", "deg"),
+      z: gsap.quickSetter(card, "z", "px"),
+      opacity: gsap.quickSetter(card, "opacity"),
+    }));
+    let metrics = { distance: 0, viewportCenter: 0, focusRange: 1, centers: [] };
+
+    const refreshMetrics = () => {
+      const stageWidth = stage.clientWidth;
+      metrics = {
+        distance: distance(),
+        viewportCenter: stageWidth * 0.5,
+        focusRange: Math.max(stageWidth * 0.52, 1),
+        centers: cards.map((card) => card.offsetLeft + card.offsetWidth * 0.5),
+      };
+    };
+
+    gsap.set(cards, { transformOrigin: "center center", force3D: true });
+    refreshMetrics();
+
     const updateFocus = (progress) => {
-      const viewportCenter = stage.clientWidth * 0.5;
-      const travel = distance() * progress;
-      cards.forEach((card) => {
+      const travel = metrics.distance * progress;
+      cards.forEach((card, index) => {
         if (card.classList.contains("hidden")) return;
-        const center = card.offsetLeft - travel + card.offsetWidth * 0.5;
-        const delta = (center - viewportCenter) / Math.max(stage.clientWidth * 0.52, 1);
+        const delta = (metrics.centers[index] - travel - metrics.viewportCenter) / metrics.focusRange;
         const focus = gsap.utils.clamp(0, 1, 1 - Math.abs(delta));
-        gsap.set(card, {
-          scale: 0.72 + focus * 0.34,
-          rotationY: delta * -24,
-          z: focus * 110,
-          autoAlpha: 0.34 + focus * 0.66,
-          filter: `saturate(${0.55 + focus * 0.8}) brightness(${0.62 + focus * 0.48}) blur(${(1 - focus) * 2.4}px)`,
-          transformOrigin: "center center",
-          force3D: true,
-        });
+        setters[index].scale(0.72 + focus * 0.34);
+        setters[index].rotationY(delta * -24);
+        setters[index].z(focus * 110);
+        setters[index].opacity(0.34 + focus * 0.66);
       });
     };
     const tween = gsap.to(rail, {
@@ -408,7 +452,11 @@ function initProjectRail() {
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => updateFocus(self.progress),
-        onRefresh: (self) => updateFocus(self.progress),
+        onRefreshInit: refreshMetrics,
+        onRefresh: (self) => {
+          refreshMetrics();
+          updateFocus(self.progress);
+        },
       },
     });
 
@@ -425,7 +473,7 @@ function initProjectRail() {
       tween.scrollTrigger?.kill();
       tween.kill();
       gsap.set(rail, { clearProps: "transform" });
-      gsap.set(cards, { clearProps: "transform,opacity,visibility,filter" });
+      gsap.set(cards, { clearProps: "transform,opacity,visibility" });
     };
   });
 
@@ -435,7 +483,6 @@ function initProjectRail() {
         x: index % 2 ? 100 : -100,
         scale: 0.58,
         rotation: index % 2 ? 5 : -5,
-        filter: "blur(12px)",
         autoAlpha: 0,
         duration: 1,
         ease: "expo.out",
@@ -462,26 +509,22 @@ function initFinale() {
       xPercent: -18,
       y: 180,
       rotation: -6,
-      filter: "blur(20px)",
       transformOrigin: "left bottom",
     }, {
       scale: 1.18,
       xPercent: 0,
       y: 0,
       rotation: 0,
-      filter: "blur(0px)",
       ease: "none",
     }, 0)
     .fromTo("#contato .contact-copy", {
       xPercent: 45,
       scale: 0.7,
       autoAlpha: 0,
-      filter: "blur(12px)",
     }, {
       xPercent: 0,
       scale: 1,
       autoAlpha: 1,
-      filter: "blur(0px)",
       ease: "none",
     }, 0.12);
 }
@@ -497,8 +540,8 @@ function initScrollSystem() {
     gsap.to(root, { "--scene-accent": color, duration: 0.9, ease: "power2.out", overwrite: true });
     if (!flash) return;
     gsap.fromTo(flash,
-      { autoAlpha: 0.3, scale: 0.55, filter: "blur(6px)" },
-      { autoAlpha: 0, scale: 1.8, filter: "blur(30px)", duration: 1.15, ease: "expo.out", overwrite: true },
+      { autoAlpha: 0.22, scale: 0.55 },
+      { autoAlpha: 0, scale: 1.8, duration: 0.8, ease: "expo.out", overwrite: true },
     );
   };
 

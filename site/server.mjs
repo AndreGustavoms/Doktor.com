@@ -19,8 +19,10 @@ const server = createServer(async (request, response) => {
 
   try {
     const body = await readFile(filePath);
-    const contentType = filePath.endsWith(".png")
-      ? "image/png"
+    const contentType = filePath.endsWith(".webp")
+      ? "image/webp"
+      : filePath.endsWith(".png")
+        ? "image/png"
       : filePath.endsWith(".js")
         ? "text/javascript; charset=utf-8"
         : filePath.endsWith(".map") || filePath.endsWith(".json")
