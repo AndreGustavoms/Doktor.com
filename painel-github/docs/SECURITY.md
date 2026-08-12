@@ -76,7 +76,8 @@ arquivo num commit posterior não resolve nada.
 - **Recomendação adicional:** habilite **Push Protection** e **Secret
   Scanning** nas configurações do repositório no GitHub — são gratuitos
   para repositórios públicos e detectam antes mesmo do seu hook local.
-- **Status:** ☐ Implementado — Fase 0.
+- **Status:** ☑ Implementado — Fase 0, cobertura corrigida e revalidada
+  ao vivo na Fase 7 (ver "Lacuna de cobertura" acima).
 
 ### A3 — CSRF e DNS rebinding a partir do navegador
 Com o painel aberto, visitar um site malicioso na mesma sessão do
@@ -300,10 +301,12 @@ seu, dano permanente.
   nesta fase (não existe "forçar push" ou "arquivar" no painel ainda).
   Exclusão de repositório **não implementada, nem atrás de flag** —
   decisão permanente, não uma lacuna desta fase.
-- **Teste automatizado:** nenhum teste unitário dedicado ainda (a lógica
-  de `requireDestructiveAllowed()` é simples o bastante para não
-  justificar um arquivo de teste próprio) — validado ao vivo contra o
-  servidor real: `PUT /visibility` sem `ALLOW_DESTRUCTIVE` retorna `403
+- **Teste automatizado:** `tests/unit/destructive-guard.test.ts` (Fase 7)
+  — cobre bloqueio com a variável ausente, com `"false"`, e com qualquer
+  valor que não seja exatamente `"true"` (`"1"`, `"TRUE"`, `"yes"`,
+  `"on"`, string vazia), além do código e status do erro lançado.
+  Também validado ao vivo contra o servidor real: `PUT /visibility` sem
+  `ALLOW_DESTRUCTIVE` retorna `403
   DESTRUCTIVE_ACTIONS_DISABLED`; nome de confirmação incorreto retorna
   `400 CONFIRMATION_MISMATCH` antes mesmo de a guarda destrutiva ser
   avaliada.
@@ -324,8 +327,10 @@ e exfiltra.
   `docs/SETUP.md`, com aviso de que pode quebrar pacotes com binário
   nativo como `better-sqlite3` (nesse caso, rode
   `npm rebuild better-sqlite3` separadamente após revisar o script).
-- **Status:** ☐ Implementado — Fase 0 traz lockfile e script de audit;
-  `dependabot.yml` chega na Fase 7 junto com o endurecimento final.
+- **Status:** ☑ Implementado — Fase 0 traz lockfile e script de audit;
+  `.github/dependabot.yml` entrou na Fase 7, na raiz do repositório Git
+  e apontando para `/painel-github` (antes vivia numa pasta que o
+  GitHub não lê e apontava para um diretório inexistente).
 
 ### Dívida técnica conhecida — vulnerabilidades aceitas
 
@@ -351,17 +356,28 @@ Se novas vulnerabilidades de severidade alta ou crítica aparecerem no
 futuro (via `npm audit` ou Dependabot), elas **não** entram nesta lista
 de aceitas sem decisão explícita — o padrão é corrigir, não silenciar.
 
-### Pendência de validação — sem token real do GitHub disponível
+### Validação contra a API real do GitHub — concluída na Fase 7
 
 `GET /api/repos` (Fase 2) foi validado ao vivo contra o servidor real
 (`next start`) para todas as camadas de guarda: Host check (421),
 sessão ausente (401), origem cross-site (403), vault bloqueado (423), e
 erro sanitizado quando o GitHub rejeita um token inválido (502, log
-confirmado sem vazamento). **Não validado nesta sessão de
-desenvolvimento**, por não haver um fine-grained PAT real disponível no
-ambiente: listagem de repositórios reais, `fromCache: true` no segundo
-load, e revalidação via ETag/304 contra `api.github.com` de verdade.
-Procedimento de validação manual documentado em `docs/SETUP.md`.
+confirmado sem vazamento).
+
+O que ficou pendente até a Fase 6 por falta de um PAT real no ambiente
+— listagem de repositórios reais e escrita de verdade — foi coberto na
+Fase 7 por `tests/e2e/full-flow.spec.ts`, rodado contra
+`api.github.com` com token e repositório de teste dedicados: setup
+completo, listagem real, commit de README criado e confirmado por
+`GET /repos/{owner}/{repo}/commits` depois da execução. O token usado
+era de teste, ficou só em `.env.local` (nunca commitado) e foi removido
+ao fim da sessão.
+
+**Continua não coberto por teste automatizado:** revalidação via
+ETag/304 contra o GitHub real — `tests/unit/cache.test.ts` cobre a
+lógica de TTL e de reaproveitamento de corpo cacheado, mas com resposta
+simulada, não com um 304 devolvido por `api.github.com`. Procedimento de
+verificação manual em `docs/SETUP.md`.
 
 ---
 
