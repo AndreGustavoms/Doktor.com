@@ -10,6 +10,18 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Remove qualquer cursor decorativo de versões antigas. */
+.pointer-orbit,
+.cursor-orbit,
+.custom-cursor,
+[data-cursor-orbit],
+.core-node.node-b {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 body::before {
   background:
     radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--scene-accent) 24%, transparent), transparent 34rem),

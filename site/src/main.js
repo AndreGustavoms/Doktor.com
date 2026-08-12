@@ -9,7 +9,12 @@ const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)]
 const root = document.documentElement;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+function removeLegacyCursor() {
+  $$(".pointer-orbit, .cursor-orbit, .custom-cursor, [data-cursor-orbit]").forEach((element) => element.remove());
+}
+
 function buildMotionLayer() {
+  removeLegacyCursor();
   const hero = $(".hero");
   const title = $(".hero h1");
   title?.classList.add("hero-title");
@@ -545,6 +550,8 @@ function initMotion() {
 }
 
 async function init() {
+  removeLegacyCursor();
+  window.addEventListener("pageshow", removeLegacyCursor);
   buildMotionLayer();
   initCanvasField();
   initInterface();
