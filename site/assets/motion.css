@@ -128,15 +128,16 @@ body::before {
   position: absolute;
   z-index: -1;
   top: 49%;
-  left: 68%;
+  left: 56%;
   color: transparent;
-  font: 800 clamp(104px, 13.5vw, 218px)/0.72 var(--sans);
+  font: 800 clamp(96px, 11.5vw, 186px)/0.72 var(--sans);
   letter-spacing: -0.075em;
   -webkit-text-stroke: 1px color-mix(in srgb, var(--scene-accent) 18%, transparent);
   filter: drop-shadow(0 0 28px color-mix(in srgb, var(--scene-accent) 12%, transparent));
   text-transform: uppercase;
   white-space: nowrap;
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
+  transform-origin: left center;
   pointer-events: none;
   user-select: none;
 }
@@ -702,8 +703,8 @@ body::before {
 @media (max-width: 900px) {
   .hero-ghost {
     top: 33%;
-    left: 70%;
-    font-size: 20vw;
+    left: 55%;
+    font-size: 17vw;
   }
 
   .velocity-hud {
@@ -736,8 +737,8 @@ body::before {
 
   .hero-ghost {
     top: 25%;
-    left: 76%;
-    font-size: 28vw;
+    left: 58%;
+    font-size: 22vw;
   }
 
   .hero h1 {

@@ -246,11 +246,11 @@ function initHero() {
   gsap.to(".core-image", { y: -9, duration: 2.4, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
   gsap.timeline({
-    scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: 0.65 },
+    scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: 0.65, invalidateOnRefresh: true },
   })
     .to(".hero-copy", { y: -180, scale: 0.58, autoAlpha: 0, filter: "blur(14px)", ease: "none" }, 0)
     .to(".core-stage", { y: 80, rotation: 38, scale: 4.6, autoAlpha: 0, filter: "blur(18px)", ease: "none" }, 0)
-    .to(".hero-ghost", { xPercent: 14, scale: 3.6, autoAlpha: 0, filter: "blur(10px)", ease: "none" }, 0)
+    .to(".hero-ghost", { x: () => innerWidth * 0.18, scale: 3.6, autoAlpha: 0, filter: "blur(10px)", transformOrigin: "left center", ease: "none" }, 0)
     .to(".hero-scroll", { autoAlpha: 0, y: 18, ease: "none" }, 0);
 }
 
