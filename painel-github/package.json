@@ -13,6 +13,7 @@
     "build": "next build && tsx scripts/check-bundle-secrets.ts",
     "start": "next start -H 127.0.0.1 -p 3000",
     "lint": "eslint . && tsc --noEmit",
+    "pretest": "tsx scripts/clean-test-dirs.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:sec": "vitest run tests/security",
