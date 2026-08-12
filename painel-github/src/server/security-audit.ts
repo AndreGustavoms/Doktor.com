@@ -16,6 +16,14 @@ import { vaultExists } from "./vault/store";
  * Esses dois continuam cobertos por `npm run check`/`npm run audit`
  * (CLI, sem limite de tempo de request) e pelos hooks do lefthook — ver
  * package.json e docs/SECURITY.md, ameaça A2/A10.
+ *
+ * As chamadas de fs abaixo levam a anotacao turbopackIgnore porque
+ * leem caminhos montados em runtime (process.cwd() + nome). Sem a
+ * anotação, a análise estática do Turbopack conclui que o projeto
+ * inteiro pode ser lido e passa a incluir todos os arquivos-fonte no
+ * output do servidor — inclusive a pasta public. Aqui a leitura é
+ * deliberada e local: a auditoria precisa inspecionar .gitignore,
+ * lefthook.yml, next.config.ts e o vault no disco de verdade.
  */
 
 export type AuditStatus = "pass" | "fail" | "warn";
@@ -54,7 +62,7 @@ function checkVaultEncrypted(): AuditItem {
 
   try {
     const dataDir = process.env.PAINEL_DATA_DIR ?? join(process.cwd(), "data");
-    const raw = readFileSync(join(dataDir, "vault.enc"), "utf8");
+    const raw = readFileSync(/* turbopackIgnore: true */ join(dataDir, "vault.enc"), "utf8");
     const parsed = JSON.parse(raw);
     const looksEncrypted =
       typeof parsed.salt === "string" &&
@@ -84,7 +92,7 @@ function checkGitignore(): AuditItem {
   const REQUIRED_PATTERNS = [".env", "data/", "*.db", "vault.enc"];
   const path = join(process.cwd(), ".gitignore");
 
-  if (!existsSync(path)) {
+  if (!existsSync(/* turbopackIgnore: true */ path)) {
     return {
       id: "gitignore",
       label: ".gitignore correto",
@@ -93,7 +101,7 @@ function checkGitignore(): AuditItem {
     };
   }
 
-  const content = readFileSync(path, "utf8");
+  const content = readFileSync(/* turbopackIgnore: true */ path, "utf8");
   const missing = REQUIRED_PATTERNS.filter((pattern) => !content.includes(pattern));
 
   return {
@@ -111,8 +119,8 @@ function checkGitleaksHooks(): AuditItem {
   const localConfigPath = join(process.cwd(), "lefthook.yml");
   const rootConfigPath = join(process.cwd(), "..", "lefthook.yml");
 
-  const localExists = existsSync(localConfigPath);
-  const rootExists = existsSync(rootConfigPath);
+  const localExists = existsSync(/* turbopackIgnore: true */ localConfigPath);
+  const rootExists = existsSync(/* turbopackIgnore: true */ rootConfigPath);
 
   if (!localExists) {
     return {
@@ -123,9 +131,9 @@ function checkGitleaksHooks(): AuditItem {
     };
   }
 
-  const content = readFileSync(localConfigPath, "utf8");
+  const content = readFileSync(/* turbopackIgnore: true */ localConfigPath, "utf8");
   const hasGitleaks = content.includes("gitleaks");
-  const rootExtends = rootExists && readFileSync(rootConfigPath, "utf8").includes("extends");
+  const rootExtends = rootExists && readFileSync(/* turbopackIgnore: true */ rootConfigPath, "utf8").includes("extends");
 
   return {
     id: "gitleaks-hooks",
@@ -152,7 +160,7 @@ function checkDestructiveFlag(): AuditItem {
 
 function checkSecurityHeadersConfigured(): AuditItem {
   const path = join(process.cwd(), "next.config.ts");
-  if (!existsSync(path)) {
+  if (!existsSync(/* turbopackIgnore: true */ path)) {
     return {
       id: "security-headers",
       label: "Headers de segurança configurados",
@@ -161,7 +169,7 @@ function checkSecurityHeadersConfigured(): AuditItem {
     };
   }
 
-  const content = readFileSync(path, "utf8");
+  const content = readFileSync(/* turbopackIgnore: true */ path, "utf8");
   const REQUIRED_HEADERS = [
     "Content-Security-Policy",
     "X-Content-Type-Options",

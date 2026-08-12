@@ -120,6 +120,88 @@ function externalLinkAttributes() {
   };
 }
 
+/*
+ * README quase sempre referencia imagens por caminho relativo
+ * (`docs/assets/foo.png`, `./capa.svg`). Sem reescrever, o navegador
+ * resolve esse caminho contra a URL do PAINEL — vira uma requisição a
+ * 127.0.0.1/repos/owner/name/docs/assets/foo.png, que devolve 404 e
+ * ainda registra o caminho no log do servidor. Encontrado ao varrer a
+ * tela de detalhe: 7 imagens quebradas num único README.
+ *
+ * Reescrever para raw.githubusercontent.com resolve o alvo certo. As
+ * imagens continuam BLOQUEADAS pela CSP (img-src não inclui esse host,
+ * de propósito — ver src/middleware.ts, ameaça de rastreamento por
+ * hotlink) e caem no tratamento visual de badge em globals.css. A
+ * diferença é que agora o alt aparece como pílula legível em vez de
+ * ícone quebrado, e nenhuma requisição inútil bate no próprio painel.
+ */
+/* Caracteres de controle num caminho de imagem só existem para enganar
+   parser — nenhum arquivo legítimo os tem no nome. */
+const CONTROLE = /[\u0000-\u001f\u007f]/;
+
+function resolveRelativeImages(repo?: RepoContext) {
+  return (tree: Root) => {
+    if (!repo) return;
+    const base = `https://raw.githubusercontent.com/${repo.owner}/${repo.name}/${repo.ref}/`;
+
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName !== "img") return;
+      const src = node.properties.src;
+      if (typeof src !== "string" || src === "") return;
+
+      // Absolutos e data: já apontam para o lugar certo.
+      if (/^(https?:)?\/\//i.test(src) || src.startsWith("data:")) return;
+
+      /*
+       * Este transform roda DEPOIS do rehypeSanitize, então não pode
+       * confiar que o valor é inócuo só por ter passado por lá: o
+       * sanitizador valida protocolo, não conteúdo de caminho. Um `..`
+       * aqui escaparia do prefixo do repositório e apontaria para outro
+       * lugar dentro de raw.githubusercontent.com. Na dúvida, deixamos o
+       * src original — que no pior caso dá 404, nunca um alvo forjado.
+       */
+      if (src.includes("..") || src.includes("\\") || CONTROLE.test(src)) return;
+
+      const limpo = src.replace(/^\.\//, "").replace(/^\/+/, "");
+      node.properties.src = base + encodeURI(limpo);
+    });
+  };
+}
+
+/*
+ * README quase sempre abre com `# Nome do projeto`, que vira um <h1> —
+ * e a página já tem o seu, com o nome do repositório. Dois <h1> deixam
+ * ambíguo, para leitor de tela, qual é o assunto da página.
+ *
+ * Rebaixar um nível preserva a hierarquia RELATIVA do documento (o que
+ * era título de seção continua sendo, um nível abaixo) e mantém o
+ * conteúdo subordinado ao título real da tela. h6 não tem para onde
+ * descer, então fica onde está.
+ */
+function demoteHeadings() {
+  const MAPA: Record<string, string> = {
+    h1: "h2",
+    h2: "h3",
+    h3: "h4",
+    h4: "h5",
+    h5: "h6",
+  };
+
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element) => {
+      const destino = MAPA[node.tagName];
+      if (destino) node.tagName = destino;
+    });
+  };
+}
+
+export interface RepoContext {
+  owner: string;
+  name: string;
+  /** Branch ou SHA que serve de base para os caminhos relativos. */
+  ref: string;
+}
+
 export interface RenderMarkdownResult {
   html: string;
 }
@@ -130,8 +212,15 @@ export interface RenderMarkdownResult {
  * qualquer string que não tenha passado por esta função — ver
  * src/components/markdown/MarkdownView.tsx, o único lugar autorizado a
  * usá-la.
+ *
+ * `repo` é opcional: sem ele, caminhos relativos de imagem ficam como
+ * estão (é o comportamento certo para markdown que não veio de um
+ * repositório, como uma nota local).
  */
-export async function renderMarkdown(source: string): Promise<RenderMarkdownResult> {
+export async function renderMarkdown(
+  source: string,
+  repo?: RepoContext,
+): Promise<RenderMarkdownResult> {
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)
@@ -140,6 +229,8 @@ export async function renderMarkdown(source: string): Promise<RenderMarkdownResu
     .use(rehypeSanitize, sanitizeSchema)
     .use(stripDataUriFromLinks)
     .use(externalLinkAttributes)
+    .use(() => resolveRelativeImages(repo))
+    .use(demoteHeadings)
     .use(rehypeHighlight)
     .use(rehypeStringify)
     .process(source);

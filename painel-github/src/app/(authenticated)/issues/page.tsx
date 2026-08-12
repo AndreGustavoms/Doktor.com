@@ -46,7 +46,7 @@ export default function IssuesInboxPage() {
   }, [filtered, groupBy]);
 
   return (
-    <main className="mx-auto max-w-360 px-8 py-6">
+    <main className="mx-auto max-w-360 px-4 py-5 sm:px-6 md:px-8 md:py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-(family-name:--font-display) text-3xl font-bold text-chalk">
@@ -83,6 +83,7 @@ export default function IssuesInboxPage() {
 
         {allLabels.length > 0 && (
           <select
+            aria-label="Filtrar por label"
             value={labelFilter ?? ""}
             onChange={(e) => setLabelFilter(e.target.value || null)}
             className="rounded border border-ink-600 bg-ink-900 px-3 py-1.5 font-mono text-xs text-chalk-dim outline-none focus-visible:border-blueprint"
@@ -146,7 +147,11 @@ function InboxRow({ item }: { item: InboxItem }) {
       >
         {item.title}
       </a>
-      <span className="shrink-0 font-mono text-xs text-chalk-dim">{item.repoFullName}</span>
+      {/* Some no celular: o título da issue e o tempo já bastam ali, e o
+          nome completo do repositório era o que estourava a largura. */}
+      <span className="hidden max-w-40 shrink truncate font-mono text-xs text-chalk-dim sm:inline">
+        {item.repoFullName}
+      </span>
       <span className="shrink-0 font-mono text-xs text-chalk-dim">
         {relativeTime(item.createdAt)}
       </span>

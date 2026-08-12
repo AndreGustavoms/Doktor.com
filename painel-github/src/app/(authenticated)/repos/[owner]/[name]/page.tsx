@@ -62,10 +62,23 @@ export default async function RepoDetailPage({ params }: PageProps) {
     listCommits(identity, 1, 5),
   ]);
 
-  const readmeHtml = markdown ? (await renderMarkdown(markdown)).html : null;
+  /*
+   * O contexto do repositório resolve as imagens de caminho relativo do
+   * README (ver renderMarkdown): sem ele, `docs/assets/foo.png` viraria
+   * uma requisição 404 contra o próprio painel.
+   */
+  const readmeHtml = markdown
+    ? (
+        await renderMarkdown(markdown, {
+          owner: identity.owner,
+          name: identity.name,
+          ref: repo.defaultBranch,
+        })
+      ).html
+    : null;
 
   return (
-    <main className="mx-auto max-w-360 px-8 py-6">
+    <main className="mx-auto max-w-360 px-4 py-5 sm:px-6 md:px-8 md:py-6">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.08em] text-chalk-dim">

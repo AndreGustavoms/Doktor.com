@@ -49,7 +49,7 @@ export default function ReposPage() {
   }, [repos, deferredQuery, sortKey]);
 
   return (
-    <main className="mx-auto max-w-360 px-8 py-6">
+    <main className="mx-auto max-w-360 px-4 py-5 sm:px-6 md:px-8 md:py-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-(family-name:--font-display) text-3xl font-bold text-chalk">
           Repositórios
@@ -67,6 +67,7 @@ export default function ReposPage() {
         />
 
         <select
+          aria-label="Ordenar repositórios por"
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as SortKey)}
           className="rounded border border-ink-600 bg-ink-900 px-3 py-2 font-mono text-xs text-chalk-dim outline-none focus-visible:border-blueprint"

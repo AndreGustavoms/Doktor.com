@@ -32,7 +32,7 @@ export default function PortfolioPage() {
   }, [reposData]);
 
   return (
-    <main className="mx-auto max-w-360 px-8 py-6">
+    <main className="mx-auto max-w-360 px-4 py-5 sm:px-6 md:px-8 md:py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-(family-name:--font-display) text-3xl font-bold text-chalk">
@@ -259,9 +259,15 @@ function PreviewCard({
   return (
     <section className="rounded border border-ink-700 bg-ink-900 p-6">
       <div className="mb-6 rounded border border-ink-600/50 bg-ink-800/40 p-6">
-        <h1 className="font-(family-name:--font-display) text-2xl font-bold text-chalk">
+        {/*
+         * <p>, não <h1>: isto é a PRÉVIA do site exportado dentro do
+         * painel, não o título desta página — que já é "Portfólio", lá em
+         * cima. Dois <h1> na mesma página confundem leitor de tela sobre
+         * qual é o assunto real dela.
+         */}
+        <p className="font-(family-name:--font-display) text-2xl font-bold text-chalk">
           {config.headline || "Headline"}
-        </h1>
+        </p>
         {config.bio && <p className="mt-2 max-w-xl text-sm text-chalk-dim">{config.bio}</p>}
         {config.socials.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-3">

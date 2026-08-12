@@ -25,7 +25,16 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   return (
     <div className="flex">
       <Sidebar />
-      <div className="flex-1">{children}</div>
+      {/*
+       * min-w-0 é o que impede o conteúdo de empurrar o layout: sem ele,
+       * um filho largo (tabela, bloco de código, régua de 720px) força a
+       * coluna flex a crescer além da viewport e a página inteira ganha
+       * rolagem horizontal.
+       *
+       * pb-20 no celular abre espaço para a barra de navegação fixa no
+       * rodapé, que senão cobriria o fim do conteúdo.
+       */}
+      <div className="min-w-0 flex-1 pb-20 md:pb-0">{children}</div>
     </div>
   );
 }

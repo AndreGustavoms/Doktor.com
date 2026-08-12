@@ -84,7 +84,10 @@ export function SyncRuler() {
         </p>
       </div>
 
-      <div className="min-w-[720px]">
+      {/* 720px é o mínimo para 90 marcas de dia ficarem distinguíveis; em
+          telas menores a régua rola dentro do próprio card, sem empurrar
+          a página. */}
+      <div className="min-w-180">
         {/* Régua graduada — marca maior a cada 7 dias, como fita métrica. */}
         <div className="relative mb-2 flex h-5 items-end border-b border-ink-700">
           {days.map((day, i) => {
