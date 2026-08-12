@@ -19,7 +19,15 @@ const server = createServer(async (request, response) => {
 
   try {
     const body = await readFile(filePath);
-    const contentType = filePath.endsWith(".png") ? "image/png" : filePath.endsWith(".css") ? "text/css; charset=utf-8" : "text/html; charset=utf-8";
+    const contentType = filePath.endsWith(".png")
+      ? "image/png"
+      : filePath.endsWith(".js")
+        ? "text/javascript; charset=utf-8"
+        : filePath.endsWith(".map") || filePath.endsWith(".json")
+          ? "application/json; charset=utf-8"
+          : filePath.endsWith(".css")
+            ? "text/css; charset=utf-8"
+            : "text/html; charset=utf-8";
     response.writeHead(200, {
       "Content-Type": contentType,
       "Cache-Control": "no-cache",
