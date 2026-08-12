@@ -30,6 +30,7 @@ function buildMotionLayer() {
             <div class="story-counter"><span id="story-current">01</span> / 03</div>
           </div>
           <h2 class="story-heading">Da ideia crua<br>ao <em>sistema vivo.</em></h2>
+          <div class="story-spectrum" aria-hidden="true"></div>
           <div class="story-panels">
             <article class="story-panel" data-status="capturando sinal">
               <span class="story-number">01</span>
@@ -69,7 +70,7 @@ function buildMotionLayer() {
   if (contactKicker) contactKicker.textContent = "05 / conexão";
 
   document.body.insertAdjacentHTML("beforeend", `
-    <div class="pointer-orbit" aria-hidden="true"></div>
+    <div class="scene-flash" aria-hidden="true"></div>
     <div class="velocity-hud" aria-hidden="true"><span>velocity</span><output>0000</output><span>px/s</span></div>`);
 }
 
@@ -96,41 +97,15 @@ function runIntro() {
         resolve();
       },
     })
-      .set(".intro-word span", { yPercent: 120, rotate: 5 })
+      .set(".intro-word span", { yPercent: 140, rotate: 8 })
+      .set(".intro-word", { scale: 0.28, rotation: -5, filter: "blur(18px)" })
       .set(".intro-meta", { autoAlpha: 0, x: 24 })
       .fromTo(".intro-scan", { x: -20 }, { x: window.innerWidth + 40, duration: 0.9, ease: "power2.inOut" })
+      .to(".intro-word", { scale: 1, rotation: 0, filter: "blur(0px)", duration: 1.05 }, 0.08)
       .to(".intro-word span", { yPercent: 0, rotate: 0, duration: 0.95, stagger: 0.08 }, 0.18)
       .to(".intro-meta", { autoAlpha: 1, x: 0, duration: 0.55 }, 0.55)
-      .to(".intro-word", { scale: 1.08, letterSpacing: "-0.12em", duration: 0.8, ease: "power2.inOut" }, 1.18)
-      .to(".intro-sequence", { clipPath: "inset(0 0 100% 0)", duration: 0.9, ease: "power4.inOut" }, 1.35);
-  });
-}
-
-function initPointer() {
-  const pointer = $(".pointer-orbit");
-  if (!pointer || reducedMotion || !window.matchMedia("(pointer:fine)").matches) return;
-
-  gsap.set(pointer, { xPercent: -50, yPercent: -50 });
-  const xTo = gsap.quickTo(pointer, "x", { duration: 0.35, ease: "power3" });
-  const yTo = gsap.quickTo(pointer, "y", { duration: 0.35, ease: "power3" });
-
-  window.addEventListener("pointermove", (event) => {
-    xTo(event.clientX);
-    yTo(event.clientY);
-    root.style.setProperty("--mx", `${Math.round((event.clientX / innerWidth) * 100)}%`);
-    root.style.setProperty("--my", `${Math.round((event.clientY / innerHeight) * 100)}%`);
-    gsap.to(pointer, { autoAlpha: 1, duration: 0.2 });
-  }, { passive: true });
-
-  $$('a, button, input, .project').forEach((target) => {
-    target.addEventListener("pointerenter", () => {
-      pointer.classList.add("is-action");
-      gsap.to(pointer, { scale: 1.55, duration: 0.25, ease: "power3.out" });
-    });
-    target.addEventListener("pointerleave", () => {
-      pointer.classList.remove("is-action");
-      gsap.to(pointer, { scale: 1, duration: 0.25, ease: "power3.out" });
-    });
+      .to(".intro-word", { scale: 6.5, letterSpacing: "0.08em", filter: "blur(18px)", autoAlpha: 0, duration: 0.92, ease: "power4.in" }, 1.18)
+      .to(".intro-sequence", { clipPath: "inset(50% 0 50% 0)", duration: 0.82, ease: "power4.inOut" }, 1.48);
   });
 }
 
@@ -140,8 +115,6 @@ function initCanvasField() {
   if (!context) return;
 
   let nodes = [];
-  const pointer = { x: innerWidth * 0.5, y: innerHeight * 0.25 };
-
   const resize = () => {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     canvas.width = innerWidth * dpr;
@@ -166,13 +139,12 @@ function initCanvasField() {
         if (node.x < -20 || node.x > innerWidth + 20) node.vx *= -1;
         if (node.y < -20 || node.y > innerHeight + 20) node.vy *= -1;
       }
-      const distance = Math.hypot(node.x - pointer.x, node.y - pointer.y);
-      const pull = Math.max(0, 1 - distance / 260);
-      node.renderX = node.x + (pointer.x - node.x) * pull * 0.055;
-      node.renderY = node.y + (pointer.y - node.y) * pull * 0.055;
+      const pulse = (Math.sin(node.x * 0.01 + node.y * 0.008 + scrollY * 0.002) + 1) * 0.5;
+      node.renderX = node.x;
+      node.renderY = node.y;
       context.beginPath();
-      context.arc(node.renderX, node.renderY, node.size + pull * 1.5, 0, Math.PI * 2);
-      context.fillStyle = `rgba(56,220,255,${0.16 + pull * 0.64})`;
+      context.arc(node.renderX, node.renderY, node.size + pulse * 0.85, 0, Math.PI * 2);
+      context.fillStyle = `rgba(56,220,255,${0.14 + pulse * 0.28})`;
       context.fill();
     });
 
@@ -194,10 +166,6 @@ function initCanvasField() {
   };
 
   window.addEventListener("resize", resize);
-  window.addEventListener("pointermove", (event) => {
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-  }, { passive: true });
   resize();
   render();
 }
@@ -244,27 +212,6 @@ function initInterface() {
   }));
   updateProjects();
 
-  cards.forEach((card) => {
-    gsap.set(card, { transformPerspective: 900, transformOrigin: "center" });
-    const rotateX = gsap.quickTo(card, "rotationX", { duration: 0.35, ease: "power3.out" });
-    const rotateY = gsap.quickTo(card, "rotationY", { duration: 0.35, ease: "power3.out" });
-    card.addEventListener("pointermove", (event) => {
-      if (event.pointerType && event.pointerType !== "mouse") return;
-      const bounds = card.getBoundingClientRect();
-      const x = (event.clientX - bounds.left) / bounds.width;
-      const y = (event.clientY - bounds.top) / bounds.height;
-      rotateX((0.5 - y) * 7);
-      rotateY((x - 0.5) * 7);
-      card.style.setProperty("--spot-x", `${(x * 100).toFixed(1)}%`);
-      card.style.setProperty("--spot-y", `${(y * 100).toFixed(1)}%`);
-      card.classList.add("is-tilting");
-    });
-    card.addEventListener("pointerleave", () => {
-      rotateX(0);
-      rotateY(0);
-      card.classList.remove("is-tilting");
-    });
-  });
 }
 
 function initHero() {
@@ -282,11 +229,11 @@ function initHero() {
 
   gsap.timeline({ defaults: { ease: "power4.out" } })
     .from(".hero .kicker", { autoAlpha: 0, x: -24, duration: 0.65 })
-    .from(split.words, { yPercent: 115, rotateX: -35, autoAlpha: 0, duration: 1.05, stagger: 0.045 }, 0.08)
-    .from(".hero-lede", { autoAlpha: 0, y: 28, duration: 0.72 }, 0.45)
+    .from(split.words, { yPercent: 150, scale: 2.2, rotateX: -70, filter: "blur(12px)", autoAlpha: 0, duration: 1.18, stagger: 0.05 }, 0.08)
+    .from(".hero-lede", { autoAlpha: 0, y: 60, scale: 0.82, filter: "blur(8px)", duration: 0.82 }, 0.45)
     .from(".hero .actions a", { autoAlpha: 0, y: 22, duration: 0.58, stagger: 0.08 }, 0.6)
     .from(".hero-meta span", { autoAlpha: 0, y: 12, duration: 0.45, stagger: 0.06 }, 0.74)
-    .from(".core-stage", { autoAlpha: 0, scale: 0.72, rotation: -12, duration: 1.2 }, 0.12)
+    .from(".core-stage", { autoAlpha: 0, scale: 3.4, rotation: -35, filter: "blur(20px)", duration: 1.35 }, 0.12)
     .from(".core-node, .core-readout, .core-label, .core-signal", { autoAlpha: 0, scale: 0.4, duration: 0.55, stagger: 0.08 }, 0.58)
     .from(".hero-scroll", { autoAlpha: 0, y: -10, duration: 0.45 }, 0.9);
 
@@ -294,11 +241,11 @@ function initHero() {
   gsap.to(".core-image", { y: -9, duration: 2.4, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
   gsap.timeline({
-    scrollTrigger: { trigger: hero, start: "top top", end: "bottom 20%", scrub: 1.1 },
+    scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: 0.65 },
   })
-    .to(".hero-copy", { y: -105, autoAlpha: 0.16, filter: "blur(3px)", ease: "none" }, 0)
-    .to(".core-stage", { y: 145, rotation: 8, scale: 0.9, autoAlpha: 0.56, ease: "none" }, 0)
-    .to(".hero-ghost", { xPercent: -16, scale: 1.08, autoAlpha: 0.25, ease: "none" }, 0)
+    .to(".hero-copy", { y: -180, scale: 0.58, autoAlpha: 0, filter: "blur(14px)", ease: "none" }, 0)
+    .to(".core-stage", { y: 80, rotation: 38, scale: 4.6, autoAlpha: 0, filter: "blur(18px)", ease: "none" }, 0)
+    .to(".hero-ghost", { xPercent: -30, scale: 3.6, autoAlpha: 0, filter: "blur(10px)", ease: "none" }, 0)
     .to(".hero-scroll", { autoAlpha: 0, y: 18, ease: "none" }, 0);
 }
 
@@ -312,21 +259,31 @@ function initReveals() {
       autoSplit: true,
     });
     gsap.from(split.words, {
-      yPercent: 110,
+      yPercent: 165,
+      scale: 2.35,
       autoAlpha: 0,
-      rotate: 2,
-      stagger: 0.035,
-      duration: 0.85,
-      ease: "power4.out",
+      rotateX: -65,
+      filter: "blur(14px)",
+      stagger: 0.045,
+      duration: 1.05,
+      ease: "expo.out",
       scrollTrigger: { trigger: title, start: "top 84%", once: true },
     });
+
+    gsap.fromTo(title,
+      { scale: 1.28, transformOrigin: "left center" },
+      { scale: 1, ease: "none", scrollTrigger: { trigger: title, start: "top bottom", end: "top 42%", scrub: 0.7 } },
+    );
   });
 
   $$(".about-copy, .module, .principle, .contact-copy, .command-bar, .project-tools").forEach((item, index) => {
     gsap.from(item, {
-      y: 38,
+      y: 90,
+      scale: 0.68,
+      rotationX: 18,
       autoAlpha: 0,
-      duration: 0.78,
+      filter: "blur(10px)",
+      duration: 0.95,
       delay: (index % 4) * 0.04,
       ease: "power3.out",
       scrollTrigger: { trigger: item, start: "top 88%", once: true },
@@ -351,14 +308,14 @@ function initStory() {
 
   const media = gsap.matchMedia();
   media.add("(min-width: 621px)", () => {
-    gsap.set(panels, { autoAlpha: 0, x: 90, clipPath: "inset(0 0 0 18%)" });
-    gsap.set(panels[0], { autoAlpha: 1, x: 0, clipPath: "inset(0 0 0 0%)" });
+    gsap.set(panels, { autoAlpha: 0, scale: 0.24, rotation: -9, filter: "blur(24px)", clipPath: "inset(12% 12% 12% 12%)" });
+    gsap.set(panels[0], { autoAlpha: 1, scale: 1, rotation: 0, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)" });
 
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: story,
         start: "top top",
-        end: "+=300%",
+        end: "+=390%",
         pin,
         scrub: 1,
         anticipatePin: 1,
@@ -372,17 +329,19 @@ function initStory() {
     });
 
     timeline
-      .from(headingSplit.words, { yPercent: 110, autoAlpha: 0, duration: 0.55, stagger: 0.035 }, 0)
+      .from(headingSplit.words, { yPercent: 170, scale: 2.2, rotateX: -70, filter: "blur(14px)", autoAlpha: 0, duration: 0.7, stagger: 0.04 }, 0)
       .from(".story-head", { autoAlpha: 0, y: -18, duration: 0.4 }, 0)
-      .to(".story-progress-fill", { scaleX: 1, ease: "none", duration: 3 }, 0)
-      .to(".story-panel:nth-child(1) .story-visual", { rotation: 220, scale: 1.08, duration: 1, ease: "none" }, 0)
-      .to(panels[0], { autoAlpha: 0, x: -90, filter: "blur(4px)", clipPath: "inset(0 18% 0 0)", duration: 0.34 }, 0.82)
-      .fromTo(panels[1], { autoAlpha: 0, x: 90, clipPath: "inset(0 0 0 18%)" }, { autoAlpha: 1, x: 0, clipPath: "inset(0 0 0 0%)", duration: 0.38 }, 0.98)
-      .to(".story-panel:nth-child(2) .story-visual", { rotation: -250, scale: 0.88, duration: 1, ease: "none" }, 1)
-      .to(panels[1], { autoAlpha: 0, x: -90, filter: "blur(4px)", clipPath: "inset(0 18% 0 0)", duration: 0.34 }, 1.82)
-      .fromTo(panels[2], { autoAlpha: 0, x: 90, clipPath: "inset(0 0 0 18%)" }, { autoAlpha: 1, x: 0, clipPath: "inset(0 0 0 0%)", duration: 0.38 }, 1.98)
-      .to(".story-panel:nth-child(3) .story-visual", { rotation: 300, scale: 1.12, duration: 1, ease: "none" }, 2)
-      .to(".story-core", { scale: 1.65, boxShadow: "0 0 70px #38dcff", stagger: 0.5, duration: 0.35, yoyo: true, repeat: 1 }, 0.35);
+      .to(".story-progress-fill", { scaleX: 1, ease: "none", duration: 3.5 }, 0)
+      .to(".story-spectrum", { rotation: 420, scale: 2.2, xPercent: -18, ease: "none", duration: 3.5 }, 0)
+      .to(".story-panel:nth-child(1) .story-visual", { rotation: 520, scale: 2.4, duration: 1.05, ease: "none" }, 0)
+      .to(panels[0], { autoAlpha: 0, scale: 3.6, rotation: 8, filter: "blur(24px)", clipPath: "inset(18% 18% 18% 18%)", duration: 0.42 }, 0.78)
+      .fromTo(panels[1], { autoAlpha: 0, scale: 0.2, rotation: -12, filter: "blur(26px)", clipPath: "inset(20% 20% 20% 20%)" }, { autoAlpha: 1, scale: 1, rotation: 0, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)", duration: 0.48 }, 1.02)
+      .to(".story-panel:nth-child(2) .story-visual", { rotation: -620, scale: 2.6, duration: 1.05, ease: "none" }, 1.12)
+      .to(panels[1], { autoAlpha: 0, scale: 3.6, rotation: -8, filter: "blur(24px)", clipPath: "inset(18% 18% 18% 18%)", duration: 0.42 }, 1.78)
+      .fromTo(panels[2], { autoAlpha: 0, scale: 0.2, rotation: 12, filter: "blur(26px)", clipPath: "inset(20% 20% 20% 20%)" }, { autoAlpha: 1, scale: 1, rotation: 0, filter: "blur(0px)", clipPath: "inset(0% 0% 0% 0%)", duration: 0.48 }, 2.02)
+      .to(".story-panel:nth-child(3) .story-visual", { rotation: 720, scale: 2.8, duration: 1.3, ease: "none" }, 2.12)
+      .to(".story-core", { scale: 3.2, boxShadow: "0 0 120px currentColor", stagger: 0.72, duration: 0.38, yoyo: true, repeat: 1 }, 0.3)
+      .to(".story-heading", { scale: 1.65, y: -55, autoAlpha: 0.08, filter: "blur(7px)", transformOrigin: "left top", duration: 2.6, ease: "none" }, 0.7);
 
     return () => {
       timeline.scrollTrigger?.kill();
@@ -412,6 +371,26 @@ function initProjectRail() {
   const media = gsap.matchMedia();
   media.add("(min-width: 901px)", () => {
     const distance = () => Math.max(0, rail.scrollWidth - stage.clientWidth);
+    const cards = $$(".project", rail);
+    const updateFocus = (progress) => {
+      const viewportCenter = stage.clientWidth * 0.5;
+      const travel = distance() * progress;
+      cards.forEach((card) => {
+        if (card.classList.contains("hidden")) return;
+        const center = card.offsetLeft - travel + card.offsetWidth * 0.5;
+        const delta = (center - viewportCenter) / Math.max(stage.clientWidth * 0.52, 1);
+        const focus = gsap.utils.clamp(0, 1, 1 - Math.abs(delta));
+        gsap.set(card, {
+          scale: 0.72 + focus * 0.34,
+          rotationY: delta * -24,
+          z: focus * 110,
+          autoAlpha: 0.34 + focus * 0.66,
+          filter: `saturate(${0.55 + focus * 0.8}) brightness(${0.62 + focus * 0.48}) blur(${(1 - focus) * 2.4}px)`,
+          transformOrigin: "center center",
+          force3D: true,
+        });
+      });
+    };
     const tween = gsap.to(rail, {
       x: () => -distance(),
       ease: "none",
@@ -423,6 +402,8 @@ function initProjectRail() {
         scrub: 1,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        onUpdate: (self) => updateFocus(self.progress),
+        onRefresh: (self) => updateFocus(self.progress),
       },
     });
 
@@ -439,27 +420,82 @@ function initProjectRail() {
       tween.scrollTrigger?.kill();
       tween.kill();
       gsap.set(rail, { clearProps: "transform" });
+      gsap.set(cards, { clearProps: "transform,opacity,visibility,filter" });
     };
   });
 
   media.add("(max-width: 900px)", () => {
     $$(".project", rail).forEach((card, index) => {
       gsap.from(card, {
-        x: index % 2 ? 38 : -38,
+        x: index % 2 ? 100 : -100,
+        scale: 0.58,
+        rotation: index % 2 ? 5 : -5,
+        filter: "blur(12px)",
         autoAlpha: 0,
-        duration: 0.72,
-        ease: "power3.out",
+        duration: 1,
+        ease: "expo.out",
         scrollTrigger: { trigger: card, start: "top 88%", once: true },
       });
     });
   });
 }
 
+function initFinale() {
+  const contact = $("#contato");
+  if (!contact) return;
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: contact,
+      start: "top bottom",
+      end: "bottom bottom",
+      scrub: 0.8,
+    },
+  })
+    .fromTo("#contato h2", {
+      scale: 0.32,
+      xPercent: -18,
+      y: 180,
+      rotation: -6,
+      filter: "blur(20px)",
+      transformOrigin: "left bottom",
+    }, {
+      scale: 1.18,
+      xPercent: 0,
+      y: 0,
+      rotation: 0,
+      filter: "blur(0px)",
+      ease: "none",
+    }, 0)
+    .fromTo("#contato .contact-copy", {
+      xPercent: 45,
+      scale: 0.7,
+      autoAlpha: 0,
+      filter: "blur(12px)",
+    }, {
+      xPercent: 0,
+      scale: 1,
+      autoAlpha: 1,
+      filter: "blur(0px)",
+      ease: "none",
+    }, 0.12);
+}
+
 function initScrollSystem() {
   const progress = $(".scroll-progress");
   const velocity = $(".velocity-hud output");
   const topbar = $(".topbar");
+  const flash = $(".scene-flash");
   let navHidden = false;
+
+  const setScene = (color) => {
+    gsap.to(root, { "--scene-accent": color, duration: 0.9, ease: "power2.out", overwrite: true });
+    if (!flash) return;
+    gsap.fromTo(flash,
+      { autoAlpha: 0.3, scale: 0.55, filter: "blur(6px)" },
+      { autoAlpha: 0, scale: 1.8, filter: "blur(30px)", duration: 1.15, ease: "expo.out", overwrite: true },
+    );
+  };
 
   ScrollTrigger.create({
     start: 0,
@@ -480,13 +516,16 @@ function initScrollSystem() {
   });
 
   const navLinks = $$('.nav a[href^="#"]');
+  const sceneColors = ["#38dcff", "#8b5cff", "#ff3cac", "#d7ff3f", "#4c7dff", "#38dcff"];
   $$("main section[id]").forEach((section) => {
+    const sceneColor = sceneColors[Math.min(sceneColors.length - 1, $$("main section[id]").indexOf(section))];
     ScrollTrigger.create({
       trigger: section,
       start: "top 45%",
       end: "bottom 45%",
       onToggle: (self) => {
         if (!self.isActive) return;
+        setScene(sceneColor);
         navLinks.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${section.id}`));
       },
     });
@@ -500,6 +539,7 @@ function initMotion() {
   initReveals();
   initStory();
   initProjectRail();
+  initFinale();
   initScrollSystem();
   ScrollTrigger.refresh();
 }
@@ -508,7 +548,6 @@ async function init() {
   buildMotionLayer();
   initCanvasField();
   initInterface();
-  initPointer();
 
   if (reducedMotion) {
     root.classList.add("motion-reduced");
