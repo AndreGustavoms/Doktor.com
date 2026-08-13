@@ -87,8 +87,9 @@ repositórios e identidade visual. Público geral, sem área autenticada.
 
 - [ ] Cobertura de testes limitada ao servidor de desenvolvimento; a camada visual e a
       integração com a API do GitHub em `src/main.js` seguem validadas manualmente.
-- [ ] O bundle `assets/hero3d.js` carrega Three.js inteiro (~578 KB) - oportunidade de
-      otimização de carregamento, sem impacto de segurança.
+- [x] ~~Otimizar o tamanho do bundle `assets/hero3d.js`~~ - investigado em 2026-08-13 e
+      encerrado: a redução não está disponível sem trocar de biblioteca. Ver o resumo de
+      decisão abaixo.
 - [ ] Domínio próprio ainda não aplicado; passos registrados em `site/README.md`.
 
 ## Resumos de decisao
@@ -109,4 +110,26 @@ placeholder literal em `.env.example`. Contagem de forks/stars/watchers igual a 
 RISCO REMANESCENTE: se aquele painel for publicado no futuro, sua árvore de rotas e desenho
 de segurança já são conhecidos. A defesa nesse caso é autenticação e restrição de rede, nunca
 segredo de caminho.
+```
+
+```text
+[2026-08-13] CONTEXTO: `assets/hero3d.js` é o maior ativo do site. O número que circulava
+(~578 KB) é o tamanho em disco; o que o navegador realmente baixa são 147 KB, porque o
+GitHub Pages serve com gzip.
+ALTERNATIVAS: (a) trocar `import * as THREE` por imports nomeados, esperando tree-shaking;
+(b) remover PMREMGenerator/RoomEnvironment e o material físico; (c) manter como está;
+(d) abandonar o Three.js e reescrever a cena.
+DECISAO: (c) manter. As opções (a) e (b) foram medidas e não entregam:
+  - imports nomeados: 147281 -> 147241 b gzip. Economia de 40 b (0%). O bundle sem
+    minificação é byte-idêntico - o esbuild já resolve o namespace tão bem quanto possível.
+  - sem PMREM + RoomEnvironment: -1556 b. Material padrão no lugar do físico: -575 b.
+    As duas juntas: -2203 b, ou 1,5% - ao custo dos dois recursos que dão à cena sua
+    aparência característica.
+O volume é o núcleo do WebGLRenderer e seus shader chunks, alcançável assim que a cena
+renderiza. Não há corte incremental disponível; só (d), que é outro projeto.
+VALIDACAO: medições por build isolado em cópia do repositório, comparando bytes após
+gzip -9. Nenhuma alteração foi aplicada ao código do site.
+MITIGACAO JA EXISTENTE: o bundle é separado, carregado por import dinâmico em
+`requestIdleCallback` (timeout de 1200 ms), e nem chega a ser baixado quando não há
+WebGL ou quando o navegador sinaliza `saveData`. O custo não pesa no carregamento inicial.
 ```
