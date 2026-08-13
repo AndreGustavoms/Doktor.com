@@ -11,6 +11,19 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000).
 
+Versão pública: [https://andregustavoms.github.io/Doktor.com/](https://andregustavoms.github.io/Doktor.com/).
+
+## Domínio próprio no futuro
+
+O projeto está preparado para receber um domínio próprio, mas nenhum `CNAME` foi criado enquanto o domínio não estiver disponível. Quando decidir aplicar um domínio:
+
+1. Adicione o domínio personalizado em `Settings → Pages → Custom domain` no GitHub.
+2. No provedor DNS, crie um registro `CNAME` apontando `www` para `andregustavoms.github.io`.
+3. Para o domínio raiz, configure os registros `A` do GitHub Pages conforme a documentação do GitHub.
+4. Ative `Enforce HTTPS` depois que o certificado for emitido.
+
+Até lá, a URL oficial continua sendo o endereço do GitHub Pages acima.
+
 O servidor de desenvolvimento escuta somente em `localhost` e responde `400 Bad Request` para
 URLs malformadas. Ele não deve ser usado como servidor público de produção; o deploy previsto é
 o GitHub Pages.
