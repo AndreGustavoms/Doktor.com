@@ -11,6 +11,10 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000).
 
+O servidor de desenvolvimento escuta somente em `localhost` e responde `400 Bad Request` para
+URLs malformadas. Ele não deve ser usado como servidor público de produção; o deploy previsto é
+o GitHub Pages.
+
 ## Estrutura
 
 - `index.html`: conteúdo e estrutura da landing page.

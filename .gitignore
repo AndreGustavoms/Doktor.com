@@ -1,3 +1,10 @@
 site/node_modules/
 site/assets/*.map
 *.log
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+secrets/

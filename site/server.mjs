@@ -7,8 +7,15 @@ const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT ?? 3000);
 
 const server = createServer(async (request, response) => {
-  const pathname = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`).pathname;
-  const requested = pathname === "/" ? "index.html" : decodeURIComponent(pathname.slice(1));
+  let requested;
+  try {
+    const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
+    requested = pathname === "/" ? "index.html" : decodeURIComponent(pathname.slice(1));
+  } catch {
+    response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Bad request");
+    return;
+  }
   const filePath = resolve(root, requested);
   const relativePath = relative(root, filePath);
   if (isAbsolute(relativePath) || relativePath === ".." || relativePath.startsWith(`..${sep}`)) {
