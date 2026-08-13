@@ -49,6 +49,11 @@ repositórios e identidade visual. Público geral, sem área autenticada.
   commits `tipo(escopo): descrição` direto no `main`. O hook `commit-msg` que valida esse
   formato não é versionado - cada cópia local precisa instalá-lo uma vez a partir de
   `doktor SystemDesign/scripts/hooks/commit-msg`.
+- [2026-08-13] Como o hook local só protege a máquina onde foi instalado, a mesma validação
+  passou a rodar no CI (`.github/workflows/valida-commits.yml`). O workflow **reutiliza o
+  script do hook** em vez de repetir o padrão, para que máquina e CI não possam discordar
+  sobre o que é uma mensagem válida. Verifica apenas os commits que o evento traz e ignora
+  commits de merge - o histórico anterior não é reavaliado.
 
 ## Testes importantes
 

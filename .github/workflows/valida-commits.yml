@@ -1,0 +1,76 @@
+# Valida que as mensagens de commit seguem o padrao definido em
+# doktor SystemDesign/docs/GIT-POLITICA-DE-VERSIONAMENTO.md.
+#
+# O hook local `commit-msg` cobre apenas a maquina onde foi instalado, e ele
+# nao e versionado — cada copia do repositorio precisa instala-lo a mao. Este
+# workflow fecha essa lacuna no servidor, para toda copia.
+#
+# Reutiliza o MESMO script do hook em vez de reescrever o padrao aqui, para
+# que maquina e CI nunca discordem sobre o que e uma mensagem valida.
+
+name: Valida mensagens de commit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  mensagens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Validar mensagens dos commits enviados
+        env:
+          SHA_ANTERIOR: ${{ github.event.before }}
+          SHA_BASE_PR: ${{ github.event.pull_request.base.sha }}
+        run: |
+          validador="doktor SystemDesign/scripts/hooks/commit-msg"
+          if [ ! -f "$validador" ]; then
+            echo "Validador nao encontrado: $validador" >&2
+            exit 1
+          fi
+          chmod +x "$validador"
+
+          # Verifica apenas os commits que este evento traz. Historico antigo
+          # nao e reavaliado: o objetivo e barrar mensagem nova fora do padrao,
+          # nao reescrever o passado.
+          if [ -n "$SHA_BASE_PR" ]; then
+            intervalo="$SHA_BASE_PR..HEAD"
+          elif [ -n "$SHA_ANTERIOR" ] && git cat-file -e "$SHA_ANTERIOR^{commit}" 2>/dev/null; then
+            intervalo="$SHA_ANTERIOR..HEAD"
+          else
+            intervalo="HEAD~0..HEAD"
+          fi
+
+          # Commits de merge tem mensagem gerada pelo git e ficam de fora.
+          commits=$(git rev-list --no-merges "$intervalo" 2>/dev/null || git rev-list --no-merges -1 HEAD)
+          if [ -z "$commits" ]; then
+            echo "Nenhum commit novo para validar."
+            exit 0
+          fi
+
+          falhas=0
+          for sha in $commits; do
+            git log -1 --format=%B "$sha" > /tmp/mensagem.txt
+            if "$validador" /tmp/mensagem.txt; then
+              echo "ok  $(git log -1 --format='%h %s' "$sha")"
+            else
+              echo "--> commit reprovado: $(git log -1 --format='%h' "$sha")" >&2
+              falhas=$((falhas + 1))
+            fi
+          done
+
+          if [ "$falhas" -gt 0 ]; then
+            echo "" >&2
+            echo "$falhas commit(s) com mensagem fora do padrao." >&2
+            echo "Instale o hook local para pegar isso antes do push:" >&2
+            echo "  cp 'doktor SystemDesign/scripts/hooks/commit-msg' .git/hooks/commit-msg" >&2
+            exit 1
+          fi
+          echo "Todas as mensagens seguem o padrao."
