@@ -42,3 +42,17 @@ o GitHub Pages.
 - `assets/app.js`: bundle estático gerado por `npm run build`.
 
 O projeto é uma landing page pública, sem login, dashboard ou painel administrativo.
+
+## Publicação
+
+O deploy no GitHub Pages monta o diretório publicado por **allowlist**: entra apenas
+`index.html`, `site.webmanifest` e `assets/`. Nada mais é copiado.
+
+Ficam fora do artefato, por não serem necessários para servir o site:
+`package.json`, `package-lock.json`, `server.mjs`, `src/` e este `README.md`.
+Eles continuam versionados no repositório — apenas não são servidos.
+
+Ao adicionar um arquivo que precise ser público, inclua-o explicitamente no passo
+`Montar artefato apenas com o que é público` de `.github/workflows/deploy-site.yml`.
+O passo seguinte valida o artefato e falha a publicação se um item não público ou uma
+extensão sensível (`.map`, `.bak`, `.old`, `.sql`, dotfiles) chegar ao diretório publicado.

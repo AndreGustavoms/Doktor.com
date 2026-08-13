@@ -39,11 +39,37 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Remove build dependencies from artifact
-        run: rm -rf site/node_modules
+      # O artefato é montado por allowlist: copiamos apenas o que deve ser
+      # público. Publicar a pasta de trabalho e remover itens depois exige uma
+      # lista de exclusão que envelhece mal — todo arquivo novo entra por
+      # padrão. Aqui o padrão é o inverso: nada entra sem estar listado.
+      - name: Montar artefato apenas com o que é público
+        run: |
+          mkdir -p dist
+          cp site/index.html site/site.webmanifest dist/
+          cp -r site/assets dist/
+      # Barreira contra regressão: falha a publicação se algo sensível ou
+      # não previsto entrar no diretório publicado.
+      - name: Validar conteúdo do artefato
+        run: |
+          if find dist -name '.*' -o -name '*.map' -o -name '*.bak' -o -name '*.old' \
+               -o -name '*.orig' -o -name '*.save' -o -name '*.sw?' -o -name '*.sql' \
+               -o -name '*.log' -o -name '*.zip' -o -name '*~' | grep -q .; then
+            echo "Arquivo sensível encontrado no artefato:" >&2
+            find dist -name '.*' -o -name '*.map' -o -name '*.bak' -o -name '*.old' \
+              -o -name '*.orig' -o -name '*.save' -o -name '*.sw?' -o -name '*.sql' \
+              -o -name '*.log' -o -name '*.zip' -o -name '*~' >&2
+            exit 1
+          fi
+          for proibido in package.json package-lock.json server.mjs README.md src; do
+            if [ -e "dist/$proibido" ]; then
+              echo "Item não público no artefato: $proibido" >&2
+              exit 1
+            fi
+          done
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
-          path: site
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
