@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DoktorDev — sistemas que importam</title>
   <meta name="description" content="Portfólio de André Gustavo: produtos digitais, sistemas, automações e experiências web construídos com intenção.">
+  <meta name="author" content="André Gustavo · DoktorDev">
   <meta name="theme-color" content="#050914">
+  <link rel="canonical" href="https://andregustavoms.github.io/Doktor.com/">
+  <link rel="preconnect" href="https://api.github.com">
   <meta property="og:title" content="DoktorDev — systems that matter">
   <meta property="og:description" content="Produtos digitais, sistemas e automações com forma, função e intenção.">
   <meta property="og:type" content="website">
@@ -22,7 +25,7 @@
   <link rel="shortcut icon" href="assets/favicon.ico">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/motion.css?v=25">
+  <link rel="stylesheet" href="assets/motion.css?v=26">
   <script>document.documentElement.className="js"</script>
 </head>
 <body>
@@ -190,11 +193,12 @@
             <div class="search-field"><span aria-hidden="true">⌕</span><input id="repo-search" type="search" placeholder="Busque por nome ou linguagem" autocomplete="off"></div>
           </div>
         </header>
-        <div class="repo-status" data-reveal>
+        <div class="repo-status" data-reveal aria-live="polite" aria-busy="true">
           <span id="repo-count">Carregando repositórios...</span>
           <a href="https://github.com/AndreGustavoms?tab=repositories" target="_blank" rel="noreferrer">GitHub completo ↗</a>
         </div>
         <div class="repo-list" id="repo-grid" aria-live="polite"></div>
+        <noscript><p class="repo-empty">Ative o JavaScript para carregar os repositórios públicos.</p></noscript>
       </div>
     </section>
 

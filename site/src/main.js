@@ -95,6 +95,8 @@ function initSectionNavigation() {
   const sections = $$("main section[id]");
   const links = $$('.site-nav a[href^="#"]');
 
+  if (!("IntersectionObserver" in window)) return;
+
   const observer = new IntersectionObserver((entries) => {
     const current = entries
       .filter((entry) => entry.isIntersecting)
@@ -266,6 +268,7 @@ function renderRepositories(list, query = "") {
 }
 
 async function loadRepositories() {
+  const status = $(".repo-status");
   renderRepositories(repositories);
 
   try {
@@ -284,11 +287,21 @@ async function loadRepositories() {
       .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
 
     if (publicRepositories.length) repositories = publicRepositories;
+    sessionStorage.setItem("doktordev-repositories", JSON.stringify({
+      timestamp: Date.now(),
+      data: publicRepositories,
+    }));
   } catch {
-    repositories = fallbackRepositories;
+    try {
+      const cached = JSON.parse(sessionStorage.getItem("doktordev-repositories") || "null");
+      repositories = cached?.data?.length ? cached.data : fallbackRepositories;
+    } catch {
+      repositories = fallbackRepositories;
+    }
   }
 
   renderRepositories(repositories, $("#repo-search")?.value || "");
+  status?.setAttribute("aria-busy", "false");
 }
 
 function initRepositorySearch() {
