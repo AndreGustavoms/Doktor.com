@@ -3,43 +3,64 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function createLetterD() {
-  const shape = new THREE.Shape();
-  shape.moveTo(-2.55, -4);
-  shape.lineTo(-.05, -4);
-  shape.bezierCurveTo(2.75, -4, 4.15, -2.2, 4.15, 0);
-  shape.bezierCurveTo(4.15, 2.2, 2.75, 4, -.05, 4);
-  shape.lineTo(-2.55, 4);
-  shape.closePath();
+function createOfficialMarkGeometries() {
+  const scale = .023;
+  const x = (value) => (value - 268) * scale;
+  const y = (value) => (256 - value) * scale;
 
-  const hole = new THREE.Path();
-  hole.moveTo(-.62, -2.22);
-  hole.lineTo(-.62, 2.22);
-  hole.lineTo(-.02, 2.22);
-  hole.bezierCurveTo(1.42, 2.22, 2.12, 1.2, 2.12, 0);
-  hole.bezierCurveTo(2.12, -1.2, 1.42, -2.22, -.02, -2.22);
-  hole.closePath();
-  shape.holes.push(hole);
+  const stem = new THREE.Shape();
+  stem.moveTo(x(96), y(320));
+  stem.lineTo(x(172), y(320));
+  stem.lineTo(x(172), y(96));
+  stem.lineTo(x(96), y(96));
+  stem.closePath();
 
-  const geometry = new THREE.ExtrudeGeometry(shape, {
-    depth: 1.72,
-    bevelEnabled: true,
-    bevelSegments: 6,
-    steps: 1,
-    bevelSize: .2,
-    bevelThickness: .24,
-    curveSegments: 40,
+  const dot = new THREE.Shape();
+  const radius = 6 * scale;
+  const left = x(96);
+  const right = x(172);
+  const top = y(344);
+  const bottom = y(416);
+  dot.moveTo(left + radius, bottom);
+  dot.lineTo(right - radius, bottom);
+  dot.quadraticCurveTo(right, bottom, right, bottom + radius);
+  dot.lineTo(right, top - radius);
+  dot.quadraticCurveTo(right, top, right - radius, top);
+  dot.lineTo(left + radius, top);
+  dot.quadraticCurveTo(left, top, left, top - radius);
+  dot.lineTo(left, bottom + radius);
+  dot.quadraticCurveTo(left, bottom, left + radius, bottom);
+  dot.closePath();
+
+  const bowl = new THREE.Shape();
+  bowl.moveTo(x(198), y(96));
+  bowl.lineTo(x(284), y(96));
+  bowl.bezierCurveTo(x(372), y(96), x(440), y(162), x(440), y(256));
+  bowl.bezierCurveTo(x(440), y(350), x(372), y(416), x(284), y(416));
+  bowl.lineTo(x(198), y(416));
+  bowl.lineTo(x(198), y(344));
+  bowl.lineTo(x(282), y(344));
+  bowl.bezierCurveTo(x(330), y(344), x(364), y(308), x(364), y(256));
+  bowl.bezierCurveTo(x(364), y(204), x(330), y(168), x(282), y(168));
+  bowl.lineTo(x(198), y(168));
+  bowl.closePath();
+
+  return [stem, dot, bowl].map((shape) => {
+    const geometry = new THREE.ExtrudeGeometry(shape, {
+      depth: 1.62,
+      bevelEnabled: true,
+      bevelSegments: 6,
+      steps: 1,
+      bevelSize: .12,
+      bevelThickness: .18,
+      curveSegments: 40,
+    });
+    geometry.computeBoundingBox();
+    const bounds = geometry.boundingBox;
+    geometry.translate(0, 0, -(bounds.max.z + bounds.min.z) / 2);
+    geometry.computeVertexNormals();
+    return geometry;
   });
-
-  geometry.computeBoundingBox();
-  const bounds = geometry.boundingBox;
-  geometry.translate(
-    -(bounds.max.x + bounds.min.x) / 2,
-    -(bounds.max.y + bounds.min.y) / 2,
-    -(bounds.max.z + bounds.min.z) / 2,
-  );
-  geometry.computeVertexNormals();
-  return geometry;
 }
 
 function createGlowPlane() {
@@ -48,7 +69,7 @@ function createGlowPlane() {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
     uniforms: {
-      glowColor: { value: new THREE.Color(0x0a73ff) },
+      glowColor: { value: new THREE.Color(0x2f80ff) },
       intensity: { value: 1.15 },
     },
     vertexShader: `
@@ -79,7 +100,7 @@ function createGlowPlane() {
 function createOrbit(radius, tilt, rotation, opacity) {
   const geometry = new THREE.TorusGeometry(radius, .018, 8, 180);
   const material = new THREE.MeshBasicMaterial({
-    color: 0x1687ff,
+    color: 0x2f80ff,
     transparent: true,
     opacity,
     blending: THREE.AdditiveBlending,
@@ -106,7 +127,7 @@ function createParticles() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   const material = new THREE.PointsMaterial({
-    color: 0x1388ff,
+    color: 0x2f80ff,
     size: .055,
     transparent: true,
     opacity: .7,
@@ -162,9 +183,9 @@ export function mountHero3D(stage) {
   root.rotation.x = -.05;
   scene.add(root);
 
-  const geometry = createLetterD();
+  const geometries = createOfficialMarkGeometries();
   const material = new THREE.MeshPhysicalMaterial({
-    color: 0x0876ff,
+    color: 0x1557e8,
     metalness: .18,
     roughness: .08,
     clearcoat: 1,
@@ -172,13 +193,13 @@ export function mountHero3D(stage) {
     transmission: .23,
     thickness: 2.2,
     ior: 1.46,
-    attenuationColor: new THREE.Color(0x075be8),
+    attenuationColor: new THREE.Color(0x0d3ebb),
     attenuationDistance: 4.8,
     emissive: new THREE.Color(0x001d78),
     emissiveIntensity: .42,
   });
 
-  const letter = new THREE.Mesh(geometry, material);
+  const letter = new THREE.Group();
   letter.rotation.y = -.32;
   root.add(letter);
 
@@ -188,18 +209,26 @@ export function mountHero3D(stage) {
     opacity: .68,
     blending: THREE.AdditiveBlending,
   });
-  const edge = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), edgeMaterial);
-  edge.scale.setScalar(1.006);
+  const edge = new THREE.Group();
+
+  geometries.forEach((geometry) => {
+    const piece = new THREE.Mesh(geometry, material);
+    const outline = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), edgeMaterial);
+    outline.scale.setScalar(1.006);
+    edge.add(outline);
+    letter.add(piece);
+  });
   letter.add(edge);
 
   const ghostMaterial = new THREE.MeshBasicMaterial({
-    color: 0x0a73ff,
+    color: 0x1557e8,
     wireframe: true,
     transparent: true,
     opacity: .055,
     depthWrite: false,
   });
-  const ghost = new THREE.Mesh(geometry.clone(), ghostMaterial);
+  const ghost = new THREE.Group();
+  geometries.forEach((geometry) => ghost.add(new THREE.Mesh(geometry.clone(), ghostMaterial)));
   ghost.scale.setScalar(1.13);
   ghost.position.z = -.7;
   ghost.rotation.y = -.32;
@@ -219,17 +248,17 @@ export function mountHero3D(stage) {
   const particles = createParticles();
   root.add(particles);
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x08389d, 2.5));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x0d3ebb, 2.5));
 
   const keyLight = new THREE.DirectionalLight(0xffffff, 5.2);
   keyLight.position.set(-5, 7, 9);
   scene.add(keyLight);
 
-  const cyanLight = new THREE.PointLight(0x62d7ff, 42, 28, 1.7);
+  const cyanLight = new THREE.PointLight(0x2f80ff, 42, 28, 1.7);
   cyanLight.position.set(4, 1.8, 7);
   scene.add(cyanLight);
 
-  const blueLight = new THREE.PointLight(0x064bff, 34, 25, 1.8);
+  const blueLight = new THREE.PointLight(0x0d3ebb, 34, 25, 1.8);
   blueLight.position.set(-4, -3, 5);
   scene.add(blueLight);
 

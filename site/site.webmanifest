@@ -1,0 +1,21 @@
+{
+  "name": "Doktor.com",
+  "short_name": "Doktor",
+  "description": "Produtos digitais, sistemas e automações com forma, função e intenção.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F9FC",
+  "theme_color": "#1557E8",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

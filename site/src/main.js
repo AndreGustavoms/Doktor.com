@@ -144,7 +144,7 @@ function initHeroArt() {
   const loadScene = async () => {
     if (!("WebGLRenderingContext" in window) || navigator.connection?.saveData) return;
     try {
-      const modulePath = "./hero3d.js";
+      const modulePath = "./hero3d.js?v=2";
       const { mountHero3D } = await import(modulePath);
       mountHero3D(art);
     } catch {

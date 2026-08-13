@@ -23,8 +23,12 @@ const server = createServer(async (request, response) => {
       ? "image/webp"
       : filePath.endsWith(".svg")
         ? "image/svg+xml; charset=utf-8"
+      : filePath.endsWith(".ico")
+        ? "image/x-icon"
       : filePath.endsWith(".png")
         ? "image/png"
+      : filePath.endsWith(".webmanifest")
+        ? "application/manifest+json; charset=utf-8"
       : filePath.endsWith(".js")
         ? "text/javascript; charset=utf-8"
         : filePath.endsWith(".map") || filePath.endsWith(".json")
