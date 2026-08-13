@@ -64,7 +64,10 @@ content.innerHTML = `
     </div>
     <div class="project-summary">
       <p>${project.description}</p>
-      <a class="project-button" href="${project.github}" target="_blank" rel="noreferrer">Abrir no GitHub ↗</a>
+      <div class="project-actions">
+        <a class="project-button" href="${project.github}" target="_blank" rel="noreferrer">Abrir no GitHub ↗</a>
+        <button class="project-button project-share" type="button">Compartilhar ↗</button>
+      </div>
     </div>
   </div>
   <div class="project-visual project-visual-${projectClass}" aria-hidden="true">
@@ -83,3 +86,16 @@ content.innerHTML = `
     <a href="projeto.html?project=${projectSlugs[(projectIndex + 1) % projectSlugs.length]}"><small>PRÓXIMO</small><strong>${next.name} →</strong></a>
   </nav>
 `;
+
+const shareButton = document.querySelector(".project-share");
+shareButton?.addEventListener("click", async () => {
+  const shareData = { title: `${project.name} — DoktorDev`, text: project.title, url: location.href };
+  try {
+    if (navigator.share) await navigator.share(shareData);
+    else await navigator.clipboard.writeText(location.href);
+    shareButton.textContent = navigator.share ? "Compartilhado ✓" : "Link copiado ✓";
+  } catch {
+    shareButton.textContent = "Compartilhar ↗";
+  }
+  setTimeout(() => { shareButton.textContent = "Compartilhar ↗"; }, 2200);
+});
