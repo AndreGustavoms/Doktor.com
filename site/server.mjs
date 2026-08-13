@@ -36,6 +36,10 @@ const server = createServer(async (request, response) => {
         ? "image/png"
       : filePath.endsWith(".webmanifest")
         ? "application/manifest+json; charset=utf-8"
+      : filePath.endsWith(".xml")
+        ? "application/xml; charset=utf-8"
+      : filePath.endsWith(".txt")
+        ? "text/plain; charset=utf-8"
       : filePath.endsWith(".js")
         ? "text/javascript; charset=utf-8"
         : filePath.endsWith(".map") || filePath.endsWith(".json")

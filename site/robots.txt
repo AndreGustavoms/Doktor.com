@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://andregustavoms.github.io/Doktor.com/sitemap.xml

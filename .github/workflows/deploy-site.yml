@@ -46,7 +46,7 @@ jobs:
       - name: Montar artefato apenas com o que é público
         run: |
           mkdir -p dist
-          cp site/index.html site/404.html site/projeto.html site/site.webmanifest dist/
+          cp site/index.html site/404.html site/projeto.html site/robots.txt site/sitemap.xml site/site.webmanifest dist/
           cp -r site/assets dist/
       # Barreira contra regressão: falha a publicação se algo sensível ou
       # não previsto entrar no diretório publicado.
