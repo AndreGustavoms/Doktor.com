@@ -220,8 +220,7 @@ img {
 .hero h1,
 .section-heading h2,
 .repo-heading h2,
-.about-intro h2,
-.contact-layout h2 {
+.about-intro h2 {
   margin: 0;
   font-weight: 520;
   letter-spacing: -.07em;
@@ -236,8 +235,7 @@ img {
 .hero h1 strong,
 .section-heading h2 strong,
 .repo-heading h2 strong,
-.about-intro h2 strong,
-.contact-layout h2 strong {
+.about-intro h2 strong {
   color: var(--blue);
   font-weight: inherit;
 }
@@ -257,8 +255,7 @@ img {
   margin-top: 34px;
 }
 
-.button,
-.contact-button {
+.button {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -277,8 +274,7 @@ img {
   color: var(--white);
 }
 
-.button-primary:hover,
-.contact-button:hover {
+.button-primary:hover {
   background: var(--blue-deep);
   transform: translateY(-2px);
 }
@@ -1045,69 +1041,166 @@ img {
 }
 
 .contact-section {
+  position: relative;
   margin-bottom: 40px;
   padding: clamp(45px, 6vw, 78px);
+  overflow: hidden;
   border-radius: 28px;
   background: var(--blue);
   color: var(--white);
   scroll-margin-top: 100px;
 }
 
+.contact-section::before {
+  content: "@";
+  position: absolute;
+  top: -25%;
+  right: -3%;
+  color: rgba(255, 255, 255, .07);
+  font-size: clamp(280px, 34vw, 520px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.12em;
+  pointer-events: none;
+}
+
 .contact-section .eyebrow {
+  margin: 0;
   color: rgba(255, 255, 255, .7);
 }
 
-.contact-layout {
-  display: grid;
-  grid-template-columns: 1.3fr .7fr;
-  align-items: end;
-  gap: 70px;
-}
-
-.contact-layout h2 {
-  font-size: clamp(54px, 7vw, 104px);
-  line-height: .9;
-}
-
-.contact-layout h2 strong {
-  color: var(--white);
-}
-
-.contact-layout > div > p {
-  max-width: 420px;
-  margin: 0 0 28px;
-  color: rgba(255,255,255,.78);
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.contact-button {
-  background: var(--white);
-  color: var(--blue);
-}
-
-.contact-button:hover {
-  background: var(--navy);
-  color: var(--white);
-}
-
-.contact-foot {
+.contact-heading {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-top: 78px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,.28);
   color: rgba(255,255,255,.72);
   font: 600 10px var(--mono);
   letter-spacing: .06em;
   text-transform: uppercase;
 }
 
-.contact-foot a {
-  color: var(--white);
+.contact-title {
+  position: relative;
+  z-index: 1;
+  margin: 32px 0 54px;
+  font-size: clamp(62px, 8vw, 120px);
+  font-weight: 520;
+  line-height: .88;
+  letter-spacing: -.075em;
+}
+
+.contact-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.contact-card {
+  display: grid;
+  min-height: 190px;
+  grid-template-columns: 64px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 24px;
+  padding: 28px;
+  border-radius: 20px;
   text-decoration: none;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+}
+
+.contact-card-mail {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 20px 50px rgba(3, 50, 108, .12);
+}
+
+.contact-card-github {
+  background: var(--navy);
+  color: var(--white);
+  box-shadow: 0 20px 50px rgba(3, 23, 48, .22);
+}
+
+.contact-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--blue);
+}
+
+.contact-card-github .contact-icon {
+  background: rgba(255, 255, 255, .12);
+}
+
+.contact-icon img {
+  width: 28px;
+  height: 28px;
+}
+
+.contact-data {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.contact-data small {
+  color: var(--blue);
+  font: 650 9px var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.contact-card-github .contact-data small {
+  color: #76b4ff;
+}
+
+.contact-data strong {
+  overflow: hidden;
+  font-size: clamp(16px, 1.55vw, 22px);
+  font-weight: 620;
+  letter-spacing: -.025em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-arrow {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--line-dark);
+  border-radius: 50%;
+  font-size: 17px;
+  transition: transform .25s var(--ease), background .25s ease, color .25s ease;
+}
+
+.contact-card:hover .contact-arrow {
+  transform: translate(2px, -2px);
+}
+
+.contact-card-mail:hover .contact-arrow {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--white);
+}
+
+.contact-card-github .contact-arrow {
+  border-color: rgba(255, 255, 255, .25);
+}
+
+.contact-card-github:hover .contact-arrow {
+  background: var(--white);
+  color: var(--navy);
 }
 
 .site-footer {
@@ -1191,10 +1284,10 @@ img {
     gap: 70px;
   }
 
-  .contact-layout {
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: 42px;
+  .contact-card {
+    grid-template-columns: 58px minmax(0, 1fr) 42px;
+    gap: 18px;
+    padding: 24px;
   }
 }
 
@@ -1414,18 +1507,42 @@ img {
     border-radius: 20px;
   }
 
-  .contact-layout h2 {
-    font-size: clamp(49px, 14vw, 72px);
-  }
-
-  .contact-foot {
+  .contact-heading {
     align-items: flex-start;
     flex-direction: column;
-    margin-top: 55px;
+    gap: 8px;
   }
 
-  .contact-foot a {
-    overflow-wrap: anywhere;
+  .contact-title {
+    margin: 28px 0 36px;
+    font-size: clamp(56px, 18vw, 82px);
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-card {
+    min-height: 150px;
+    grid-template-columns: 52px minmax(0, 1fr) 40px;
+    gap: 15px;
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .contact-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .contact-data strong {
+    font-size: 14px;
+  }
+
+  .contact-arrow {
+    width: 40px;
+    height: 40px;
   }
 
   .site-footer {

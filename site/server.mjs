@@ -21,6 +21,8 @@ const server = createServer(async (request, response) => {
     const body = await readFile(filePath);
     const contentType = filePath.endsWith(".webp")
       ? "image/webp"
+      : filePath.endsWith(".svg")
+        ? "image/svg+xml; charset=utf-8"
       : filePath.endsWith(".png")
         ? "image/png"
       : filePath.endsWith(".js")
