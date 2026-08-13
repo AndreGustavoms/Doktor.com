@@ -127,6 +127,52 @@ function initReveals() {
   items.forEach((item) => observer.observe(item));
 }
 
+function initAmbientMotion() {
+  if (reducedMotion) return;
+
+  const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!canHover) return;
+
+  const root = document.documentElement;
+  let frame = 0;
+  let pointerX = innerWidth / 2;
+  let pointerY = innerHeight / 2;
+
+  const syncSpotlight = () => {
+    frame = 0;
+    root.style.setProperty("--pointer-x", `${pointerX}px`);
+    root.style.setProperty("--pointer-y", `${pointerY}px`);
+  };
+
+  addEventListener("pointermove", (event) => {
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    if (!frame) frame = requestAnimationFrame(syncSpotlight);
+  }, { passive: true });
+
+  $$(".case-stage").forEach((stage) => {
+    const spotlight = document.createElement("span");
+    spotlight.className = "stage-spotlight";
+    spotlight.setAttribute("aria-hidden", "true");
+    stage.append(spotlight);
+    stage.addEventListener("pointermove", (event) => {
+      const bounds = stage.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - .5;
+      const y = (event.clientY - bounds.top) / bounds.height - .5;
+      stage.style.setProperty("--tilt-x", `${(y * -3.2).toFixed(2)}deg`);
+      stage.style.setProperty("--tilt-y", `${(x * 3.2).toFixed(2)}deg`);
+      stage.style.setProperty("--spot-x", `${((x + .5) * 100).toFixed(1)}%`);
+      stage.style.setProperty("--spot-y", `${((y + .5) * 100).toFixed(1)}%`);
+    });
+    stage.addEventListener("pointerleave", () => {
+      stage.style.removeProperty("--tilt-x");
+      stage.style.removeProperty("--tilt-y");
+      stage.style.removeProperty("--spot-x");
+      stage.style.removeProperty("--spot-y");
+    });
+  });
+}
+
 function initHeroArt() {
   const art = $("[data-art]");
   if (!art) return;
@@ -257,6 +303,7 @@ function init() {
   initHeader();
   initSectionNavigation();
   initReveals();
+  initAmbientMotion();
   initHeroArt();
   initRepositorySearch();
 }

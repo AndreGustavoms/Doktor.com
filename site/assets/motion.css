@@ -2788,3 +2788,57 @@ a {
     display: none;
   }
 }
+
+/* Ambient interaction layer: depth follows intent, never content. */
+@media (hover: hover) and (pointer: fine) {
+  .js body::before {
+    content: "";
+    position: fixed;
+    z-index: 20;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 320px;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(47, 128, 255, .1), transparent 68%);
+    transform: translate3d(calc(var(--pointer-x, 50vw) - 50%), calc(var(--pointer-y, 50vh) - 50%), 0);
+    mix-blend-mode: screen;
+    opacity: .7;
+    transition: opacity .3s var(--ease);
+  }
+
+  .case-stage {
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+    --spot-x: 50%;
+    --spot-y: 50%;
+    transform: perspective(1200px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(0);
+    transition: transform .55s var(--ease), box-shadow .55s var(--ease);
+    will-change: transform;
+  }
+
+  .stage-spotlight {
+    position: absolute;
+    z-index: 7;
+    inset: 0;
+    background: radial-gradient(circle at var(--spot-x) var(--spot-y), rgba(255, 255, 255, .16), transparent 30%);
+    opacity: 0;
+    transition: opacity .45s var(--ease);
+    pointer-events: none;
+  }
+
+  .case-stage:hover {
+    box-shadow: 0 24px 70px rgba(5, 20, 48, .18);
+  }
+
+  .case-stage:hover .stage-spotlight {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .case-stage {
+    transform: none !important;
+  }
+}
