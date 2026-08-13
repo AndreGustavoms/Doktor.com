@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname, join, resolve, relative, isAbsolute, sep } from "node:path";
+import { dirname, resolve, relative, isAbsolute, sep } from "node:path";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT ?? 3000);
