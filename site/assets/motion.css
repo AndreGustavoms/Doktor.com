@@ -1832,6 +1832,32 @@ a {
   color: rgba(255,255,255,.42);
 }
 
+.repo-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.repo-filter {
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,.58);
+  cursor: pointer;
+  font: 700 7px var(--mono);
+  letter-spacing: .06em;
+  transition: border-color .2s ease, background .2s ease, color .2s ease;
+}
+
+.repo-filter:hover,
+.repo-filter.is-active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--white);
+}
+
 .repo-status {
   display: flex;
   justify-content: space-between;

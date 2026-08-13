@@ -57,6 +57,7 @@ const repositoryDescriptions = Object.fromEntries(
 );
 
 let repositories = fallbackRepositories;
+let activeLanguage = "all";
 
 function initHeader() {
   const header = $(".site-header");
@@ -272,7 +273,9 @@ function renderRepositories(list, query = "") {
       repository.language,
       ...(repository.topics || []),
     ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
-    return !normalized || searchable.includes(normalized);
+    const matchesQuery = !normalized || searchable.includes(normalized);
+    const matchesLanguage = activeLanguage === "all" || repository.language === activeLanguage;
+    return matchesQuery && matchesLanguage;
   });
 
   grid.replaceChildren();
@@ -331,6 +334,13 @@ async function loadRepositories() {
 function initRepositorySearch() {
   const input = $("#repo-search");
   input?.addEventListener("input", () => renderRepositories(repositories, input.value));
+  $$(".repo-filter").forEach((filter) => {
+    filter.addEventListener("click", () => {
+      activeLanguage = filter.dataset.language || "all";
+      $$(".repo-filter").forEach((item) => item.classList.toggle("is-active", item === filter));
+      renderRepositories(repositories, input?.value || "");
+    });
+  });
   loadRepositories();
 }
 

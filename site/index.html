@@ -195,6 +195,12 @@
           <div class="repo-tools">
             <label for="repo-search">Filtrar repositórios</label>
             <div class="search-field"><span aria-hidden="true">⌕</span><input id="repo-search" type="search" placeholder="Busque por nome ou linguagem" autocomplete="off"></div>
+            <div class="repo-filters" role="group" aria-label="Filtrar por linguagem">
+              <button class="repo-filter is-active" type="button" data-language="all">Todos</button>
+              <button class="repo-filter" type="button" data-language="JavaScript">JavaScript</button>
+              <button class="repo-filter" type="button" data-language="TypeScript">TypeScript</button>
+              <button class="repo-filter" type="button" data-language="Python">Python</button>
+            </div>
           </div>
         </header>
         <div class="repo-status" data-reveal aria-live="polite" aria-busy="true">
