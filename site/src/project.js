@@ -1,58 +1,11 @@
-const projects = {
-  "contas-exe": {
-    number: "01",
-    category: "PRODUCT / SECURITY",
-    name: "Contas.exe",
-    title: "Segurança que também é clareza.",
-    description: "Um cofre de credenciais para equipes organizarem acessos compartilhados com segurança, contexto e uma interface fácil de entender.",
-    status: "Produto em evolução",
-    stack: ["TypeScript", "Security", "Desktop"],
-    github: "https://github.com/AndreGustavoms/Contas.exe",
-  },
-  "doktor-system-design": {
-    number: "02",
-    category: "FOUNDATION / SYSTEMS",
-    name: "Doktor System Design",
-    title: "Começar com direção.",
-    description: "Uma base de arquitetura, documentação e qualidade para projetos que precisam crescer sem perder coerência.",
-    status: "Sistema em construção",
-    stack: ["Architecture", "Docs", "Quality"],
-    github: "https://github.com/AndreGustavoms/Doktor-SystemDesign",
-  },
-  "meu-ecoo": {
-    number: "03",
-    category: "EXPERIENCE / IDENTITY",
-    name: "MeuEcoo",
-    title: "Uma presença que continua reverberando.",
-    description: "Identidade, narrativa e presença em uma experiência digital autoral construída para transformar expressão em conexão.",
-    status: "Experiência autoral",
-    stack: ["TypeScript", "Web", "Interface"],
-    github: "https://github.com/AndreGustavoms/MeuEcooBETA",
-  },
-  "prisma-test": {
-    number: "04",
-    category: "APPLIED AI / LEARNING",
-    name: "PrismaTest",
-    title: "Estudar conecta.",
-    description: "Uma plataforma de estudos com inteligência artificial para organizar conhecimento e aproximar cada pessoa do seu contexto.",
-    status: "Pesquisa aplicada",
-    stack: ["Python", "AI", "Education"],
-    github: "https://github.com/AndreGustavoms/PrismaTest",
-  },
-};
+// Renderiza a pagina de detalhe do projeto. O catalogo e a resolucao do slug
+// vivem em `projects-catalog.js`, que nao depende de DOM e por isso e testavel.
+import { projects, resolverSlug, vizinhos } from "./projects-catalog.js";
 
-const projectSlugs = Object.keys(projects);
-const slugPedido = new URLSearchParams(location.search).get("project") || "contas-exe";
-// Object.hasOwn e nao `projects[slug]`: chaves herdadas de Object.prototype
-// ("constructor", "toString", "valueOf", "__proto__", "hasOwnProperty") sao
-// truthy e passariam pelo fallback, entregando um objeto sem os campos usados
-// abaixo e quebrando a pagina.
-const slug = Object.hasOwn(projects, slugPedido) ? slugPedido : "contas-exe";
+const slug = resolverSlug(new URLSearchParams(location.search).get("project"));
 const project = projects[slug];
+const { anterior, proximo } = vizinhos(slug);
 const content = document.querySelector("#project-content");
-const projectIndex = projectSlugs.indexOf(slug);
-const previous = projects[projectSlugs[(projectIndex - 1 + projectSlugs.length) % projectSlugs.length]];
-const next = projects[projectSlugs[(projectIndex + 1) % projectSlugs.length]];
 const projectClass = slug.replace(/[^a-z0-9]+/gi, "-");
 
 document.body.classList.add(`project-${projectClass}`);
@@ -87,8 +40,8 @@ content.innerHTML = `
     <div><small>ORIGEM</small><strong>DoktorDev lab</strong></div>
   </div>
   <nav class="project-pagination" aria-label="Navegação entre projetos">
-    <a href="projeto.html?project=${projectSlugs[(projectIndex - 1 + projectSlugs.length) % projectSlugs.length]}"><small>ANTERIOR</small><strong>← ${previous.name}</strong></a>
-    <a href="projeto.html?project=${projectSlugs[(projectIndex + 1) % projectSlugs.length]}"><small>PRÓXIMO</small><strong>${next.name} →</strong></a>
+    <a href="projeto.html?project=${anterior.slug}"><small>ANTERIOR</small><strong>← ${anterior.project.name}</strong></a>
+    <a href="projeto.html?project=${proximo.slug}"><small>PRÓXIMO</small><strong>${proximo.project.name} →</strong></a>
   </nav>
 `;
 

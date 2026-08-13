@@ -55,6 +55,9 @@ o GitHub Pages.
 - `site.webmanifest`: identidade, cores e ícones da experiência instalável.
 - `assets/app.js`: bundle estático gerado por `npm run build`.
 - `projeto.html`: página interna de detalhe dos projetos, alimentada por `assets/project.js`.
+- `src/projects-catalog.js`: catálogo dos projetos e resolução do slug vindo da URL. Não
+  depende de DOM, por isso é coberto por testes.
+- `src/project.js`: renderiza a página de detalhe a partir do catálogo.
 
 O projeto é uma landing page pública, sem login, dashboard ou painel administrativo.
 

@@ -69,6 +69,16 @@ repositórios e identidade visual. Público geral, sem área autenticada.
 - [2026-08-13] `npm test` em `site/`: 20 testes, todos passando. Cobrem a proteção contra
   path traversal do servidor de desenvolvimento em 16 variantes de codificação, além de
   serviço de página, content-type e resposta a URL malformada.
+- [2026-08-13] BUG: `?project=constructor` (e `toString`, `valueOf`, `__proto__`,
+  `hasOwnProperty`) derrubava a página de projeto. A resolução era
+  `projects[slug] || padrão`, e chaves herdadas de `Object.prototype` devolvem valor
+  truthy, então o fallback nunca disparava e a renderização morria em
+  `project.stack.join()` com `TypeError`. Slug simplesmente desconhecido já caía no
+  fallback corretamente - o defeito atingia só as chaves herdadas. Corrigido com
+  `Object.hasOwn`; a lógica saiu para `src/projects-catalog.js` para poder ser testada, e
+  a regressão está fixada em `tests/projects-catalog.test.mjs`.
+- [2026-08-13] Teste de mutação da suíte de catálogo: reintroduzindo o lookup por herança
+  numa cópia isolada, 7 dos 15 testes falham.
 - [2026-08-13] Teste de mutação da suíte acima: removendo a guarda de traversal de uma cópia
   isolada do servidor, 4 testes falham - exatamente as variantes com separador
   percent-encoded (`%2e%2e%2f`, `%2e%2e%5c`). As demais variantes já são neutralizadas pelo
