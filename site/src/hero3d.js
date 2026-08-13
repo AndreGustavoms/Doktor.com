@@ -112,8 +112,7 @@ function createOrbit(radius, tilt, rotation, opacity) {
   return orbit;
 }
 
-function createParticles() {
-  const count = 48;
+function createParticles(count = 48) {
   const positions = new Float32Array(count * 3);
 
   for (let index = 0; index < count; index += 1) {
@@ -149,6 +148,8 @@ function disposeObject(object) {
 export function mountHero3D(stage) {
   const canvas = stage?.querySelector("[data-flux-canvas]");
   if (!stage || !canvas) return null;
+  const connectionType = navigator.connection?.effectiveType || "";
+  const lowPower = navigator.hardwareConcurrency <= 4 || navigator.deviceMemory <= 4 || /^(slow-2g|2g)$/.test(connectionType);
 
   let renderer;
   try {
@@ -245,7 +246,7 @@ export function mountHero3D(stage) {
   );
   root.add(orbitGroup);
 
-  const particles = createParticles();
+  const particles = createParticles(lowPower ? 22 : 48);
   root.add(particles);
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x0d3ebb, 2.5));
@@ -281,8 +282,8 @@ export function mountHero3D(stage) {
 
     width = nextWidth;
     height = nextHeight;
-    const constrainedDevice = innerWidth < 700 || navigator.hardwareConcurrency <= 4;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, constrainedDevice ? 1.15 : 1.6));
+    const constrainedDevice = lowPower || innerWidth < 700;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, constrainedDevice ? 1 : 1.45));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
