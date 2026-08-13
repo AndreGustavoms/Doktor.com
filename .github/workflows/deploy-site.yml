@@ -46,7 +46,7 @@ jobs:
       - name: Montar artefato apenas com o que é público
         run: |
           mkdir -p dist
-          cp site/index.html site/404.html site/site.webmanifest dist/
+          cp site/index.html site/404.html site/projeto.html site/site.webmanifest dist/
           cp -r site/assets dist/
       # Barreira contra regressão: falha a publicação se algo sensível ou
       # não previsto entrar no diretório publicado.
@@ -64,6 +64,19 @@ jobs:
           for proibido in package.json package-lock.json server.mjs README.md src; do
             if [ -e "dist/$proibido" ]; then
               echo "Item não público no artefato: $proibido" >&2
+              exit 1
+            fi
+          done
+          # Contrapartida da allowlist: ela não pode deixar cair, em silêncio,
+          # uma página que deveria ser pública. Toda página na raiz de site/
+          # precisa estar no artefato — se faltar, a publicação falha aqui em
+          # vez de servir 404 em produção.
+          for publico in site/*.html site/*.webmanifest; do
+            [ -e "$publico" ] || continue
+            nome=$(basename "$publico")
+            if [ ! -e "dist/$nome" ]; then
+              echo "Página pública ausente do artefato: $nome" >&2
+              echo "Inclua-a no passo 'Montar artefato apenas com o que é público'." >&2
               exit 1
             fi
           done

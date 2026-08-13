@@ -45,6 +45,13 @@ const fallbackRepositories = [
   },
 ];
 
+const projectPages = {
+  "Contas.exe": "projeto.html?project=contas-exe",
+  "Doktor-SystemDesign": "projeto.html?project=doktor-system-design",
+  "MeuEcooBETA": "projeto.html?project=meu-ecoo",
+  "PrismaTest": "projeto.html?project=prisma-test",
+};
+
 const repositoryDescriptions = Object.fromEntries(
   fallbackRepositories.map((repository) => [repository.name, repository.description]),
 );
@@ -214,10 +221,10 @@ function initHeroArt() {
 function createRepoRow(repository, index) {
   const row = document.createElement("a");
   row.className = "repo-card";
-  row.href = repository.html_url;
+  row.href = projectPages[repository.name] || repository.html_url;
   row.target = "_blank";
   row.rel = "noreferrer";
-  row.setAttribute("aria-label", `Abrir ${repository.name} no GitHub`);
+  row.setAttribute("aria-label", `Abrir página de ${repository.name}`);
 
   const number = document.createElement("span");
   number.className = "repo-number";
