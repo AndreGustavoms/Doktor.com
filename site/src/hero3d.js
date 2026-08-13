@@ -297,9 +297,9 @@ export function mountHero3D(stage) {
     lastTime = time;
     elapsed += delta;
 
-    letter.rotation.y += delta * .42 + scrollImpulse * delta;
-    letter.rotation.x = Math.sin(elapsed * .62) * .08;
-    letter.rotation.z = Math.sin(elapsed * .38) * .035 + scrollImpulse * .012;
+    letter.rotation.y += delta * .22 + scrollImpulse * delta * .45;
+    letter.rotation.x = Math.sin(elapsed * .42) * .045;
+    letter.rotation.z = Math.sin(elapsed * .28) * .018 + scrollImpulse * .006;
     edge.rotation.y = Math.sin(elapsed * .7) * .035;
     ghost.rotation.y -= delta * .12;
     orbitGroup.rotation.z += delta * .075;
@@ -326,7 +326,7 @@ export function mountHero3D(stage) {
   const boostFromScroll = () => {
     const delta = scrollY - previousScroll;
     previousScroll = scrollY;
-    scrollImpulse = THREE.MathUtils.clamp(scrollImpulse + delta * .018, -2.6, 2.6);
+    scrollImpulse = THREE.MathUtils.clamp(scrollImpulse + delta * .012, -1.6, 1.6);
   };
 
   const visibilityObserver = new IntersectionObserver(([entry]) => {
