@@ -58,6 +58,14 @@ o GitHub Pages.
 
 O projeto é uma landing page pública, sem login, dashboard ou painel administrativo.
 
+Para executar a suíte de segurança do servidor local:
+
+```bash
+npm test
+```
+
+Os testes cobrem carregamento de assets, URLs malformadas, listagem de diretórios e tentativas de path traversal.
+
 ## Publicação
 
 O deploy no GitHub Pages monta o diretório publicado por **allowlist**: entra apenas
