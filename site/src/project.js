@@ -41,11 +41,16 @@ const projects = {
   },
 };
 
-const slug = new URLSearchParams(location.search).get("project") || "contas-exe";
-const project = projects[slug] || projects["contas-exe"];
-const content = document.querySelector("#project-content");
 const projectSlugs = Object.keys(projects);
-const projectIndex = projectSlugs.indexOf(slug) >= 0 ? projectSlugs.indexOf(slug) : 0;
+const slugPedido = new URLSearchParams(location.search).get("project") || "contas-exe";
+// Object.hasOwn e nao `projects[slug]`: chaves herdadas de Object.prototype
+// ("constructor", "toString", "valueOf", "__proto__", "hasOwnProperty") sao
+// truthy e passariam pelo fallback, entregando um objeto sem os campos usados
+// abaixo e quebrando a pagina.
+const slug = Object.hasOwn(projects, slugPedido) ? slugPedido : "contas-exe";
+const project = projects[slug];
+const content = document.querySelector("#project-content");
+const projectIndex = projectSlugs.indexOf(slug);
 const previous = projects[projectSlugs[(projectIndex - 1 + projectSlugs.length) % projectSlugs.length]];
 const next = projects[projectSlugs[(projectIndex + 1) % projectSlugs.length]];
 const projectClass = slug.replace(/[^a-z0-9]+/gi, "-");
