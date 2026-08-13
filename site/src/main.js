@@ -60,10 +60,10 @@ let repositories = fallbackRepositories;
 let activeLanguage = "all";
 
 function initHeader() {
-  const header = $(".site-header");
+  const header = $(".site-header, .topbar");
   const progress = $("#page-progress");
   const menu = $(".menu-button");
-  const nav = $(".site-nav");
+  const nav = $(".site-nav, .nav");
   let frame = 0;
 
   const closeMenu = () => {
@@ -108,7 +108,7 @@ function initHeader() {
 
 function initSectionNavigation() {
   const sections = $$("main section[id]");
-  const links = $$('.site-nav a[href^="#"]');
+  const links = $$('.site-nav a[href^="#"], .nav a[href^="#"]');
 
   if (!("IntersectionObserver" in window)) return;
 
