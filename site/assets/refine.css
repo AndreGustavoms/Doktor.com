@@ -7,4 +7,7 @@
 .nav a:hover:before{transform:scaleX(1);transform-origin:left}
 .hero-ghost{top:21%;right:-4%;font-size:clamp(120px,20vw,310px);-webkit-text-stroke-color:rgba(16,19,24,.055)}
 .footer span{letter-spacing:.03em}
+.overlap-hero{height:100vh;min-height:680px;grid-template-rows:76px minmax(0,1fr) 48px}
+.hero-copy{align-self:center;transform:translateY(20px)}
+.hero-stack{align-self:center;max-height:650px}
 @media(max-width:500px){.brand img{width:178px}}
