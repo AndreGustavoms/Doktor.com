@@ -1,6 +1,6 @@
-# Doktor
+# DoktorDev
 
-Landing page e portfólio público do laboratório Doktor. A experiência combina direção editorial, tipografia expressiva e composições próprias para apresentar projetos selecionados e repositórios públicos atualizados pelo GitHub.
+Landing page e portfólio público do laboratório DoktorDev. A experiência combina direção editorial, tipografia expressiva e composições próprias para apresentar projetos selecionados e repositórios públicos atualizados pelo GitHub.
 
 ## Rodar localmente
 
@@ -17,9 +17,10 @@ Acesse [http://localhost:3000](http://localhost:3000).
 - `assets/motion.css`: identidade visual, composições de projeto, movimento e responsividade.
 - `src/main.js`: navegação, progresso de leitura, pausa de animações, busca e integração pública com o GitHub.
 - `src/hero3d.js`: cena Three.js carregada sob demanda, com o símbolo oficial extrudado, material físico, iluminação e órbitas.
-- `assets/doktor-mark.svg`: símbolo oficial da identidade Doktor, usado em assinaturas e aplicações de marca.
+- `assets/doktordev-lockup-dark.svg`: assinatura oficial DoktorDev.com para fundos escuros.
+- `assets/doktordev-mark.svg`: símbolo oficial isolado da identidade DoktorDev.
 - `assets/favicon.svg`, `favicon.ico` e ícones PNG: conjunto derivado da versão sólida oficial para navegadores e dispositivos.
-- `assets/og-doktor-v4.png`: aplicação oficial da marca para compartilhamentos em redes sociais.
+- `assets/og-doktordev-v1.png`: aplicação oficial da marca para compartilhamentos em redes sociais.
 - `site.webmanifest`: identidade, cores e ícones da experiência instalável.
 - `assets/app.js`: bundle estático gerado por `npm run build`.
 

@@ -43,10 +43,10 @@ const server = createServer(async (request, response) => {
     response.end(body);
   } catch {
     response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
-    response.end("Unable to load Doktor site");
+    response.end("Unable to load DoktorDev site");
   }
 });
 
 server.listen(port, "localhost", () => {
-  console.log(`Doktor site running at http://localhost:${port}`);
+  console.log(`DoktorDev site running at http://localhost:${port}`);
 });

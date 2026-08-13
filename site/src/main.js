@@ -4,8 +4,8 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const fallbackRepositories = [
   {
-    name: "Doktor.com",
-    description: "Landing page e portfólio público do laboratório Doktor.",
+    name: "DoktorDev.com",
+    description: "Landing page e portfólio público do laboratório DoktorDev.",
     language: "JavaScript",
     stargazers_count: 0,
     html_url: "https://github.com/AndreGustavoms/Doktor.com",
@@ -172,7 +172,7 @@ function createRepoRow(repository, index) {
   title.textContent = repository.name;
 
   const description = document.createElement("p");
-  description.textContent = repository.description || "Projeto público do laboratório Doktor.";
+  description.textContent = repository.description || "Projeto público do laboratório DoktorDev.";
 
   const meta = document.createElement("span");
   meta.className = "repo-meta";

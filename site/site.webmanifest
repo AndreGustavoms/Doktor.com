@@ -1,10 +1,10 @@
 {
-  "name": "Doktor.com",
-  "short_name": "Doktor",
+  "name": "DoktorDev.com",
+  "short_name": "DoktorDev",
   "description": "Produtos digitais, sistemas e automações com forma, função e intenção.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F7F9FC",
+  "background_color": "#050914",
   "theme_color": "#1557E8",
   "icons": [
     {

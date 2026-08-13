@@ -12,6 +12,7 @@
   --blue-dark: #0d3ebb;
   --blue-pale: #edf4ff;
   --navy: #050914;
+  --gray: #8d99ae;
   --line: #dce1e8;
   --line-dark: rgba(255, 255, 255, .16);
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -108,14 +109,16 @@ a {
   right: 0;
   left: 0;
   height: 88px;
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid rgba(247, 249, 252, .08);
+  background: rgba(5, 9, 20, .94);
+  backdrop-filter: blur(18px);
   transition: height .3s var(--ease), border-color .3s ease, background .3s ease;
 }
 
 .site-header.is-scrolled {
   height: 70px;
-  border-color: rgba(9, 17, 31, .1);
-  background: rgba(247, 249, 252, .96);
+  border-color: rgba(247, 249, 252, .12);
+  background: rgba(5, 9, 20, .97);
 }
 
 .header-inner {
@@ -134,7 +137,12 @@ a {
   text-decoration: none;
 }
 
-.brand-mark,
+.brand-lockup {
+  display: block;
+  width: clamp(170px, 14vw, 200px);
+  height: auto;
+}
+
 .identity-mark,
 .contact-plus {
   position: relative;
@@ -175,7 +183,7 @@ a {
   display: flex;
   align-items: baseline;
   gap: 5px;
-  color: #4f596a;
+  color: var(--gray, #8d99ae);
   font-size: 11px;
   font-weight: 650;
   text-decoration: none;
@@ -183,7 +191,7 @@ a {
 }
 
 .site-nav a span {
-  color: #a1a9b4;
+  color: rgba(247, 249, 252, .42);
   font: 600 7px var(--mono);
 }
 
@@ -202,7 +210,7 @@ a {
 
 .site-nav a:hover,
 .site-nav a.is-active {
-  color: var(--ink);
+  color: var(--white);
 }
 
 .site-nav a:hover::after,
@@ -217,7 +225,8 @@ a {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px solid rgba(247, 249, 252, .55);
+  color: var(--white);
   font-size: 10px;
   font-weight: 760;
   text-decoration: none;
@@ -239,6 +248,7 @@ a {
   background: transparent;
   font-size: 10px;
   font-weight: 750;
+  color: var(--white);
 }
 
 .menu-button i {
@@ -601,7 +611,7 @@ a {
   right: -3vw;
   width: min(44vw, 720px);
   aspect-ratio: 1;
-  background: url("doktor-mark.svg") center / contain no-repeat;
+  background: url("doktordev-mark.svg") center / contain no-repeat;
   opacity: .055;
   transform: translateY(-50%);
 }
@@ -2156,7 +2166,8 @@ a {
 
 /* Footer */
 .site-footer {
-  background: var(--white);
+  background: var(--navy);
+  color: var(--white);
 }
 
 .footer-inner {
@@ -2185,7 +2196,7 @@ a {
 }
 
 .footer-inner > div a {
-  color: var(--ink);
+  color: var(--white);
   text-decoration: none;
 }
 
@@ -2362,7 +2373,11 @@ a {
     justify-content: space-between;
     padding: 13px 11px;
     border-bottom: 1px solid var(--line);
+    color: #4f596a;
   }
+
+  .site-nav a:hover,
+  .site-nav a.is-active { color: var(--ink); }
 
   .site-nav a:last-child { border: 0; }
   .site-nav a::after { display: none; }
