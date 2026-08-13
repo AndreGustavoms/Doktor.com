@@ -4,11 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild src/main.js --bundle --minify --outfile=assets/app.js",
+    "build": "esbuild src/main.js --bundle --minify --outfile=assets/app.js && esbuild src/hero3d.js --bundle --minify --outfile=assets/hero3d.js",
     "dev": "node server.mjs",
     "start": "node server.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
   }
 }

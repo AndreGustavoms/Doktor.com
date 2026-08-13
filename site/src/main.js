@@ -129,10 +129,10 @@ function initReveals() {
 
 function initHeroArt() {
   const art = $("[data-art]");
-  if (!art || reducedMotion) return;
+  if (!art) return;
 
   let visible = false;
-  const sync = () => art.classList.toggle("is-running", visible && !document.hidden);
+  const sync = () => art.classList.toggle("is-running", visible && !document.hidden && !reducedMotion);
   const observer = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     sync();
@@ -140,6 +140,20 @@ function initHeroArt() {
 
   observer.observe(art);
   document.addEventListener("visibilitychange", sync);
+
+  const loadScene = async () => {
+    if (!("WebGLRenderingContext" in window) || navigator.connection?.saveData) return;
+    try {
+      const modulePath = "./hero3d.js";
+      const { mountHero3D } = await import(modulePath);
+      mountHero3D(art);
+    } catch {
+      art.classList.add("webgl-failed");
+    }
+  };
+
+  if ("requestIdleCallback" in window) requestIdleCallback(loadScene, { timeout: 1200 });
+  else setTimeout(loadScene, 320);
 }
 
 function createRepoRow(repository, index) {

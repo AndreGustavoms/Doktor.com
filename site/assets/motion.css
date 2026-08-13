@@ -776,6 +776,33 @@ a {
   perspective: 900px;
 }
 
+.flux-canvas {
+  position: absolute;
+  z-index: 7;
+  inset: -8%;
+  display: block;
+  width: 116%;
+  height: 116%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .8s var(--ease);
+}
+
+.flux-stage.has-webgl .flux-canvas {
+  opacity: 1;
+}
+
+.flux-stage.has-webgl .flux-orb,
+.flux-stage.has-webgl .ring-outer,
+.flux-stage.has-webgl .ring-inner {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.flux-stage.has-webgl .flux-aura {
+  transform: translate(-50%, -50%) scale(1.55);
+}
+
 .flux-aura {
   position: absolute;
   top: 50%;
