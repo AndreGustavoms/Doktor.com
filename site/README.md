@@ -1,8 +1,8 @@
-# Doktor // laboratório
+# Doktor
 
-Landing page pessoal do Doktor: uma vitrine autoral com direção de movimento baseada em GSAP, ScrollTrigger e SplitText.
+Landing page e portfólio público do laboratório Doktor. A interface usa branco como base, azul como acento e movimento discreto, com uma vitrine editorial de projetos e repositórios públicos atualizados pelo GitHub.
 
-## Rodar
+## Rodar localmente
 
 ```bash
 npm install
@@ -11,8 +11,11 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000).
 
-## Editar
+## Estrutura
 
-O conteúdo e a identidade visual ficam em `index.html`. A direção de movimento está em `src/main.js`; `npm run build` gera o bundle estático em `assets/app.js`.
+- `index.html`: conteúdo e estrutura da landing page.
+- `assets/motion.css`: identidade visual e responsividade.
+- `src/main.js`: navegação, transições leves, busca e integração pública com o GitHub.
+- `assets/app.js`: bundle estático gerado por `npm run build`.
 
-O servidor local usa `localhost:3000`; a aplicação é pública, estática e focada exclusivamente na landing page.
+O projeto é uma landing page pública, sem login, dashboard ou painel administrativo.

@@ -9,7 +9,6 @@
     "start": "node server.mjs"
   },
   "devDependencies": {
-    "esbuild": "0.28.2",
-    "gsap": "3.13.0"
+    "esbuild": "0.28.2"
   }
 }

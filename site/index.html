@@ -1,43 +1,197 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DOKTOR // systems that matter</title>
-  <meta name="description" content="Doktor é um laboratório de sistemas, produtos digitais, automações e ideias em movimento.">
-  <meta name="theme-color" content="#050a12">
-  <style>
-    :root{--bg:#050a12;--bg2:#08111d;--panel:#0b1623;--panel2:#102235;--ink:#effaff;--muted:#91a9b9;--dim:#4e6a7a;--line:#183042;--line2:#27526b;--neon:#38dcff;--electric:#4c7dff;--amber:#ffbf4d;--lime:#c9f36b;--red:#ff707d;--sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;--ease:cubic-bezier(.2,.8,.2,1)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:320px;overflow-x:hidden;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}body:before{content:"";position:fixed;z-index:-3;inset:0;background:radial-gradient(ellipse at var(--mx,50%) var(--my,5%),rgba(56,220,255,.12),transparent 29rem),radial-gradient(ellipse at 90% 74%,rgba(76,125,255,.1),transparent 32rem),var(--bg);transition:background .4s var(--ease)}body:after{content:"";position:fixed;z-index:-2;inset:-50%;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}a{color:inherit}button,input{font:inherit}button{cursor:pointer}::selection{background:rgba(56,220,255,.28);color:#fff}.grid{position:fixed;z-index:-1;inset:0;pointer-events:none;opacity:.35;background-image:linear-gradient(rgba(56,220,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(56,220,255,.04) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,#000,transparent 76%)}.container{width:min(1220px,calc(100% - 56px));margin:auto}.topbar{position:fixed;z-index:20;inset:0 0 auto;height:72px;border-bottom:1px solid rgba(56,220,255,.14);background:rgba(5,10,18,.8);backdrop-filter:blur(20px)}.topbar-inner{display:flex;align-items:center;height:100%}.brand{display:flex;align-items:center;gap:10px;font:700 13px var(--mono);letter-spacing:.12em;text-decoration:none}.brand-mark{display:grid;place-items:center;width:29px;height:29px;border:1px solid var(--neon);border-radius:4px;color:var(--neon);font-size:19px;box-shadow:0 0 15px rgba(56,220,255,.2)}.brand small{margin-left:3px;color:var(--neon);font-size:9px;font-weight:400;letter-spacing:.08em}.nav{display:flex;gap:28px;margin-left:auto}.nav a{color:var(--muted);font-size:12px;text-decoration:none;transition:color .2s var(--ease)}.nav a:hover,.nav a.active{color:var(--neon)}.nav-cta{margin-left:25px;padding:8px 13px;border:1px solid var(--line2);border-radius:3px;color:var(--ink)!important;background:rgba(56,220,255,.06)}.menu{display:none;margin-left:auto;border:0;background:none;color:var(--neon);font-size:21px}
-    .hero{position:relative;min-height:820px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:70px;padding:140px 0 90px;border-bottom:1px solid var(--line)}.hero-copy{position:relative;z-index:2}.kicker{display:flex;align-items:center;gap:10px;color:var(--neon);font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase}.kicker:before{content:"[";color:var(--amber)}.kicker:after{content:"]";color:var(--amber)}.hero h1{max-width:650px;margin:25px 0 23px;font-size:clamp(50px,6.1vw,83px);line-height:.92;letter-spacing:-.075em}.hero h1 em{color:var(--neon);font-style:normal;text-shadow:0 0 28px rgba(56,220,255,.3)}.hero-lede{max-width:520px;margin:0;color:var(--muted);font-size:17px;line-height:1.76}.hero-lede strong{color:var(--ink);font-weight:650}.actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:29px}.button{display:inline-flex;align-items:center;gap:9px;padding:11px 16px;border-radius:3px;font-size:12px;font-weight:750;text-decoration:none;transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s var(--ease)}.button:hover{transform:translateY(-3px)}.button-primary{border:1px solid var(--neon);background:var(--neon);color:#041019;box-shadow:0 0 30px rgba(56,220,255,.2)}.button-primary:hover{box-shadow:0 0 42px rgba(56,220,255,.4)}.button-ghost{border:1px solid var(--line2);color:var(--ink)}.button-ghost:hover{border-color:var(--neon);color:var(--neon)}.hero-meta{display:flex;gap:22px;margin-top:38px;color:var(--dim);font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase}.hero-meta b{color:var(--lime);font-weight:400}.hero-scroll{position:absolute;bottom:28px;left:0;color:var(--dim);font:10px var(--mono);letter-spacing:.13em;text-decoration:none;text-transform:uppercase}.hero-scroll span{color:var(--neon)}
-    .core-stage{position:relative;min-height:455px;display:grid;place-items:center}.core-stage:before{content:"";position:absolute;width:360px;height:360px;border:1px solid rgba(56,220,255,.22);border-radius:50%;box-shadow:0 0 80px rgba(56,220,255,.08),inset 0 0 70px rgba(56,220,255,.05);animation:spin 24s linear infinite}.core-stage:after{content:"";position:absolute;width:450px;height:160px;border:1px solid rgba(76,125,255,.35);border-radius:50%;transform:rotate(-28deg);box-shadow:0 0 20px rgba(76,125,255,.12);animation:orbit 10s var(--ease) infinite alternate}.core-image{position:relative;z-index:1;width:285px;height:285px;overflow:hidden;border:1px solid var(--neon);border-radius:50%;background:var(--panel);box-shadow:0 0 55px rgba(56,220,255,.25),0 0 130px rgba(76,125,255,.16)}.core-image img{width:100%;height:100%;object-fit:cover;object-position:68% center;filter:saturate(.88) contrast(1.1) brightness(.72)}.core-image:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(3,8,15,.82)),linear-gradient(90deg,rgba(56,220,255,.08),transparent 44%,rgba(76,125,255,.17))}.core-readout{position:absolute;z-index:3;top:2%;right:1%;padding:9px 11px;border:1px solid var(--line2);background:rgba(5,10,18,.8);color:var(--lime);font:9px var(--mono);letter-spacing:.08em}.core-readout:before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}.core-label{position:absolute;z-index:3;bottom:1%;left:2%;padding:8px 10px;border:1px solid var(--line);background:rgba(5,10,18,.8);color:var(--amber);font:9px var(--mono)}.core-node{position:absolute;z-index:4;display:grid;place-items:center;width:45px;height:45px;border:1px solid var(--neon);border-radius:50%;background:var(--bg2);color:var(--neon);font:14px var(--mono);box-shadow:0 0 18px rgba(56,220,255,.2)}.node-a{top:12%;left:4%}.node-b{right:5%;bottom:12%;color:var(--amber);border-color:var(--amber)}@keyframes spin{to{transform:rotate(360deg)}}@keyframes orbit{to{transform:rotate(28deg) scale(1.04)}}
-    .telemetry{display:grid;grid-template-columns:repeat(4,1fr);border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-left:1px solid var(--line)}.telemetry-cell{padding:17px 20px;border-right:1px solid var(--line)}.telemetry-cell:last-child{border:0}.telemetry-cell small{display:block;margin-bottom:4px;color:var(--dim);font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.telemetry-cell strong{font:500 13px var(--mono)}.telemetry-cell strong b{color:var(--neon);font-weight:400}
-    .section{padding:105px 0;border-bottom:1px solid var(--line)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:40px}.section-title{margin:10px 0 0;font-size:clamp(36px,4.8vw,64px);line-height:.94;letter-spacing:-.07em}.section-title em{color:var(--amber);font-style:normal}.section-note{max-width:420px;margin:14px 0 0;color:var(--muted);font-size:14px}.section-link{display:flex;align-items:center;gap:7px;color:var(--neon);font:10px var(--mono);letter-spacing:.1em;text-decoration:none;text-transform:uppercase}.section-link:hover{color:var(--amber)}.about-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:75px}.about-copy{color:var(--muted);font-size:16px;line-height:1.8}.about-copy p{margin:0 0 20px}.about-copy strong{color:var(--ink)}.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.module{min-height:155px;padding:20px;border:1px solid var(--line);background:rgba(11,22,35,.7);transition:transform .25s var(--ease),border-color .25s var(--ease),box-shadow .25s var(--ease)}.module:hover{transform:translateY(-5px);border-color:var(--neon);box-shadow:0 0 25px rgba(56,220,255,.08)}.module small{color:var(--neon);font:10px var(--mono)}.module h3{margin:27px 0 5px;font-size:17px}.module p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
-    .command-bar{display:flex;align-items:center;gap:12px;margin-bottom:25px;padding:12px 15px;border:1px solid var(--line);background:var(--panel);font:11px var(--mono)}.command-bar span{color:var(--lime)}.command-bar output{overflow:hidden;color:var(--muted);white-space:nowrap;text-overflow:ellipsis}.project-tools{display:flex;align-items:center;gap:8px;margin-bottom:20px}.project-search{min-width:230px;flex:1;padding:11px 13px;border:1px solid var(--line2);border-radius:3px;outline:0;background:var(--panel);color:var(--ink);font-size:13px}.project-search:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(56,220,255,.1)}.filter{padding:9px 12px;border:1px solid var(--line);border-radius:3px;background:var(--panel);color:var(--muted);font:10px var(--mono);text-transform:uppercase}.filter:hover,.filter.selected{border-color:var(--neon);color:var(--neon)}.projects{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.project{display:flex;min-height:345px;flex-direction:column;border:1px solid var(--line);background:linear-gradient(150deg,rgba(16,34,53,.8),rgba(8,16,26,.94));transition:transform .3s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease)}.project:hover{transform:translateY(-7px);border-color:var(--neon);box-shadow:0 18px 40px rgba(0,0,0,.28),0 0 28px rgba(56,220,255,.1)}.project.hidden{display:none}.project-top{position:relative;height:115px;overflow:hidden;border-bottom:1px solid var(--line);background:radial-gradient(circle at 72% 32%,rgba(56,220,255,.3),transparent 27%),linear-gradient(135deg,#10283b,#08121d)}.project:nth-child(2) .project-top{background:radial-gradient(circle at 28% 35%,rgba(76,125,255,.32),transparent 28%),linear-gradient(135deg,#162448,#09121e)}.project:nth-child(3) .project-top{background:radial-gradient(circle at 70% 30%,rgba(201,243,107,.24),transparent 28%),linear-gradient(135deg,#1c2b25,#091513)}.project-top:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 48%,rgba(56,220,255,.19) 49%,transparent 50%);background-size:28px 28px}.project-state,.project-name{position:absolute;z-index:1;font:9px var(--mono);letter-spacing:.1em}.project-state{top:14px;right:14px;padding:4px 7px;border:1px solid rgba(201,243,107,.55);color:var(--lime)}.project-name{bottom:14px;left:17px;color:var(--neon)}.project-body{display:flex;flex:1;flex-direction:column;padding:19px}.project-index{color:var(--dim);font:10px var(--mono)}.project h3{margin:15px 0 8px;font-size:21px;letter-spacing:-.04em}.project p{flex:1;margin:0;color:var(--muted);font-size:13px;line-height:1.55}.project-foot{display:flex;align-items:center;justify-content:space-between;margin-top:19px}.tag{padding:4px 8px;border:1px solid var(--line2);color:var(--muted);font:9px var(--mono)}.open{display:flex;align-items:center;gap:5px;color:var(--ink);font:11px var(--mono);text-decoration:none}.open:hover{color:var(--neon)}
-    .principles{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}.principle{min-height:245px;padding:25px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.principle small{color:var(--neon);font:10px var(--mono)}.principle h3{margin:52px 0 10px;font-size:20px}.principle p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}.contact{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end}.contact h2{margin:10px 0 0;font-size:clamp(42px,5.5vw,76px);line-height:.9;letter-spacing:-.075em}.contact h2 em{color:var(--neon);font-style:normal}.contact-copy{color:var(--muted);font-size:15px}.contact-list{display:grid;grid-template-columns:1fr 1fr;margin-top:26px;border-top:1px solid var(--line)}.contact-item{padding:15px 0;border-bottom:1px solid var(--line)}.contact-item small{display:block;margin-bottom:4px;color:var(--dim);font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.contact-item a{color:var(--ink);text-decoration:none}.contact-item a:hover{color:var(--neon)}.footer{display:flex;align-items:center;justify-content:space-between;padding:28px 0;color:var(--dim);font:10px var(--mono);letter-spacing:.06em}.footer a{color:var(--muted);text-decoration:none}.footer a:hover{color:var(--neon)}.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease),transform .7s var(--ease)}.reveal.visible{opacity:1;transform:none}
-    @media(max-width:900px){.hero{grid-template-columns:1fr;gap:18px}.hero-copy,.core-stage{min-width:0}.core-stage{min-height:390px}.telemetry{grid-template-columns:1fr 1fr}.telemetry-cell{border-bottom:1px solid var(--line)}.about-grid,.contact{grid-template-columns:1fr;gap:30px}.projects{grid-template-columns:repeat(2,1fr)}.principles{grid-template-columns:1fr 1fr}.principle:last-child{grid-column:1/-1}}
-    @media(max-width:620px){.container{width:calc(100% - 32px);min-width:0}.topbar{height:64px}.topbar-inner{width:calc(100% - 32px)}.nav{display:none}.nav.open{position:absolute;top:64px;right:16px;left:16px;display:flex;flex-direction:column;gap:0;margin:0;padding:8px;border:1px solid var(--line2);background:rgba(5,10,18,.98)}.nav.open a{padding:10px}.nav.open .nav-cta{margin:0!important;border:0}.menu{display:block}.hero{min-height:850px;padding-top:115px}.hero h1{font-size:43px;overflow-wrap:break-word}.hero-lede{font-size:15px}.hero-meta{flex-direction:column;gap:7px}.core-stage{min-height:335px}.core-stage:before{width:270px;height:270px}.core-stage:after{width:340px;height:120px}.core-image{width:225px;height:225px}.core-readout{right:0}.core-label{left:0}.telemetry{grid-template-columns:1fr 1fr}.telemetry-cell{padding:14px 12px}.section{padding:72px 0}.section-head{align-items:flex-start;flex-direction:column}.module-grid,.projects,.principles{grid-template-columns:1fr}.principle:last-child{grid-column:auto}.project-tools{align-items:stretch;flex-wrap:wrap}.project-search{flex-basis:100%;min-width:0}.contact-list{grid-template-columns:1fr}.footer{align-items:flex-start;flex-direction:column;gap:10px}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
-    .constellation{position:fixed;z-index:-1;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen;opacity:.78}.scroll-progress{position:fixed;z-index:30;top:0;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--electric),var(--neon),var(--lime));box-shadow:0 0 18px rgba(56,220,255,.72);pointer-events:none}.hero-copy{transform:translate3d(0,var(--hero-copy-y,0px),0);opacity:var(--hero-copy-opacity,1);filter:blur(var(--hero-copy-blur,0px));will-change:transform,opacity,filter}.core-stage{perspective:900px;transform:translate3d(0,var(--core-y,0px),0) rotate(var(--core-rotate,0deg));opacity:var(--core-opacity,1);will-change:transform,opacity}.hero-scroll{opacity:var(--scroll-cue-opacity,1);transition:opacity .2s linear}.core-image{transition:transform .6s var(--ease),box-shadow .6s var(--ease)}.core-stage:hover .core-image{transform:rotateX(3deg) rotateY(-5deg) translateZ(12px);box-shadow:0 0 75px rgba(56,220,255,.36),0 0 150px rgba(76,125,255,.2)}.core-signal{position:absolute;z-index:5;right:-2%;bottom:22%;display:flex;align-items:end;gap:9px;padding:9px 11px;border-left:1px solid var(--neon);background:rgba(5,10,18,.78);font:9px var(--mono);letter-spacing:.08em}.core-signal span{color:var(--dim)}.core-signal strong{color:var(--neon);font-size:14px;font-weight:400}.project{position:relative;overflow:hidden;transform-style:preserve-3d}.project:before{content:"";position:absolute;z-index:0;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--spot-x,50%) var(--spot-y,50%),rgba(56,220,255,.18),transparent 38%);transition:opacity .3s var(--ease)}.project:hover:before,.project.is-tilting:before{opacity:1}.project-top,.project-body{position:relative;z-index:1}.project.is-tilting{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-7px)}.project.is-tilting .project-top{transform:translateZ(12px)}.project.reveal{transform:translateY(28px) rotateX(4deg);transform-origin:50% 100%;transition:opacity .75s var(--ease) var(--reveal-delay,0s),transform .75s var(--ease) var(--reveal-delay,0s)}.project.reveal.visible{transform:none}.project.reveal.visible.is-tilting{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-7px)}.reveal{transition-delay:var(--reveal-delay,0s)}.project:nth-child(2){--reveal-delay:.06s}.project:nth-child(3){--reveal-delay:.12s}.project:nth-child(4){--reveal-delay:.18s}.project:nth-child(5){--reveal-delay:.24s}.project:nth-child(6){--reveal-delay:.3s}
-    @media(max-width:620px){.hero-copy,.core-stage{min-width:0;max-width:100%}.hero h1{max-width:100%;width:100%;min-width:0;font-size:35px;line-height:1.02;overflow-wrap:anywhere;word-break:normal}.hero-lede{max-width:100%;width:100%;min-width:0}.core-signal{right:auto;left:50%;bottom:10%;transform:translateX(-50%);padding:7px 8px;white-space:nowrap}.core-signal strong{font-size:12px}}
-  </style>
-  <link rel="stylesheet" href="assets/motion.css?v=8">
-  <script>document.documentElement.classList.add("js")</script>
+  <title>Doktor — produtos digitais e sistemas</title>
+  <meta name="description" content="Doktor é um laboratório independente de produtos digitais, sistemas e experiências web.">
+  <meta name="theme-color" content="#f7f8fb">
+  <link rel="stylesheet" href="assets/motion.css?v=9">
+  <script>document.documentElement.className="js"</script>
 </head>
 <body>
-  <div class="grid" aria-hidden="true"></div>
-  <canvas class="constellation" id="constellation" aria-hidden="true"></canvas>
-  <div class="scroll-progress" aria-hidden="true"></div>
-  <nav class="topbar"><div class="topbar-inner container"><a class="brand" href="#inicio"><span class="brand-mark">+</span> DOKTOR <small>// SYSTEMS LAB</small></a><div class="nav"><a class="active" href="#inicio">Início</a><a href="#sobre">O sistema</a><a href="#projetos">Projetos</a><a href="#principios">Princípios</a><a href="#contato">Contato</a><a class="nav-cta" href="#contato">Falar comigo</a></div><button class="menu" type="button" aria-label="Abrir menu">☰</button></div></nav>
-  <main>
-    <section id="inicio" class="hero container"><div class="hero-copy"><div class="kicker">DOKTOR SYSTEM DESIGN · 001</div><h1>Sistemas que <em>pensam.</em><br>Produtos que funcionam.</h1><p class="hero-lede">Um laboratório pessoal para transformar problemas reais em <strong>software claro, seguro e pronto para uso.</strong> Arquitetura, interfaces, automações e ideias em movimento.</p><div class="actions"><a class="button button-primary" href="#projetos">Ver projetos <span>↗</span></a><a class="button button-ghost" href="#sobre">Conhecer o sistema</a></div><div class="hero-meta"><span><b>●</b> laboratório ativo</span><span>Rio de Janeiro · BR</span><span>v.2026</span></div></div><div class="core-stage"><div class="core-image"><img src="assets/doktor-system-design.webp" alt="Núcleo visual do Doktor System Design em um laboratório de sistemas" width="285" height="285" decoding="async" fetchpriority="high"><span class="core-readout">SYSTEMCORE // RUNNING</span><span class="core-label">ARCHITECTURE / PRODUCT / AI</span></div><div class="core-signal"><span>SYNC / VECTOR</span><strong>98.4%</strong></div><span class="core-node node-a">01</span><span class="core-node node-b">+</span></div><a class="hero-scroll" href="#sobre"><span>↓</span> explorar o sistema</a></section>
-    <section class="telemetry container" aria-label="Telemetria do laboratório"><div class="telemetry-cell"><small>modo</small><strong><b>marca</b> / produto</strong></div><div class="telemetry-cell"><small>princípio</small><strong>clareza &gt; ruído</strong></div><div class="telemetry-cell"><small>estado</small><strong><b>online</b> / criando</strong></div><div class="telemetry-cell"><small>stack</small><strong>web + sistemas</strong></div></section>
-    <section id="sobre" class="section container"><div class="section-head reveal"><div><div class="kicker">01 / o sistema</div><h2 class="section-title">Uma base para <em>construir melhor.</em></h2></div></div><div class="about-grid"><div class="about-copy reveal"><p>O Doktor é meu espaço para criar, testar e publicar. Não é uma coleção de telas bonitas: é uma prática de transformar intenção em sistemas que alguém consegue entender, usar e manter.</p><p>O <strong>DOKTOR SYSTEM DESIGN</strong> organiza os padrões por trás dessa prática — arquitetura, segurança, documentação, frontend, backend e qualidade — para que cada projeto comece com direção, não com improviso.</p><p>Este site é a camada pública: o lugar onde os experimentos ganham contexto e as coisas prontas podem ser abertas.</p></div><div class="module-grid reveal"><article class="module"><small>MODULE / 01</small><h3>Estrutura antes do efeito</h3><p>Componentes pequenos, tokens claros e decisões que continuam legíveis.</p></article><article class="module"><small>MODULE / 02</small><h3>Segurança desde o desenho</h3><p>Risco, privacidade e estados reais entram na arquitetura.</p></article><article class="module"><small>MODULE / 03</small><h3>Feito para uso real</h3><p>Interface boa reduz dúvida e deixa a próxima ação evidente.</p></article><article class="module"><small>MODULE / 04</small><h3>Documentar para continuar</h3><p>Código e contexto precisam sobreviver à conversa inicial.</p></article></div></div></section>
-    <section id="projetos" class="section container"><div class="section-head reveal"><div><div class="kicker">02 / campo de teste</div><h2 class="section-title">Projetos em <em>movimento.</em></h2><p class="section-note">Produtos, ferramentas e experimentos que aplicam o método Doktor em problemas diferentes.</p></div><a class="section-link" href="https://github.com/AndreGustavoms" target="_blank" rel="noreferrer">abrir GitHub ↗</a></div><div class="command-bar"><span>doktor://query</span><output id="telemetry-output">carregando módulos ativos...</output></div><div class="project-tools"><input id="project-search" class="project-search" type="search" placeholder="Pesquisar projeto ou tecnologia..." aria-label="Pesquisar projetos"><button class="filter selected" type="button" data-filter="all">Todos</button><button class="filter" type="button" data-filter="web">Web</button><button class="filter" type="button" data-filter="systems">Sistemas</button><button class="filter" type="button" data-filter="lab">Lab</button></div><div class="projects"><article class="project reveal" data-type="systems" data-search="contas exe segurança credenciais typescript react"><div class="project-top"><span class="project-state">EM DESENVOLVIMENTO</span><span class="project-name">DOKTOR / CONTAS.EXE</span></div><div class="project-body"><span class="project-index">01 / sistema</span><h3>Contas.exe</h3><p>Cofre de credenciais para equipes gerenciarem contas compartilhadas com segurança e clareza.</p><div class="project-foot"><span class="tag">TypeScript · React</span><a class="open" href="https://github.com/AndreGustavoms/Contas.exe" target="_blank" rel="noreferrer">Abrir ↗</a></div></div></article><article class="project reveal" data-type="systems" data-search="doktor system design arquitetura documentação padrões"><div class="project-top"><span class="project-state">ATIVO</span><span class="project-name">DOKTOR / SYSTEM DESIGN</span></div><div class="project-body"><span class="project-index">02 / base</span><h3>DOKTOR SYSTEM DESIGN</h3><p>A base de arquitetura, qualidade e documentação que dá direção aos projetos do laboratório.</p><div class="project-foot"><span class="tag">Arquitetura · Docs</span><a class="open" href="https://github.com/AndreGustavoms/Doktor-SystemDesign" target="_blank" rel="noreferrer">Abrir ↗</a></div></div></article><article class="project reveal" data-type="web" data-search="meu ecoo web interface react vite"><div class="project-top"><span class="project-state">EM DESENVOLVIMENTO</span><span class="project-name">DOKTOR / ECOO</span></div><div class="project-body"><span class="project-index">03 / experiência</span><h3>MeuEcoo</h3><p>Uma experiência digital autoral para explorar identidade visual, narrativa e interface.</p><div class="project-foot"><span class="tag">React · Vite</span><a class="open" href="https://github.com/AndreGustavoms/MeuEcooBETA" target="_blank" rel="noreferrer">Abrir ↗</a></div></div></article><article class="project reveal" data-type="lab" data-search="prisma ia estudos python plataforma"><div class="project-top"><span class="project-state">EXPERIMENTO</span><span class="project-name">DOKTOR / PRISMA</span></div><div class="project-body"><span class="project-index">04 / pesquisa</span><h3>Prisma</h3><p>Uma plataforma de estudos com IA para investigar tecnologia aplicada à aprendizagem.</p><div class="project-foot"><span class="tag">Python · IA</span><a class="open" href="https://github.com/AndreGustavoms/PrismaTest" target="_blank" rel="noreferrer">Abrir ↗</a></div></div></article><article class="project reveal" data-type="lab" data-search="discord automação comunidade node javascript"><div class="project-top"><span class="project-state">EXPERIMENTO</span><span class="project-name">DOKTOR / DISCORD US</span></div><div class="project-body"><span class="project-index">05 / automação</span><h3>Discord Us</h3><p>Automação para estruturar comunidades, organizar canais e reduzir trabalho repetitivo.</p><div class="project-foot"><span class="tag">Node · Discord</span><a class="open" href="https://github.com/AndreGustavoms" target="_blank" rel="noreferrer">Abrir ↗</a></div></div></article><article class="project reveal" data-type="web" data-search="doktor site landing portfolio html css javascript"><div class="project-top"><span class="project-state">ONLINE</span><span class="project-name">DOKTOR / THIS SITE</span></div><div class="project-body"><span class="project-index">06 / interface</span><h3>Doktor.com</h3><p>A camada pública do laboratório: uma landing page estática, direta e feita para durar.</p><div class="project-foot"><span class="tag">HTML · CSS · JS</span><a class="open" href="https://github.com/AndreGustavoms/Doktor.com" target="_blank" rel="noreferrer">Abrir ↗</a></div></div></article></div></section>
-    <section id="principios" class="section container"><div class="section-head reveal"><div><div class="kicker">03 / princípios</div><h2 class="section-title">Menos ruído.<br><em>Mais sistema.</em></h2></div></div><div class="principles"><article class="principle reveal"><small>PRINCÍPIO 01</small><h3>Clareza é uma função.</h3><p>Hierarquia, estados e linguagem ajudam a pessoa a saber onde está e o que fazer em seguida.</p></article><article class="principle reveal"><small>PRINCÍPIO 02</small><h3>Cor codifica estado.</h3><p>Acento é sinal, não decoração. Superfícies neutras deixam o que importa aparecer.</p></article><article class="principle reveal"><small>PRINCÍPIO 03</small><h3>O detalhe tem motivo.</h3><p>Movimento, borda, contraste e espaçamento existem para orientar, não para disputar atenção.</p></article></div></section>
-    <section id="contato" class="section container"><div class="contact"><div><div class="kicker">04 / conexão</div><h2>Tem uma ideia?<br><em>Vamos construir.</em></h2></div><div class="contact-copy"><p>Aberto a conversas, colaborações e projetos que precisam sair do papel com uma base melhor.</p><div class="contact-list"><div class="contact-item"><small>Email</small><a href="mailto:dede.gustavo100@gmail.com">dede.gustavo100@gmail.com</a></div><div class="contact-item"><small>GitHub</small><a href="https://github.com/AndreGustavoms" target="_blank" rel="noreferrer">@AndreGustavoms ↗</a></div><div class="contact-item"><small>System Design</small><a href="https://github.com/AndreGustavoms/Doktor-SystemDesign" target="_blank" rel="noreferrer">Doktor System Design ↗</a></div><div class="contact-item"><small>Localização</small><span>Rio de Janeiro, BR</span></div></div></div></div></section>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="site-header" id="topo">
+    <div class="shell header-inner">
+      <a class="brand" href="#inicio" aria-label="Doktor, início">
+        <span class="brand-symbol" aria-hidden="true">+</span>
+        <span>DOKTOR</span>
+      </a>
+
+      <nav class="site-nav" id="site-nav" aria-label="Navegação principal">
+        <a href="#projetos">Projetos</a>
+        <a href="#repositorios">Repositórios</a>
+        <a href="#sobre">Sobre</a>
+        <a class="nav-contact" href="#contato">Contato <span aria-hidden="true">↗</span></a>
+      </nav>
+
+      <button class="menu-button" type="button" aria-controls="site-nav" aria-expanded="false">
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero shell" id="inicio">
+      <div class="hero-copy" data-reveal>
+        <p class="eyebrow"><span>●</span> laboratório independente · Rio de Janeiro</p>
+        <h1>Ideias complexas.<br><strong>Produtos claros.</strong></h1>
+        <p class="hero-text">Projeto sistemas, interfaces e automações que transformam problemas reais em experiências simples de entender e boas de usar.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#projetos">Ver projetos <span aria-hidden="true">↓</span></a>
+          <a class="text-link" href="https://github.com/AndreGustavoms" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+
+      <div class="hero-art" data-reveal>
+        <div class="hero-art-head">
+          <span>DOKTOR / SYSTEMS</span>
+          <span class="availability"><i></i> disponível para criar</span>
+        </div>
+        <div class="hero-art-body">
+          <p class="art-index">01 / 26</p>
+          <p class="art-word" aria-hidden="true">D</p>
+          <div class="art-message">
+            <span>Da estrutura</span>
+            <strong>ao produto.</strong>
+          </div>
+          <div class="art-orbit" aria-hidden="true"><i>+</i></div>
+        </div>
+        <div class="hero-art-foot">
+          <span>Arquitetura</span>
+          <span>Produto</span>
+          <span>Engenharia</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="capabilities" aria-label="Áreas de atuação">
+      <div class="shell capabilities-inner">
+        <span>Design de produto</span>
+        <span>Aplicações web</span>
+        <span>Automação</span>
+        <span>System design</span>
+        <span>IA aplicada</span>
+      </div>
+    </div>
+
+    <section class="section shell" id="projetos">
+      <header class="section-heading" data-reveal>
+        <div>
+          <p class="eyebrow">01 / projetos selecionados</p>
+          <h2>Trabalho que resolve<br><strong>e permanece simples.</strong></h2>
+        </div>
+        <p>Uma seleção de produtos próprios, sistemas em desenvolvimento e experimentos que viraram prática.</p>
+      </header>
+
+      <div class="featured-grid">
+        <article class="featured-project featured-project-main" data-reveal>
+          <a class="project-visual visual-contas" href="https://github.com/AndreGustavoms/Contas.exe" target="_blank" rel="noreferrer" aria-label="Abrir Contas.exe no GitHub">
+            <div class="visual-window">
+              <div class="window-bar"><span></span><span></span><span></span><small>contas.exe / workspace</small></div>
+              <div class="window-content">
+                <aside><b>+</b><i></i><i></i><i></i></aside>
+                <div class="window-main"><p>ACESSOS DA EQUIPE</p><strong>Um lugar seguro para<br>o que é compartilhado.</strong><div class="window-row"><span></span><span></span><span></span></div></div>
+              </div>
+            </div>
+          </a>
+          <div class="project-info">
+            <div><p class="project-type">Produto / segurança</p><h3>Contas.exe</h3></div>
+            <p>Cofre de credenciais para equipes organizarem contas compartilhadas com segurança, contexto e clareza.</p>
+            <a class="circle-link" href="https://github.com/AndreGustavoms/Contas.exe" target="_blank" rel="noreferrer" aria-label="Abrir Contas.exe">↗</a>
+          </div>
+        </article>
+
+        <article class="featured-project" data-reveal>
+          <a class="project-visual visual-system" href="https://github.com/AndreGustavoms/Doktor-SystemDesign" target="_blank" rel="noreferrer" aria-label="Abrir Doktor System Design no GitHub">
+            <img src="assets/doktor-system-design.webp" alt="Composição visual do Doktor System Design" width="1000" height="562" loading="lazy" decoding="async">
+            <span class="image-label">DOKTOR SYSTEM DESIGN</span>
+          </a>
+          <div class="project-info">
+            <div><p class="project-type">Base / arquitetura</p><h3>System Design</h3></div>
+            <p>Padrões e documentação para começar projetos com direção e mantê-los compreensíveis.</p>
+            <a class="circle-link" href="https://github.com/AndreGustavoms/Doktor-SystemDesign" target="_blank" rel="noreferrer" aria-label="Abrir System Design">↗</a>
+          </div>
+        </article>
+
+        <article class="featured-project" data-reveal>
+          <a class="project-visual visual-ecoo" href="https://github.com/AndreGustavoms/MeuEcooBETA" target="_blank" rel="noreferrer" aria-label="Abrir MeuEcoo no GitHub">
+            <span class="ecoo-ring ring-one"></span>
+            <span class="ecoo-ring ring-two"></span>
+            <strong>ECOO</strong>
+            <small>identidade · presença · conexão</small>
+          </a>
+          <div class="project-info">
+            <div><p class="project-type">Web / experiência</p><h3>MeuEcoo</h3></div>
+            <p>Uma experiência autoral para explorar identidade, narrativa e presença digital.</p>
+            <a class="circle-link" href="https://github.com/AndreGustavoms/MeuEcooBETA" target="_blank" rel="noreferrer" aria-label="Abrir MeuEcoo">↗</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section repo-section" id="repositorios">
+      <div class="shell">
+        <header class="repo-heading" data-reveal>
+          <div>
+            <p class="eyebrow">02 / código aberto</p>
+            <h2>Repositórios<br><strong>em movimento.</strong></h2>
+          </div>
+          <div class="repo-tools">
+            <label for="repo-search">Buscar projeto</label>
+            <div class="search-field"><span aria-hidden="true">⌕</span><input id="repo-search" type="search" placeholder="Nome, linguagem ou assunto..." autocomplete="off"></div>
+          </div>
+        </header>
+
+        <div class="repo-status" data-reveal>
+          <span id="repo-count">carregando repositórios...</span>
+          <a href="https://github.com/AndreGustavoms?tab=repositories" target="_blank" rel="noreferrer">Ver todos no GitHub ↗</a>
+        </div>
+        <div class="repo-grid" id="repo-grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section shell about-section" id="sobre">
+      <div class="about-intro" data-reveal>
+        <p class="eyebrow">03 / sobre o laboratório</p>
+        <h2>Menos ruído.<br><strong>Mais intenção.</strong></h2>
+      </div>
+      <div class="about-copy" data-reveal>
+        <p class="about-lead">Doktor é meu espaço para transformar intenção em produto.</p>
+        <p>Trabalho entre arquitetura, interface e engenharia. O objetivo não é produzir telas por produzir — é criar soluções que alguém consiga entender, usar e continuar desenvolvendo.</p>
+        <p>Cada projeto nasce com uma pergunta simples: qual é a forma mais clara de fazer isso funcionar?</p>
+        <a class="text-link" href="https://github.com/AndreGustavoms/Doktor-SystemDesign" target="_blank" rel="noreferrer">Conhecer o método <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="principle-list" data-reveal>
+        <article><span>01</span><div><h3>Clareza antes do efeito</h3><p>Movimento e aparência orientam a experiência; nunca competem com ela.</p></div></article>
+        <article><span>02</span><div><h3>Estrutura antes da escala</h3><p>Uma base legível permite que o produto cresça sem perder direção.</p></div></article>
+        <article><span>03</span><div><h3>Uso real antes da promessa</h3><p>Decisões são testadas no contexto em que a solução precisa funcionar.</p></div></article>
+      </div>
+    </section>
+
+    <section class="contact-section shell" id="contato" data-reveal>
+      <p class="eyebrow">04 / contato</p>
+      <div class="contact-layout">
+        <h2>Tem algo para<br><strong>tirar do papel?</strong></h2>
+        <div>
+          <p>Estou aberto a projetos, colaborações e boas conversas sobre produto, sistemas e automação.</p>
+          <a class="contact-button" href="mailto:dede.gustavo100@gmail.com">Vamos conversar <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="contact-foot">
+        <span>Rio de Janeiro · Brasil</span>
+        <a href="mailto:dede.gustavo100@gmail.com">dede.gustavo100@gmail.com</a>
+      </div>
+    </section>
   </main>
-  <footer class="footer container"><span>© 2026 DOKTOR // SYSTEMS LAB</span><span>clareza · estrutura · uso real</span><a href="#inicio">voltar ao topo ↑</a></footer>
-  <script type="module" src="assets/app.js?v=8"></script>
+
+  <footer class="site-footer shell">
+    <a class="brand" href="#inicio"><span class="brand-symbol" aria-hidden="true">+</span><span>DOKTOR</span></a>
+    <p>Produtos digitais, sistemas e ideias bem construídas.</p>
+    <div><span>© <span id="year">2026</span></span><a href="#topo">Voltar ao topo ↑</a></div>
+  </footer>
+
+  <script type="module" src="assets/app.js?v=9"></script>
 </body>
 </html>
