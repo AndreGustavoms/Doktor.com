@@ -224,7 +224,17 @@ function createRepoRow(repository, index) {
 
   const meta = document.createElement("span");
   meta.className = "repo-meta";
-  meta.textContent = repository.language || "Projeto";
+  const language = repository.language || "Projeto";
+  const stars = Number(repository.stargazers_count || 0);
+  meta.textContent = `${language} / ${stars} ${stars === 1 ? "star" : "stars"}`;
+  if (repository.pushed_at) {
+    const updated = new Date(repository.pushed_at).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    meta.title = `Atualizado em ${updated}`;
+  }
 
   const arrow = document.createElement("span");
   arrow.className = "repo-arrow";

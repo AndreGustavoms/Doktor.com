@@ -1929,6 +1929,7 @@ a {
   display: flex;
   align-items: center;
   gap: 7px;
+  white-space: nowrap;
   color: rgba(255,255,255,.58);
   font: 650 7px var(--mono);
   letter-spacing: .07em;
