@@ -53,24 +53,27 @@ let repositories = fallbackRepositories;
 
 function initHeader() {
   const header = $(".site-header");
+  const progress = $("#page-progress");
   const menu = $(".menu-button");
   const nav = $(".site-nav");
-  let scrollFrame = 0;
+  let frame = 0;
 
   const closeMenu = () => {
     menu?.setAttribute("aria-expanded", "false");
     nav?.classList.remove("is-open");
   };
 
-  const syncHeader = () => {
-    scrollFrame = 0;
-    header?.classList.toggle("is-scrolled", scrollY > 16);
+  const sync = () => {
+    frame = 0;
+    header?.classList.toggle("is-scrolled", scrollY > 14);
+    const scrollable = document.documentElement.scrollHeight - innerHeight;
+    const position = scrollable > 0 ? Math.min(scrollY / scrollable, 1) : 0;
+    if (progress) progress.style.transform = `scaleX(${position})`;
   };
 
-  syncHeader();
-  window.addEventListener("scroll", () => {
-    if (scrollFrame) return;
-    scrollFrame = requestAnimationFrame(syncHeader);
+  sync();
+  addEventListener("scroll", () => {
+    if (!frame) frame = requestAnimationFrame(sync);
   }, { passive: true });
 
   menu?.addEventListener("click", () => {
@@ -80,26 +83,28 @@ function initHeader() {
   });
 
   $$("a", nav).forEach((link) => link.addEventListener("click", closeMenu));
+  addEventListener("resize", () => {
+    if (innerWidth > 900) closeMenu();
+  });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeMenu();
   });
 }
 
-function initSectionState() {
+function initSectionNavigation() {
   const sections = $$("main section[id]");
   const links = $$('.site-nav a[href^="#"]');
-  const status = $("#system-status");
 
   const observer = new IntersectionObserver((entries) => {
-    const visible = entries
+    const current = entries
       .filter((entry) => entry.isIntersecting)
       .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-    if (!visible) return;
+    if (!current) return;
 
-    const id = visible.target.id;
-    links.forEach((link) => link.classList.toggle("is-active", link.hash === `#${id}`));
-    if (status) status.textContent = visible.target.dataset.sectionStatus || "SYSTEM / READY";
-  }, { rootMargin: "-24% 0px -62%", threshold: [0.04, 0.2, 0.45] });
+    links.forEach((link) => {
+      link.classList.toggle("is-active", link.hash === `#${current.target.id}`);
+    });
+  }, { rootMargin: "-22% 0px -66%", threshold: [0.02, 0.2, 0.5] });
 
   sections.forEach((section) => observer.observe(section));
 }
@@ -117,72 +122,55 @@ function initReveals() {
       entry.target.classList.add("is-visible");
       observer.unobserve(entry.target);
     });
-  }, { rootMargin: "0px 0px -8%", threshold: 0.08 });
+  }, { rootMargin: "0px 0px -9%", threshold: 0.06 });
 
   items.forEach((item) => observer.observe(item));
 }
 
-function initSignalCore() {
-  const core = $("[data-core]");
-  const state = $("[data-core-state]", core);
-  if (!core) return;
+function initHeroArt() {
+  const art = $("[data-art]");
+  if (!art || reducedMotion) return;
 
-  let inView = false;
-  const sync = () => {
-    const running = inView && !document.hidden && !reducedMotion;
-    core.classList.toggle("is-running", running);
-    if (state) state.textContent = running ? "ACTIVE" : "IDLE";
-  };
-
+  let visible = false;
+  const sync = () => art.classList.toggle("is-running", visible && !document.hidden);
   const observer = new IntersectionObserver(([entry]) => {
-    inView = entry.isIntersecting;
+    visible = entry.isIntersecting;
     sync();
   }, { threshold: 0.08 });
 
-  observer.observe(core);
+  observer.observe(art);
   document.addEventListener("visibilitychange", sync);
 }
 
-function createRepoCard(repo, index) {
-  const card = document.createElement("a");
-  card.className = "repo-card";
-  card.href = repo.html_url;
-  card.target = "_blank";
-  card.rel = "noreferrer";
-  card.setAttribute("aria-label", `Abrir ${repo.name} no GitHub`);
-
-  const head = document.createElement("div");
-  head.className = "repo-card-head";
+function createRepoRow(repository, index) {
+  const row = document.createElement("a");
+  row.className = "repo-card";
+  row.href = repository.html_url;
+  row.target = "_blank";
+  row.rel = "noreferrer";
+  row.setAttribute("aria-label", `Abrir ${repository.name} no GitHub`);
 
   const number = document.createElement("span");
   number.className = "repo-number";
   number.textContent = String(index + 1).padStart(2, "0");
 
+  const title = document.createElement("h3");
+  title.textContent = repository.name;
+
+  const description = document.createElement("p");
+  description.textContent = repository.description || "Projeto público do laboratório Doktor.";
+
+  const meta = document.createElement("span");
+  meta.className = "repo-meta";
+  meta.textContent = repository.language || "Projeto";
+
   const arrow = document.createElement("span");
   arrow.className = "repo-arrow";
   arrow.setAttribute("aria-hidden", "true");
   arrow.textContent = "↗";
-  head.append(number, arrow);
 
-  const title = document.createElement("h3");
-  title.textContent = repo.name;
-
-  const description = document.createElement("p");
-  description.textContent = repo.description || "Projeto público do laboratório Doktor.";
-
-  const foot = document.createElement("div");
-  foot.className = "repo-card-foot";
-
-  const language = document.createElement("span");
-  language.className = "language";
-  language.textContent = repo.language || "Projeto";
-
-  const stars = document.createElement("span");
-  stars.textContent = `☆ ${repo.stargazers_count || 0}`;
-  foot.append(language, stars);
-
-  card.append(head, title, description, foot);
-  return card;
+  row.append(number, title, description, meta, arrow);
+  return row;
 }
 
 function renderRepositories(list, query = "") {
@@ -191,30 +179,35 @@ function renderRepositories(list, query = "") {
   if (!grid || !status) return;
 
   const normalized = query.toLocaleLowerCase("pt-BR").trim();
-  const filtered = list.filter((repo) => {
-    const content = [repo.name, repo.description, repo.language, ...(repo.topics || [])]
-      .filter(Boolean)
-      .join(" ")
-      .toLocaleLowerCase("pt-BR");
-    return !normalized || content.includes(normalized);
+  const filtered = list.filter((repository) => {
+    const searchable = [
+      repository.name,
+      repository.description,
+      repository.language,
+      ...(repository.topics || []),
+    ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
+    return !normalized || searchable.includes(normalized);
   });
 
   grid.replaceChildren();
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     const empty = document.createElement("p");
     empty.className = "repo-empty";
     empty.textContent = "Nenhum repositório encontrado para essa busca.";
     grid.append(empty);
   } else {
-    filtered.slice(0, 9).forEach((repo, index) => grid.append(createRepoCard(repo, index)));
+    filtered.slice(0, 9).forEach((repository, index) => {
+      grid.append(createRepoRow(repository, index));
+    });
   }
 
   const shown = Math.min(filtered.length, 9);
-  status.textContent = `${String(shown).padStart(2, "0")} ${shown === 1 ? "repositório exibido" : "repositórios exibidos"}`;
+  status.textContent = `${String(shown).padStart(2, "0")} ${shown === 1 ? "repositório público" : "repositórios públicos"}`;
 }
 
 async function loadRepositories() {
   renderRepositories(repositories);
+
   try {
     const response = await fetch("https://api.github.com/users/AndreGustavoms/repos?per_page=100&sort=updated", {
       headers: { Accept: "application/vnd.github+json" },
@@ -222,12 +215,15 @@ async function loadRepositories() {
     if (!response.ok) throw new Error(`GitHub respondeu ${response.status}`);
 
     const data = await response.json();
-    const publicRepos = data
-      .filter((repo) => !repo.fork && !repo.archived)
-      .map((repo) => ({ ...repo, description: repositoryDescriptions[repo.name] || repo.description }))
+    const publicRepositories = data
+      .filter((repository) => !repository.fork && !repository.archived)
+      .map((repository) => ({
+        ...repository,
+        description: repositoryDescriptions[repository.name] || repository.description,
+      }))
       .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
 
-    if (publicRepos.length) repositories = publicRepos;
+    if (publicRepositories.length) repositories = publicRepositories;
   } catch {
     repositories = fallbackRepositories;
   }
@@ -242,11 +238,12 @@ function initRepositorySearch() {
 }
 
 function init() {
-  $("#year").textContent = new Date().getFullYear();
+  const year = $("#year");
+  if (year) year.textContent = new Date().getFullYear();
   initHeader();
-  initSectionState();
+  initSectionNavigation();
   initReveals();
-  initSignalCore();
+  initHeroArt();
   initRepositorySearch();
 }
 
