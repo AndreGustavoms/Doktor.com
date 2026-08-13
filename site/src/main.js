@@ -61,6 +61,7 @@ function initHeader() {
   const closeMenu = () => {
     menu?.setAttribute("aria-expanded", "false");
     nav?.classList.remove("is-open");
+    document.body.classList.remove("menu-open");
   };
 
   const sync = () => {
@@ -80,9 +81,15 @@ function initHeader() {
     const open = menu.getAttribute("aria-expanded") !== "true";
     menu.setAttribute("aria-expanded", String(open));
     nav?.classList.toggle("is-open", open);
+    document.body.classList.toggle("menu-open", open);
   });
 
   $$("a", nav).forEach((link) => link.addEventListener("click", closeMenu));
+  document.addEventListener("pointerdown", (event) => {
+    if (!nav?.classList.contains("is-open")) return;
+    if (nav.contains(event.target) || menu?.contains(event.target)) return;
+    closeMenu();
+  });
   addEventListener("resize", () => {
     if (innerWidth > 900) closeMenu();
   });

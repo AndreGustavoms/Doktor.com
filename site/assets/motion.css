@@ -40,6 +40,8 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+body.menu-open { overflow: hidden; }
+
 body::selection {
   background: var(--blue);
   color: var(--white);
@@ -2459,7 +2461,8 @@ a {
     top: calc(100% + 8px);
     right: 18px;
     left: 18px;
-    display: none;
+    display: flex;
+    visibility: hidden;
     align-items: stretch;
     flex-direction: column;
     gap: 0;
@@ -2468,9 +2471,16 @@ a {
     border-radius: 18px;
     background: var(--white);
     box-shadow: 0 25px 70px rgba(9,17,31,.12);
+    opacity: 0;
+    transform: translateY(-8px) scale(.98);
+    transition: opacity .25s ease, transform .35s var(--ease), visibility .25s ease;
   }
 
-  .site-nav.is-open { display: flex; }
+  .site-nav.is-open {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+  }
 
   .site-nav a {
     justify-content: space-between;
@@ -2563,6 +2573,7 @@ a {
   :root { --shell: min(calc(100% - 24px), 1440px); }
   html { scroll-padding-top: 68px; }
   .brand-copy small { display: none; }
+  .brand-lockup { width: 154px; }
   .hero-index span:last-child { display: none; }
   .hero-title { padding-top: 48px; }
   .hero-kicker { margin-bottom: 24px; font-size: 7px; }
@@ -2599,6 +2610,8 @@ a {
 
   .case-list { gap: 88px; }
   .case-stage { min-height: 470px; border-radius: 19px; }
+  .stage-action { right: 74px; bottom: 31px; font-size: 7px; }
+  .stage-arrow { right: 17px; bottom: 17px; width: 44px; height: 44px; }
   .case-contas .case-stage { padding: 58px 14px 30px; }
   .case-coordinate { top: 20px; right: 18px; left: 18px; }
   .case-coordinate span:last-child { display: none; }
