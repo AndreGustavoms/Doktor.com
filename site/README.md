@@ -68,14 +68,17 @@ Os testes cobrem carregamento de assets, URLs malformadas, listagem de diretóri
 
 ## Publicação
 
-O deploy no GitHub Pages monta o diretório publicado por **allowlist**: entra apenas
-`index.html`, `site.webmanifest` e `assets/`. Nada mais é copiado.
+O deploy no GitHub Pages monta o diretório publicado por **allowlist**: entram apenas as
+páginas e arquivos listados no workflow, mais a pasta `assets/`. Nada além disso é copiado.
+A lista viva está em `.github/workflows/deploy-site.yml`, no passo
+`Montar artefato apenas com o que é público` — consulte-a lá em vez de duplicá-la aqui.
 
 Ficam fora do artefato, por não serem necessários para servir o site:
-`package.json`, `package-lock.json`, `server.mjs`, `src/` e este `README.md`.
+`package.json`, `package-lock.json`, `server.mjs`, `src/`, `tests/` e este `README.md`.
 Eles continuam versionados no repositório — apenas não são servidos.
 
-Ao adicionar um arquivo que precise ser público, inclua-o explicitamente no passo
-`Montar artefato apenas com o que é público` de `.github/workflows/deploy-site.yml`.
-O passo seguinte valida o artefato e falha a publicação se um item não público ou uma
-extensão sensível (`.map`, `.bak`, `.old`, `.sql`, dotfiles) chegar ao diretório publicado.
+Ao adicionar um arquivo que precise ser público, inclua-o explicitamente naquele passo.
+A validação seguinte cobre os dois sentidos: falha a publicação se um item não público ou
+uma extensão sensível (`.map`, `.bak`, `.old`, `.sql`, dotfiles) entrar no artefato, e
+também se uma página da raiz de `site/` ficar **de fora** dele — assim a allowlist não
+derruba uma página nova em silêncio.
