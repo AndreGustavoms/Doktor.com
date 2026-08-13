@@ -73,6 +73,27 @@ test("serve asset publico com o content-type correto", async () => {
   assert.match(resposta.headers.get("content-type"), /text\/css/);
 });
 
+test("serve paginas internas e seo publico", async () => {
+  const projeto = await fetch(`${baseUrl}/projeto.html?project=contas-exe`);
+  assert.equal(projeto.status, 200);
+  assert.match(projeto.headers.get("content-type"), /text\/html/);
+
+  const robots = await fetch(`${baseUrl}/robots.txt`);
+  assert.equal(robots.status, 200);
+  assert.match(robots.headers.get("content-type"), /text\/plain/);
+
+  const sitemap = await fetch(`${baseUrl}/sitemap.xml`);
+  assert.equal(sitemap.status, 200);
+  assert.match(sitemap.headers.get("content-type"), /application\/xml/);
+  assert.match(await sitemap.text(), /sitemap/);
+});
+
+test("serve a pagina 404 personalizada", async () => {
+  const resposta = await fetch(`${baseUrl}/404.html`);
+  assert.equal(resposta.status, 200);
+  assert.match(await resposta.text(), /ERROR \/ 404/);
+});
+
 test("responde 400 para URL malformada", async () => {
   // %ZZ nao e uma sequencia percent-encoded valida: decodeURIComponent lanca.
   const resposta = await fetch(`${baseUrl}/%ZZ`);
