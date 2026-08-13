@@ -1,0 +1,10 @@
+/* Quiet chrome: a larger mark, restrained watermark, and precise navigation. */
+.brand img{width:218px}
+.top-index{font-size:8px;color:var(--muted)}
+.nav a{position:relative;padding:8px 0}
+.nav a:before{position:absolute;right:0;bottom:0;left:0;height:1px;background:var(--blue);content:"";transform:scaleX(0);transform-origin:right;transition:transform .3s var(--ease)}
+.nav a:hover{color:var(--blue)}
+.nav a:hover:before{transform:scaleX(1);transform-origin:left}
+.hero-ghost{top:21%;right:-4%;font-size:clamp(120px,20vw,310px);-webkit-text-stroke-color:rgba(16,19,24,.055)}
+.footer span{letter-spacing:.03em}
+@media(max-width:500px){.brand img{width:178px}}
