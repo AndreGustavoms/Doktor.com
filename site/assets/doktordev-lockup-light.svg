@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1750 420">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F80FF"/><stop offset=".55" stop-color="#1557E8"/><stop offset="1" stop-color="#0D3EBB"/></linearGradient></defs>
+<g transform="translate(35,20) scale(.74)"><path fill="url(#g)" d="M96 96h76v224H96z"/><rect fill="url(#g)" x="96" y="344" width="76" height="72" rx="6"/><path fill="url(#g)" fill-rule="evenodd" d="M198 96h86c88 0 156 66 156 160s-68 160-156 160h-86v-72h84c48 0 82-36 82-88s-34-88-82-88h-84z"/></g>
+<text x="430" y="245" font-family="Inter, Arial, sans-serif" font-size="142" font-weight="700" fill="#101318">Doktor</text><text x="910" y="245" font-family="Inter, Arial, sans-serif" font-size="142" font-weight="700" fill="#1677FF">Dev</text><text x="1185" y="245" font-family="Inter, Arial, sans-serif" font-size="142" font-weight="700" fill="#68717D">.com</text>
+</svg>
