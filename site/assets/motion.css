@@ -2148,6 +2148,10 @@ a {
   transform: translateY(-5px);
 }
 
+.contact-link:focus-visible {
+  transform: translateY(-5px);
+}
+
 .contact-mail {
   background: var(--blue);
   color: var(--white);
@@ -2191,6 +2195,13 @@ a {
   transform: translateY(-50%) scale(1);
 }
 
+.contact-link:hover .contact-icon,
+.contact-link:focus-visible .contact-icon {
+  border-color: rgba(255,255,255,.62);
+  background: rgba(255,255,255,.16);
+  transform: rotate(-6deg) scale(1.06);
+}
+
 .contact-icon {
   position: relative;
   z-index: 2;
@@ -2201,6 +2212,7 @@ a {
   border: 1px solid rgba(255,255,255,.22);
   border-radius: 50%;
   background: rgba(255,255,255,.08);
+  transition: transform .35s var(--ease), border-color .25s ease, background .25s ease;
 }
 
 .contact-name {
