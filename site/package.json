@@ -6,7 +6,8 @@
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --outfile=assets/app.js && esbuild src/hero3d.js --bundle --minify --outfile=assets/hero3d.js && esbuild src/project.js --bundle --minify --outfile=assets/project.js",
     "dev": "node server.mjs",
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "test": "node --test \"tests/**/*.test.mjs\""
   },
   "devDependencies": {
     "esbuild": "0.28.2"

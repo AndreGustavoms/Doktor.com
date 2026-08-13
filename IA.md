@@ -26,7 +26,8 @@ repositórios e identidade visual. Público geral, sem área autenticada.
 - Backend: nenhum. `site/server.mjs` é servidor de desenvolvimento local, escuta apenas em
   `localhost` e não deve servir tráfego público.
 - Deploy: GitHub Actions -> GitHub Pages, com actions fixadas por SHA.
-- Testes: sem suíte automatizada; validações são manuais e registradas abaixo.
+- Testes: `npm test` em `site/` (apenas `node --test`, sem dependência nova) cobre o
+  servidor de desenvolvimento; o restante do site é visual e validado manualmente.
 
 ## Decisoes de arquitetura
 
@@ -65,6 +66,14 @@ repositórios e identidade visual. Público geral, sem área autenticada.
 - [2026-08-13] Verificação contra o site publicado: caminhos sensíveis e caminho inexistente
   retornam `404` com corpo byte-idêntico - sem diferença de status, tamanho, cabeçalho ou
   redirecionamento que confirme existência. Os arquivos públicos referenciados retornam `200`.
+- [2026-08-13] `npm test` em `site/`: 20 testes, todos passando. Cobrem a proteção contra
+  path traversal do servidor de desenvolvimento em 16 variantes de codificação, além de
+  serviço de página, content-type e resposta a URL malformada.
+- [2026-08-13] Teste de mutação da suíte acima: removendo a guarda de traversal de uma cópia
+  isolada do servidor, 4 testes falham - exatamente as variantes com separador
+  percent-encoded (`%2e%2e%2f`, `%2e%2e%5c`). As demais variantes já são neutralizadas pelo
+  parser de URL antes de chegar à guarda. Confirma que a suíte detecta a regressão real e
+  documenta qual é, de fato, o trabalho da guarda.
 
 ## Integracoes e servicos externos
 
@@ -76,7 +85,8 @@ repositórios e identidade visual. Público geral, sem área autenticada.
 
 ## Pendencias
 
-- [ ] Sem suíte de testes automatizados; validações do site são manuais.
+- [ ] Cobertura de testes limitada ao servidor de desenvolvimento; a camada visual e a
+      integração com a API do GitHub em `src/main.js` seguem validadas manualmente.
 - [ ] O bundle `assets/hero3d.js` carrega Three.js inteiro (~578 KB) - oportunidade de
       otimização de carregamento, sem impacto de segurança.
 - [ ] Domínio próprio ainda não aplicado; passos registrados em `site/README.md`.

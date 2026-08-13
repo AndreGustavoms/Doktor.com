@@ -13,6 +13,20 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 Versão pública: [https://andregustavoms.github.io/Doktor.com/](https://andregustavoms.github.io/Doktor.com/).
 
+## Testes
+
+```bash
+npm test
+```
+
+Cobrem o servidor de desenvolvimento, com foco na proteção contra path traversal:
+sobem `server.mjs` numa porta livre e fazem requisições reais, sem precisar alterar
+o servidor. As tentativas de escape miram arquivos que existem **apenas** acima de
+`site/` — se o conteúdo deles aparecer numa resposta, o teste falha.
+
+Os testes usam apenas `node --test`, sem dependência nova. Não são publicados: a
+pasta `tests/` não está na allowlist do artefato.
+
 ## Domínio próprio no futuro
 
 O projeto está preparado para receber um domínio próprio, mas nenhum `CNAME` foi criado enquanto o domínio não estiver disponível. Quando decidir aplicar um domínio:
