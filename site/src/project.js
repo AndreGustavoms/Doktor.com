@@ -44,6 +44,13 @@ const projects = {
 const slug = new URLSearchParams(location.search).get("project") || "contas-exe";
 const project = projects[slug] || projects["contas-exe"];
 const content = document.querySelector("#project-content");
+const projectSlugs = Object.keys(projects);
+const projectIndex = projectSlugs.indexOf(slug) >= 0 ? projectSlugs.indexOf(slug) : 0;
+const previous = projects[projectSlugs[(projectIndex - 1 + projectSlugs.length) % projectSlugs.length]];
+const next = projects[projectSlugs[(projectIndex + 1) % projectSlugs.length]];
+const projectClass = slug.replace(/[^a-z0-9]+/gi, "-");
+
+document.body.classList.add(`project-${projectClass}`);
 
 document.title = `${project.name} — DoktorDev`;
 document.querySelector('meta[name="description"]')?.setAttribute("content", project.description);
@@ -60,8 +67,10 @@ content.innerHTML = `
       <a class="project-button" href="${project.github}" target="_blank" rel="noreferrer">Abrir no GitHub ↗</a>
     </div>
   </div>
-  <div class="project-visual" aria-hidden="true">
+  <div class="project-visual project-visual-${projectClass}" aria-hidden="true">
     <img src="assets/doktordev-mark.svg" alt="">
+    <div class="project-orbit orbit-a"></div><div class="project-orbit orbit-b"></div>
+    <div class="project-visual-label">${project.category}</div>
     <span>${project.number} / DOKTORDEV</span>
   </div>
   <div class="project-details">
@@ -69,4 +78,8 @@ content.innerHTML = `
     <div><small>STACK</small><strong>${project.stack.join(" · ")}</strong></div>
     <div><small>ORIGEM</small><strong>DoktorDev lab</strong></div>
   </div>
+  <nav class="project-pagination" aria-label="Navegação entre projetos">
+    <a href="projeto.html?project=${projectSlugs[(projectIndex - 1 + projectSlugs.length) % projectSlugs.length]}"><small>ANTERIOR</small><strong>← ${previous.name}</strong></a>
+    <a href="projeto.html?project=${projectSlugs[(projectIndex + 1) % projectSlugs.length]}"><small>PRÓXIMO</small><strong>${next.name} →</strong></a>
+  </nav>
 `;
